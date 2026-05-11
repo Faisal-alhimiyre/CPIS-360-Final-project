@@ -20,7 +20,7 @@
     https://raw.githubusercontent.com/AR-js-org/ARToolkit5/master/bin/HIRO.jpg
   -->
   <!-- Stable marker stack: A-Frame 1.2 + AR.js 3.4.5 (widely used in HIRO tutorials). 1.6+r164 + 3.4.8 caused black camera / fragile compositing here. -->
-  <script src="https://unpkg.com/aframe@1.2.0/dist/aframe.min.js?v=markerfix-6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/aframe@1.2.0/dist/aframe.min.js?v=markerfix-6"></script>
   <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.5/aframe/build/aframe-ar.js?v=markerfix-6"></script>
 </head>
 <body>
@@ -90,17 +90,16 @@
 
   <!-- Cloned into #ar-container on first successful Generate (starts webcam + AR tracking). -->
   <template id="ar-scene-template">
-    <!-- HIRO marker is attached in ar-scene.js AFTER scene "loaded" so scene.systems.arjs exists before arjs-anchor inits (fixes isReady / startsWith spam). -->
+    <!-- Classic HIRO layout (marker before camera). Do not set videoTexture:true — it skips AR session setup for markers. -->
     <a-scene
       embedded
       vr-mode-ui="enabled: false"
-      renderer="logarithmicDepthBuffer: true; alpha: true; colorManagement: false;"
-      arjs="sourceType: webcam; debugUIEnabled: false; trackingMethod: best;"
+      arjs="sourceType: webcam; trackingMethod: best; debugUIEnabled: false;"
       id="ar-scene"
     >
-      <!-- A-Frame 1.6 + Three r164: explicit lights help flat / MeshBasic materials stay visible -->
-      <a-light type="ambient" color="#ffffff" intensity="0.85"></a-light>
-      <a-light type="directional" position="0.5 1 0.3" color="#ffffff" intensity="0.55"></a-light>
+      <a-marker preset="hiro" id="hiro-marker" emitevents="true">
+        <a-entity id="building-root" position="0 0 0"></a-entity>
+      </a-marker>
       <a-entity id="ar-camera" camera>
         <a-cursor
           id="ar-cursor"

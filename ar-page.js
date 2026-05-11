@@ -1,7 +1,8 @@
 /**
  * ar-page.js
  * ----------
- * ar.html only: load spec, wait for A-Frame scene loaded, then build geometry + interactions.
+ * ar.html: wait until the AR webcam pipeline is up BEFORE injecting lots of geometry.
+ * Building immediately on a-scene "loaded" caused a visible flash then a black screen.
  */
 
 (function () {
@@ -17,7 +18,7 @@
   function start() {
     var raw = sessionStorage.getItem(STORAGE_KEY);
     if (!raw) {
-      window.location.replace('index.html?v=markerfix-14');
+      window.location.replace('index.html?v=markerfix-15');
       return;
     }
 
@@ -26,7 +27,7 @@
       spec = JSON.parse(raw);
     } catch (e) {
       sessionStorage.removeItem(STORAGE_KEY);
-      window.location.replace('index.html?v=markerfix-14');
+      window.location.replace('index.html?v=markerfix-15');
       return;
     }
 
@@ -50,23 +51,60 @@
         return;
       }
 
-      function build() {
+      var built = false;
+      function tryBuild() {
+        if (built) return;
+        built = true;
         var buildErr = window.AppCore.rebuildFromSpec(spec);
         if (buildErr) {
           setArError(buildErr);
           return;
         }
         setArError('');
+        window.dispatchEvent(new Event('resize'));
       }
 
-      if (scene.hasLoaded) {
-        build();
-      } else {
-        scene.addEventListener('loaded', function once() {
-          scene.removeEventListener('loaded', once);
-          build();
-        });
+      // Best: AR.js fires this when #arjs-video exists and the stream is attached.
+      window.addEventListener(
+        'arjs-video-loaded',
+        function onVideo() {
+          window.removeEventListener('arjs-video-loaded', onVideo);
+          setTimeout(tryBuild, 300);
+        },
+        { once: true }
+      );
+
+      // If the event already fired before we subscribed, poll for the video element.
+      var pollId = setInterval(function () {
+        var v = document.querySelector('#arjs-video');
+        if (v && v.srcObject && v.readyState >= 2) {
+          clearInterval(pollId);
+          setTimeout(tryBuild, 300);
+        }
+      }, 100);
+      setTimeout(function () {
+        clearInterval(pollId);
+      }, 8000);
+
+      // A-Frame scene graph is ready (may still be before webcam is fully wired).
+      function afterSceneLoaded() {
+        setTimeout(tryBuild, 1400);
       }
+      if (scene.hasLoaded) {
+        afterSceneLoaded();
+      } else {
+        scene.addEventListener(
+          'loaded',
+          function once() {
+            scene.removeEventListener('loaded', once);
+            afterSceneLoaded();
+          },
+          { once: true }
+        );
+      }
+
+      // Last resort if neither path fired (very slow devices).
+      setTimeout(tryBuild, 4000);
     });
   }
 

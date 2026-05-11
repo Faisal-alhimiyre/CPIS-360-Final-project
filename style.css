@@ -1,5 +1,5 @@
 /* ---------------------------------------------------------------------------
-   markerfix-13: embedded AR + copy webcam layout onto A-Frame canvas (AR.js skips it).
+   markerfix-15: ar-page defers geometry until arjs-video-loaded (see ar-page.js).
    --------------------------------------------------------------------------- */
 
 :root {

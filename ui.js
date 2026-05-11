@@ -101,16 +101,6 @@
       setMessage('Inputs look good — opening the camera page…');
       onSubmitValid(spec);
     });
-
-    var btnHide = document.getElementById('btn-toggle-ui');
-    var uiLayer = document.getElementById('ui-layer');
-    if (btnHide && uiLayer) {
-      btnHide.addEventListener('click', function () {
-        var hidden = uiLayer.classList.toggle('hidden');
-        document.body.classList.toggle('ui-fullscreen', hidden);
-        btnHide.textContent = hidden ? 'Show form' : 'Hide form';
-      });
-    }
   }
 
   window.Ui = {

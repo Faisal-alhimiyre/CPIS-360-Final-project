@@ -1,7 +1,7 @@
 /**
  * ar-page.js
  * ----------
- * ar.html only: load spec from sessionStorage, start AR, build the model.
+ * ar.html only: load spec, wait for A-Frame scene loaded, then build geometry + interactions.
  */
 
 (function () {
@@ -17,7 +17,7 @@
   function start() {
     var raw = sessionStorage.getItem(STORAGE_KEY);
     if (!raw) {
-      window.location.replace('index.html?v=markerfix-13');
+      window.location.replace('index.html?v=markerfix-14');
       return;
     }
 
@@ -26,7 +26,7 @@
       spec = JSON.parse(raw);
     } catch (e) {
       sessionStorage.removeItem(STORAGE_KEY);
-      window.location.replace('index.html?v=markerfix-13');
+      window.location.replace('index.html?v=markerfix-14');
       return;
     }
 
@@ -40,22 +40,33 @@
     window.ArScene.mountSceneIfNeeded(function (mountErr) {
       if (mountErr) {
         console.error(mountErr);
-        setArError('Could not start the camera. Check permissions and try again.');
+        setArError('Could not open AR scene.');
         return;
       }
-      var buildErr = window.AppCore.rebuildFromSpec(spec);
-      if (buildErr) {
-        setArError(buildErr);
+
+      var scene = document.getElementById('ar-scene');
+      if (!scene) {
+        setArError('Scene missing.');
         return;
       }
-      setArError('');
-      function kickLayout() {
-        if (window.ArScene.syncArDisplayToContainer) window.ArScene.syncArDisplayToContainer();
+
+      function build() {
+        var buildErr = window.AppCore.rebuildFromSpec(spec);
+        if (buildErr) {
+          setArError(buildErr);
+          return;
+        }
+        setArError('');
       }
-      kickLayout();
-      requestAnimationFrame(kickLayout);
-      setTimeout(kickLayout, 120);
-      setTimeout(kickLayout, 450);
+
+      if (scene.hasLoaded) {
+        build();
+      } else {
+        scene.addEventListener('loaded', function once() {
+          scene.removeEventListener('loaded', once);
+          build();
+        });
+      }
     });
   }
 

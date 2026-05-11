@@ -4,14 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>AR Building Visualizer — setup</title>
-  <link rel="stylesheet" href="style.css?v=markerfix-13" />
+  <link rel="stylesheet" href="style.css?v=markerfix-14" />
   <!-- AR (A-Frame + AR.js) loads only on ar.html after you submit this form. -->
 </head>
 <body class="form-page">
   <div id="ui-layer">
     <header class="app-header">
       <h1>AR Building Visualizer</h1>
-      <p class="subtitle"><strong>Deploy check (markerfix-13):</strong> camera page syncs the webcam onto the A-Frame WebGL canvas (AR.js omits that step). Network: <code>?v=markerfix-13</code>.</p>
+      <p class="subtitle"><strong>Deploy check (markerfix-14):</strong> camera page is <strong>minimal AR</strong> (inline CSS, flex layout for embedded scene, no ar-scene hacks). From the form you jump to <code>ar.html?v=markerfix-14&amp;c=…</code> so the HTML is never a stale cached copy.</p>
     </header>
 
     <details class="help-panel">
@@ -60,7 +60,7 @@
 
   <button type="button" id="btn-toggle-ui" class="form-floating-toggle" title="Show or hide the form panel">Hide form</button>
 
-  <script src="ui.js?v=markerfix-13"></script>
-  <script src="form-app.js?v=markerfix-13"></script>
+  <script src="ui.js?v=markerfix-14"></script>
+  <script src="form-app.js?v=markerfix-14"></script>
 </body>
 </html>

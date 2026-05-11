@@ -1,49 +1,93 @@
 <!DOCTYPE html>
-<html lang="en" class="ar-page-doc">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
   <title>AR camera — Building visualizer</title>
-  <link rel="stylesheet" href="style.css?v=markerfix-13" />
-  <script src="https://cdn.jsdelivr.net/npm/aframe@1.2.0/dist/aframe.min.js?v=markerfix-13"></script>
-  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.5/aframe/build/aframe-ar.js?v=markerfix-13"></script>
+  <!-- Inline layout only: avoids CSS conflicts. Flex + min-height:0 fixes embedded a-scene height. -->
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      background: #000;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+    }
+    .ar-bar {
+      flex: 0 0 auto;
+      z-index: 10;
+      padding: 10px 12px;
+      padding-top: max(10px, env(safe-area-inset-top, 0px));
+      background: rgba(224, 242, 254, 0.96);
+      border-bottom: 2px solid #0369a1;
+      font: 14px system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      color: #0c4a6e;
+    }
+    .ar-bar a {
+      font-weight: 700;
+      color: #6d28d9;
+      text-decoration: none;
+      margin-right: 12px;
+    }
+    .ar-bar a:hover {
+      text-decoration: underline;
+    }
+    #ar-scene {
+      flex: 1 1 auto;
+      min-height: 0;
+      width: 100%;
+      display: block;
+    }
+    #ar-page-error {
+      margin: 6px 0 0;
+      font-weight: 600;
+      color: #9d174d;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/aframe@1.2.0/dist/aframe.min.js?v=markerfix-14"></script>
+  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.5/aframe/build/aframe-ar.js?v=markerfix-14"></script>
 </head>
-<body class="ar-page ar-mounted">
-  <header class="ar-page-header">
-    <a href="index.html?v=markerfix-13" class="ar-page-back">← Edit building</a>
-    <span class="ar-page-hint">Point at the HIRO marker. Tap the door for a transparent front wall.</span>
-    <p id="ar-page-error" class="ar-page-error" role="alert"></p>
-  </header>
-
-  <div id="ar-container">
-    <a-scene
-      embedded
-      vr-mode-ui="enabled: false"
-      arjs="sourceType: webcam; trackingMethod: best; debugUIEnabled: false;"
-      id="ar-scene"
-      style="width: 100%; height: 100%; display: block;"
-    >
-      <a-marker preset="hiro" id="hiro-marker" emitevents="true">
-        <a-entity id="building-root" position="0 0 0"></a-entity>
-      </a-marker>
-      <a-entity id="ar-camera" camera>
-        <a-cursor
-          id="ar-cursor"
-          raycaster="objects: .clickable; far: 25"
-          fuse="false"
-          scale="0.01 0.01 0.01"
-          color="#4CC3D9"
-          animation__click="property: scale; startEvents: click; easing: easeInCubic; dur: 150; from: 0.1 0.1 0.1; to: 0.01 0.01 0.01"
-        ></a-cursor>
-      </a-entity>
-    </a-scene>
+<body>
+  <div class="ar-bar">
+    <a href="index.html?v=markerfix-14">← Edit building</a>
+    <span>Point at the HIRO marker. Tap the door for a transparent front wall.</span>
+    <p id="ar-page-error" role="alert"></p>
   </div>
 
-  <script src="ar-scene.js?v=markerfix-13"></script>
-  <script src="generator.js?v=markerfix-13"></script>
-  <script src="interactions.js?v=markerfix-13"></script>
-  <script src="ui.js?v=markerfix-13"></script>
-  <script src="app-core.js?v=markerfix-13"></script>
-  <script src="ar-page.js?v=markerfix-13"></script>
+  <a-scene
+    id="ar-scene"
+    embedded
+    vr-mode-ui="enabled: false"
+    arjs="sourceType: webcam; trackingMethod: best; debugUIEnabled: false;"
+  >
+    <a-marker preset="hiro" id="hiro-marker" emitevents="true">
+      <a-entity id="building-root" position="0 0 0"></a-entity>
+    </a-marker>
+    <a-entity id="ar-camera" camera>
+      <a-cursor
+        id="ar-cursor"
+        raycaster="objects: .clickable; far: 25"
+        fuse="false"
+        scale="0.01 0.01 0.01"
+        color="#4CC3D9"
+        animation__click="property: scale; startEvents: click; easing: easeInCubic; dur: 150; from: 0.1 0.1 0.1; to: 0.01 0.01 0.01"
+      ></a-cursor>
+    </a-entity>
+  </a-scene>
+
+  <script src="generator.js?v=markerfix-14"></script>
+  <script src="interactions.js?v=markerfix-14"></script>
+  <script src="ui.js?v=markerfix-14"></script>
+  <script src="app-core.js?v=markerfix-14"></script>
+  <script src="ar-scene.js?v=markerfix-14"></script>
+  <script src="ar-page.js?v=markerfix-14"></script>
 </body>
 </html>

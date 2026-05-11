@@ -1,5 +1,5 @@
 /**
- * ar-canvas-sync.js (markerfix-19)
+ * ar-canvas-sync.js (markerfix-20)
  * --------------------------------
  * AR.js: copyElementSizeTo(canvas) matches the webcam element to the WebGL canvas.
  * Do NOT call setSize(w,h,false) here — that updates the drawing buffer but skips
@@ -13,7 +13,7 @@
   var sentinel = document.createElement('div');
   sentinel.id = 'cpis-deploy-sentinel';
   sentinel.textContent =
-    'markerfix-19 — fullscreen AR + fixed canvas sizing. (5s)';
+    'markerfix-20 — transparent WebGL clear (camera shows through). (5s)';
   sentinel.style.cssText =
     'position:fixed;bottom:0;left:0;right:0;z-index:2147483647;background:#ffef00;color:#000;font:700 14px system-ui,sans-serif;padding:10px;text-align:center;border-top:3px solid red;';
   function mountSentinel() {

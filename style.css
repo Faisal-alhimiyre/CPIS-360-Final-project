@@ -1,5 +1,5 @@
 /* ---------------------------------------------------------------------------
-   markerfix-19: fullscreen a-scene (no embedded); canvas sync without setSize false.
+   markerfix-20: ar-display-fix.js transparent clear + renderer alpha for AR.js video under canvas.
    --------------------------------------------------------------------------- */
 
 :root {

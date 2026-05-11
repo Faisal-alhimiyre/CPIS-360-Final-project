@@ -77,7 +77,22 @@
     var ph = document.getElementById('ar-placeholder');
     if (ph) ph.remove();
 
-    container.appendChild(tpl.content.cloneNode(true));
+    // Clone first, set arjs with a plain object (booleans are real booleans). Marker mode must keep
+    // videoTexture === false: if true, AR.js returns early and never creates _arProfile; arjs-anchor
+    // then crashes reading changeMatrixMode. String arjs="...videoTexture: false..." can mis-parse on some builds.
+    var frag = tpl.content.cloneNode(true);
+    var sceneEl = frag.querySelector('#ar-scene');
+    if (!sceneEl) {
+      onReady(new Error('Template missing #ar-scene'));
+      return;
+    }
+    sceneEl.setAttribute('arjs', {
+      sourceType: 'webcam',
+      videoTexture: false,
+      debugUIEnabled: false,
+      trackingMethod: 'best',
+    });
+    container.appendChild(frag);
     document.body.classList.add('ar-mounted');
 
     scene = document.getElementById('ar-scene');

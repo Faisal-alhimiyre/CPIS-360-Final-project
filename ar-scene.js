@@ -2,7 +2,7 @@
  * ar-scene.js
  * -----------
  * Mounts the <a-scene> from the HTML template once the user taps Generate.
- * Keep this file boring: no AR library hacks here — version pairing lives in index.html.
+ * Patches AR.js webcam sizing for split layouts (see patchArSourceForEmbeddedPanel).
  */
 
 (function () {
@@ -32,9 +32,146 @@
     return { scene: scene, marker: marker, buildingRoot: buildingRoot };
   }
 
+  function arContainerBox() {
+    var box = document.getElementById('ar-container');
+    if (!box) return { w: window.innerWidth, h: window.innerHeight };
+    return {
+      w: Math.max(2, box.clientWidth),
+      h: Math.max(2, box.clientHeight),
+    };
+  }
+
   /**
-   * Embedded AR.js often starts with wrong internal size → black “camera”. Push the real
-   * #ar-container pixel size into arjs (display + processing canvas).
+   * AR.js sizes the webcam + processing canvas from window.innerWidth/Height and copies
+   * sizes to document.body (see aframe system-arjs + threex/arjs-source). That breaks a
+   * split UI where the scene lives in #ar-container only → black panel. We patch the
+   * live ArToolkitSource after the video is ready.
+   */
+  function patchArSourceForEmbeddedPanel(arSource) {
+    if (!arSource || arSource.__cpisEmbeddedPatch) return;
+    arSource.__cpisEmbeddedPatch = true;
+
+    arSource.onResizeElement = function () {
+      var b = arContainerBox();
+      var screenWidth = b.w;
+      var screenHeight = b.h;
+      var sourceWidth;
+      var sourceHeight;
+      if (this.domElement.nodeName === 'IMG') {
+        sourceWidth = this.domElement.naturalWidth;
+        sourceHeight = this.domElement.naturalHeight;
+      } else if (this.domElement.nodeName === 'VIDEO') {
+        sourceWidth = this.domElement.videoWidth;
+        sourceHeight = this.domElement.videoHeight;
+      } else {
+        return;
+      }
+      if (!sourceWidth || !sourceHeight) return;
+      var sourceAspect = sourceWidth / sourceHeight;
+      var screenAspect = screenWidth / screenHeight;
+      if (screenAspect < sourceAspect) {
+        var newWidth = sourceAspect * screenHeight;
+        this.domElement.style.width = newWidth + 'px';
+        this.domElement.style.marginLeft = -(newWidth - screenWidth) / 2 + 'px';
+        this.domElement.style.height = screenHeight + 'px';
+        this.domElement.style.marginTop = '0px';
+      } else {
+        var newHeight = 1 / (sourceAspect / screenWidth);
+        this.domElement.style.height = newHeight + 'px';
+        this.domElement.style.marginTop = -(newHeight - screenHeight) / 2 + 'px';
+        this.domElement.style.width = screenWidth + 'px';
+        this.domElement.style.marginLeft = '0px';
+      }
+    };
+
+    arSource.copyElementSizeTo = function (otherElement) {
+      var target = otherElement === document.body ? document.getElementById('ar-container') || otherElement : otherElement;
+      var b = arContainerBox();
+      var cw = b.w;
+      var ch = b.h;
+      var landscape = cw > ch;
+      if (landscape) {
+        target.style.width = this.domElement.style.width;
+        target.style.height = this.domElement.style.height;
+        target.style.marginLeft = this.domElement.style.marginLeft;
+        target.style.marginTop = this.domElement.style.marginTop;
+      } else {
+        target.style.height = this.domElement.style.height;
+        var hNum = parseInt(target.style.height, 10);
+        if (!hNum || hNum < 1) hNum = ch;
+        target.style.width = (hNum * 4) / 3 + 'px';
+        var wNum = parseInt(target.style.width, 10);
+        target.style.marginLeft = (cw - wNum) / 2 + 'px';
+        target.style.marginTop = '0';
+      }
+    };
+  }
+
+  function forceArPipelineResize(scene) {
+    try {
+      var ar = scene.systems && scene.systems.arjs;
+      if (!ar || !ar._arSession || !ar._arSession.arSource) return;
+      var sess = ar._arSession;
+      if (!sess.arContext || !scene.renderer || !scene.camera) return;
+      sess.arSource.onResize(sess.arContext, scene.renderer, scene.camera);
+    } catch (e) {
+      /* AR context still booting */
+    }
+  }
+
+  function ensureEmbeddedArPatch(scene) {
+    if (scene.dataset.cpisArPatch === '1') return;
+    if (scene.dataset.cpisArPatchPending === '1') return;
+    scene.dataset.cpisArPatchPending = '1';
+    var tries = 0;
+    var id = setInterval(function () {
+      tries += 1;
+      var ar = scene.systems && scene.systems.arjs;
+      if (!ar || !ar._arSession || !ar._arSession.arSource) {
+        if (tries > 100) {
+          clearInterval(id);
+          scene.dataset.cpisArPatchPending = '0';
+        }
+        return;
+      }
+      var src = ar._arSession.arSource;
+      if (!src.ready && tries < 100) return;
+      clearInterval(id);
+      scene.dataset.cpisArPatchPending = '0';
+      if (scene.dataset.cpisArPatch === '1') return;
+      scene.dataset.cpisArPatch = '1';
+      patchArSourceForEmbeddedPanel(src);
+      forceArPipelineResize(scene);
+    }, 40);
+  }
+
+  function wireRenderstartSync(scene) {
+    if (scene.dataset.cpisRenderstartWired === '1') return;
+    scene.dataset.cpisRenderstartWired = '1';
+
+    function kick() {
+      ensureEmbeddedArPatch(scene);
+      requestAnimationFrame(function () {
+        syncArDisplayToContainer();
+      });
+    }
+
+    if (scene.hasLoaded && scene.renderer) {
+      kick();
+      return;
+    }
+    scene.addEventListener(
+      'renderstart',
+      function onRs() {
+        scene.removeEventListener('renderstart', onRs);
+        kick();
+      },
+      { once: true }
+    );
+  }
+
+  /**
+   * Push #ar-container size into arjs schema + trigger resize (still helps initial profile).
    */
   function syncArDisplayToContainer() {
     var scene = document.getElementById('ar-scene');
@@ -57,6 +194,7 @@
         ';'
     );
     window.dispatchEvent(new Event('resize'));
+    forceArPipelineResize(scene);
   }
 
   var resizeTimer = null;
@@ -73,8 +211,10 @@
   function mountSceneIfNeeded(onReady) {
     var scene = document.getElementById('ar-scene');
     if (scene) {
+      wireRenderstartSync(scene);
       function fire() {
         try {
+          ensureEmbeddedArPatch(scene);
           syncArDisplayToContainer();
           onReady(null);
         } catch (e) {
@@ -115,8 +255,11 @@
       return;
     }
 
+    wireRenderstartSync(scene);
+
     function fire() {
       try {
+        ensureEmbeddedArPatch(scene);
         syncArDisplayToContainer();
         setTimeout(syncArDisplayToContainer, 80);
         setTimeout(syncArDisplayToContainer, 350);

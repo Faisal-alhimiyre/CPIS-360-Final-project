@@ -1,20 +1,19 @@
 /* ---------------------------------------------------------------------------
-   Deploy visibility: bright golden form strip so you can tell “new build” vs
-   old GitHub Pages / wrong tab. (Revert palette later if you want subtle UI.)
+   markerfix-8: unmistakable palette swap (was golden). Confirms deploy/cache.
    --------------------------------------------------------------------------- */
 
 :root {
-  --bg-page: #fef9c3;
-  --bg-panel: #fef08a;
-  --border: #ca8a04;
-  --text: #422006;
-  --text-muted: #713f12;
-  --heading: #78350f;
-  --accent: #b45309;
-  --accent-hover: #92400e;
-  --input-bg: #fffbeb;
-  --message: #991b1b;
-  --link: #1e3a8a;
+  --bg-page: #ede9fe;
+  --bg-panel: #ddd6fe;
+  --border: #7c3aed;
+  --text: #1e1b4b;
+  --text-muted: #4c1d95;
+  --heading: #312e81;
+  --accent: #059669;
+  --accent-hover: #047857;
+  --input-bg: #f5f3ff;
+  --message: #9d174d;
+  --link: #0369a1;
 }
 
 *,
@@ -46,8 +45,7 @@ body {
   /* Leave space for the fixed “Hide form” control (it sits outside this panel). */
   padding: 14px 120px 16px 16px;
   background: var(--bg-panel);
-  /* Thick “beacon” line — old deploys did not have this */
-  border-bottom: 6px solid #0e7490;
+  border-bottom: 6px solid #10b981;
 }
 
 #ui-layer.hidden {
@@ -185,7 +183,7 @@ button {
 
 #btn-generate {
   flex: 1 1 200px;
-  color: #ffffff;
+  color: #ecfdf5;
   background: var(--accent);
   border-color: var(--accent);
 }
@@ -204,13 +202,13 @@ button {
   min-height: 44px;
   padding: 10px 14px;
   font-size: 0.85rem;
-  color: #fffbeb;
-  background: #0e7490;
-  border: 2px solid #155e75;
+  color: #faf5ff;
+  background: #6d28d9;
+  border: 2px solid #5b21b6;
 }
 
 .form-floating-toggle:hover {
-  background: #155e75;
+  background: #5b21b6;
 }
 
 .form-message {

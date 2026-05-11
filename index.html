@@ -5,7 +5,7 @@
   <!-- Mobile AR needs viewport + no weird zoom -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>AR Building Visualizer (HIRO)</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=markerfix-3" />
   <!--
     TESTING (Live Server in VS Code / Cursor)
     -----------------------------------------
@@ -20,15 +20,15 @@
     https://raw.githubusercontent.com/AR-js-org/ARToolkit5/master/bin/HIRO.jpg
   -->
   <!-- A-Frame + AR.js (marker build). Bump ?v= after edits so phones drop old cached JS. -->
-  <script src="https://aframe.io/releases/1.6.0/aframe.min.js?v=cpis360-markerfix-2"></script>
-  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.8/aframe/build/aframe-ar.js?v=cpis360-markerfix-2"></script>
+  <script src="https://aframe.io/releases/1.6.0/aframe.min.js?v=markerfix-3"></script>
+  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.8/aframe/build/aframe-ar.js?v=markerfix-3"></script>
 </head>
 <body>
   <!-- UI layer sits above the AR canvas -->
   <div id="ui-layer">
     <header class="app-header">
       <h1>AR Building Visualizer</h1>
-      <p class="subtitle"><strong>Deploy check:</strong> this whole top block should be <strong>golden yellow</strong>. If you still see white or pale beige, you are on an old cache or the wrong site URL.</p>
+      <p class="subtitle"><strong>Deploy check (markerfix-3):</strong> golden yellow top bar + scripts ending in <code>?v=markerfix-3</code>. If you see <code>markerfix-1</code> or <code>markerfix-2</code> in DevTools → Network, GitHub Pages has not finished updating yet.</p>
     </header>
 
     <details class="help-panel">
@@ -90,7 +90,7 @@
 
   <!-- Cloned into #ar-container on first successful Generate (starts webcam + AR tracking). -->
   <template id="ar-scene-template">
-    <!-- arjs must stay on this tag (HTML string). Do not set arjs from JS on a detached scene — systems.arjs never registers. Never add videoTexture:true here (breaks HIRO + changeMatrixMode). -->
+    <!-- HIRO marker is attached in ar-scene.js AFTER scene "loaded" so scene.systems.arjs exists before arjs-anchor inits (fixes isReady / startsWith spam). -->
     <a-scene
       embedded
       vr-mode-ui="enabled: false"
@@ -98,9 +98,6 @@
       arjs="sourceType: webcam; debugUIEnabled: false; trackingMethod: best;"
       id="ar-scene"
     >
-      <a-marker preset="hiro" id="hiro-marker" emitevents="true">
-        <a-entity id="building-root" position="0 0 0"></a-entity>
-      </a-marker>
       <a-entity id="ar-camera" camera>
         <a-cursor
           id="ar-cursor"

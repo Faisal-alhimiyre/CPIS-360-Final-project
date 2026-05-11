@@ -43,6 +43,28 @@
   }
 
   /**
+   * AR.js arjs-anchor reads scene.systems.arjs once in init(). If the marker is in the HTML
+   * template as a sibling that upgrades too early, that reference is undefined forever → hundreds
+   * of "isReady" / "startsWith" errors. Attach HIRO after the scene has fired "loaded".
+   *
+   * @param {Element} scene
+   */
+  function attachHiroMarkerIfNeeded(scene) {
+    if (!scene || scene.querySelector('#hiro-marker')) return;
+    var marker = document.createElement('a-marker');
+    marker.setAttribute('preset', 'hiro');
+    marker.id = 'hiro-marker';
+    marker.setAttribute('emitevents', true);
+    var root = document.createElement('a-entity');
+    root.id = 'building-root';
+    root.setAttribute('position', '0 0 0');
+    marker.appendChild(root);
+    var cam = scene.querySelector('#ar-camera');
+    if (cam) scene.insertBefore(marker, cam);
+    else scene.appendChild(marker);
+  }
+
+  /**
    * First successful form submit clones #ar-scene-template into #ar-container.
    * That is when the browser asks for camera permission (user gesture from the button).
    * Later submits reuse the same scene.
@@ -53,11 +75,14 @@
     var scene = document.getElementById('ar-scene');
     if (scene) {
       function fire() {
-        try {
-          onReady(null);
-        } catch (e) {
-          onReady(e);
-        }
+        requestAnimationFrame(function () {
+          try {
+            attachHiroMarkerIfNeeded(scene);
+            onReady(null);
+          } catch (e) {
+            onReady(e);
+          }
+        });
       }
       if (scene.hasLoaded) fire();
       else scene.addEventListener('loaded', function once() {
@@ -90,11 +115,15 @@
     }
 
     function fire() {
-      try {
-        onReady(null);
-      } catch (e) {
-        onReady(e);
-      }
+      // One frame after "loaded" so scene.systems.arjs is guaranteed to exist before arjs-anchor init.
+      requestAnimationFrame(function () {
+        try {
+          attachHiroMarkerIfNeeded(scene);
+          onReady(null);
+        } catch (e) {
+          onReady(e);
+        }
+      });
     }
     if (scene.hasLoaded) fire();
     else scene.addEventListener('loaded', function once() {

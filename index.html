@@ -4,14 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>AR Building Visualizer — setup</title>
-  <link rel="stylesheet" href="style.css?v=markerfix-22" />
+  <link rel="stylesheet" href="style.css?v=markerfix-23" />
   <!-- AR (A-Frame + AR.js) loads only on ar.html after you submit this form. -->
 </head>
 <body class="form-page">
   <div id="ui-layer">
     <header class="app-header">
       <h1>AR Building Visualizer</h1>
-      <p class="subtitle"><strong>Deploy check (markerfix-22):</strong> <code>ar.html</code> auto-redirects if <code>v=</code> is wrong (stops mixed cached HTML vs new JS). Transparent clear hooks <code>renderer.render</code>. <a href="ar-test.html?v=markerfix-22" target="_blank" rel="noopener">Minimal AR test</a>.</p>
+      <p class="subtitle"><strong>Deploy check (markerfix-23):</strong> AR.js <code>videoTexture: true</code> (camera as WebGL texture). Removed DOM/clear-color hacks. <a href="ar-test.html?v=markerfix-23" target="_blank" rel="noopener">Minimal AR test</a>.</p>
     </header>
 
     <details class="help-panel">
@@ -60,7 +60,7 @@
 
   <button type="button" id="btn-toggle-ui" class="form-floating-toggle" title="Show or hide the form panel">Hide form</button>
 
-  <script src="ui.js?v=markerfix-22"></script>
-  <script src="form-app.js?v=markerfix-22"></script>
+  <script src="ui.js?v=markerfix-23"></script>
+  <script src="form-app.js?v=markerfix-23"></script>
 </body>
 </html>

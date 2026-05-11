@@ -4,47 +4,43 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>AR camera — Building visualizer</title>
-  <link rel="stylesheet" href="style.css?v=markerfix-11" />
-  <script src="https://cdn.jsdelivr.net/npm/aframe@1.2.0/dist/aframe.min.js?v=markerfix-11"></script>
-  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.5/aframe/build/aframe-ar.js?v=markerfix-11"></script>
+  <link rel="stylesheet" href="style.css?v=markerfix-12" />
+  <script src="https://cdn.jsdelivr.net/npm/aframe@1.2.0/dist/aframe.min.js?v=markerfix-12"></script>
+  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.5/aframe/build/aframe-ar.js?v=markerfix-12"></script>
 </head>
-<body class="ar-page ar-mounted">
+<body class="ar-page ar-mounted ar-fullscreen">
   <header class="ar-page-header">
-    <a href="index.html?v=markerfix-11" class="ar-page-back">← Edit building</a>
+    <a href="index.html?v=markerfix-12" class="ar-page-back">← Edit building</a>
     <span class="ar-page-hint">Point at the HIRO marker. Tap the door for a transparent front wall.</span>
     <p id="ar-page-error" class="ar-page-error" role="alert"></p>
   </header>
 
-  <div id="ar-container">
-    <a-scene
-      embedded
-      vr-mode-ui="enabled: false"
-      renderer="alpha: true; antialias: true"
-      style="width: 100%; height: 100%; box-sizing: border-box;"
-      arjs="sourceType: webcam; trackingMethod: best; debugUIEnabled: false;"
-      id="ar-scene"
-    >
-      <a-marker preset="hiro" id="hiro-marker" emitevents="true">
-        <a-entity id="building-root" position="0 0 0"></a-entity>
-      </a-marker>
-      <a-entity id="ar-camera" camera>
-        <a-cursor
-          id="ar-cursor"
-          raycaster="objects: .clickable; far: 25"
-          fuse="false"
-          scale="0.01 0.01 0.01"
-          color="#4CC3D9"
-          animation__click="property: scale; startEvents: click; easing: easeInCubic; dur: 150; from: 0.1 0.1 0.1; to: 0.01 0.01 0.01"
-        ></a-cursor>
-      </a-entity>
-    </a-scene>
-  </div>
+  <!-- Non-embedded scene: AR.js expects window-sized WebGL (embedded + patches caused black screen). -->
+  <a-scene
+    vr-mode-ui="enabled: false"
+    arjs="sourceType: webcam; trackingMethod: best; debugUIEnabled: false;"
+    id="ar-scene"
+  >
+    <a-marker preset="hiro" id="hiro-marker" emitevents="true">
+      <a-entity id="building-root" position="0 0 0"></a-entity>
+    </a-marker>
+    <a-entity id="ar-camera" camera>
+      <a-cursor
+        id="ar-cursor"
+        raycaster="objects: .clickable; far: 25"
+        fuse="false"
+        scale="0.01 0.01 0.01"
+        color="#4CC3D9"
+        animation__click="property: scale; startEvents: click; easing: easeInCubic; dur: 150; from: 0.1 0.1 0.1; to: 0.01 0.01 0.01"
+      ></a-cursor>
+    </a-entity>
+  </a-scene>
 
-  <script src="ar-scene.js?v=markerfix-11"></script>
-  <script src="generator.js?v=markerfix-11"></script>
-  <script src="interactions.js?v=markerfix-11"></script>
-  <script src="ui.js?v=markerfix-11"></script>
-  <script src="app-core.js?v=markerfix-11"></script>
-  <script src="ar-page.js?v=markerfix-11"></script>
+  <script src="ar-scene.js?v=markerfix-12"></script>
+  <script src="generator.js?v=markerfix-12"></script>
+  <script src="interactions.js?v=markerfix-12"></script>
+  <script src="ui.js?v=markerfix-12"></script>
+  <script src="app-core.js?v=markerfix-12"></script>
+  <script src="ar-page.js?v=markerfix-12"></script>
 </body>
 </html>

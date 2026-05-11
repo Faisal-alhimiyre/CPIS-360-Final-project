@@ -17,7 +17,7 @@
   function start() {
     var raw = sessionStorage.getItem(STORAGE_KEY);
     if (!raw) {
-      window.location.replace('index.html?v=markerfix-11');
+      window.location.replace('index.html?v=markerfix-12');
       return;
     }
 
@@ -26,7 +26,7 @@
       spec = JSON.parse(raw);
     } catch (e) {
       sessionStorage.removeItem(STORAGE_KEY);
-      window.location.replace('index.html?v=markerfix-11');
+      window.location.replace('index.html?v=markerfix-12');
       return;
     }
 
@@ -50,7 +50,7 @@
       }
       setArError('');
       function kickLayout() {
-        if (window.ArScene.forceLayoutFromViewport) window.ArScene.forceLayoutFromViewport();
+        if (window.ArScene.syncArDisplayToContainer) window.ArScene.syncArDisplayToContainer();
       }
       kickLayout();
       requestAnimationFrame(kickLayout);

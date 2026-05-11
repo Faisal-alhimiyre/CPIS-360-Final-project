@@ -1,12 +1,16 @@
 /**
  * ar-scene.js
  * -----------
- * Mounts the <a-scene> from the HTML template once the user taps Generate.
- * Patches AR.js webcam sizing for split layouts (see patchArSourceForEmbeddedPanel).
+ * ar.html (body.ar-fullscreen): non-embedded scene — native AR.js window sizing, no patches.
+ * Legacy: template clone into #ar-container + embedded patch (split layout) if still used.
  */
 
 (function () {
   'use strict';
+
+  function isArFullscreen() {
+    return document.body.classList.contains('ar-fullscreen');
+  }
 
   function whenSceneReady(sceneId, callback) {
     var scene = document.getElementById(sceneId);
@@ -34,19 +38,15 @@
 
   function arContainerBox() {
     var box = document.getElementById('ar-container');
-    if (!box) return { w: window.innerWidth, h: window.innerHeight };
+    if (!box) {
+      return { w: Math.max(2, window.innerWidth), h: Math.max(2, window.innerHeight) };
+    }
     return {
       w: Math.max(2, box.clientWidth),
       h: Math.max(2, box.clientHeight),
     };
   }
 
-  /**
-   * AR.js sizes the webcam + processing canvas from window.innerWidth/Height and copies
-   * sizes to document.body (see aframe system-arjs + threex/arjs-source). That breaks a
-   * split UI where the scene lives in #ar-container only → black panel. We patch the
-   * live ArToolkitSource after the video is ready.
-   */
   function patchArSourceForEmbeddedPanel(arSource) {
     if (!arSource || arSource.__cpisEmbeddedPatch) return;
     arSource.__cpisEmbeddedPatch = true;
@@ -129,12 +129,14 @@
     v.dataset.cpisMetaBound = '1';
     function kick() {
       forceArPipelineResize(scene);
-      forceLayoutFromViewport();
+      syncArDisplayToContainer();
     }
     v.addEventListener('loadedmetadata', kick);
   }
 
   function ensureEmbeddedArPatch(scene) {
+    if (isArFullscreen()) return;
+
     if (scene.dataset.cpisArPatch === '1') return;
     if (scene.dataset.cpisArPatchPending === '1') return;
     scene.dataset.cpisArPatchPending = '1';
@@ -168,7 +170,7 @@
     function kick() {
       ensureEmbeddedArPatch(scene);
       requestAnimationFrame(function () {
-        forceLayoutFromViewport();
+        softLayoutSync();
       });
     }
 
@@ -186,11 +188,23 @@
     );
   }
 
+  /** Fullscreen page: only sync arjs + resize pipeline (no inline pixel hacks). */
+  function softLayoutSync() {
+    if (isArFullscreen()) {
+      syncArDisplayToContainer();
+      return;
+    }
+    forceLayoutFromViewport();
+  }
+
   /**
-   * Pin #ar-container + a-scene to the visual viewport in px. Embedded A-Frame + AR.js
-   * otherwise sometimes resolve height:100% to a tiny strip when the chain is ambiguous.
+   * Legacy embedded split layout: pin container + scene in px so % heights resolve.
    */
   function forceLayoutFromViewport() {
+    if (isArFullscreen()) {
+      syncArDisplayToContainer();
+      return;
+    }
     var box = document.getElementById('ar-container');
     var scene = document.getElementById('ar-scene');
     if (!box || !scene) return;
@@ -210,21 +224,32 @@
     if (!box || box.dataset.cpisRo === '1' || typeof ResizeObserver === 'undefined') return;
     box.dataset.cpisRo = '1';
     var ro = new ResizeObserver(function () {
-      forceLayoutFromViewport();
+      softLayoutSync();
     });
     ro.observe(box);
   }
 
-  /**
-   * Push #ar-container size into arjs schema + trigger resize (still helps initial profile).
-   */
   function syncArDisplayToContainer() {
     var scene = document.getElementById('ar-scene');
+    if (!scene) return;
+
+    if (isArFullscreen()) {
+      window.dispatchEvent(new Event('resize'));
+      forceArPipelineResize(scene);
+      return;
+    }
+
     var box = document.getElementById('ar-container');
-    if (!scene || !box) return;
-    var r = box.getBoundingClientRect();
-    var w = Math.floor(Math.max(2, r.width));
-    var h = Math.floor(Math.max(2, r.height));
+    var w;
+    var h;
+    if (box) {
+      var r = box.getBoundingClientRect();
+      w = Math.floor(Math.max(2, r.width));
+      h = Math.floor(Math.max(2, r.height));
+    } else {
+      w = Math.floor(Math.max(2, window.innerWidth));
+      h = Math.floor(Math.max(2, window.innerHeight));
+    }
     if (w < 8 || h < 8) return;
     scene.setAttribute(
       'arjs',
@@ -246,7 +271,7 @@
   function onWindowResize() {
     if (resizeTimer) clearTimeout(resizeTimer);
     resizeTimer = setTimeout(function () {
-      forceLayoutFromViewport();
+      softLayoutSync();
     }, 120);
   }
 
@@ -260,7 +285,7 @@
       function fire() {
         try {
           ensureEmbeddedArPatch(scene);
-          forceLayoutFromViewport();
+          softLayoutSync();
           onReady(null);
         } catch (e) {
           onReady(e);
@@ -279,7 +304,7 @@
         window.addEventListener('orientationchange', onWindowResize);
       }
       bindArContainerResizeObserver();
-      forceLayoutFromViewport();
+      softLayoutSync();
       return;
     }
 
@@ -307,10 +332,10 @@
     function fire() {
       try {
         ensureEmbeddedArPatch(scene);
-        forceLayoutFromViewport();
-        setTimeout(forceLayoutFromViewport, 80);
-        setTimeout(forceLayoutFromViewport, 350);
-        setTimeout(forceLayoutFromViewport, 800);
+        softLayoutSync();
+        setTimeout(softLayoutSync, 80);
+        setTimeout(softLayoutSync, 350);
+        setTimeout(softLayoutSync, 800);
         onReady(null);
       } catch (e) {
         onReady(e);
@@ -331,7 +356,7 @@
     }
 
     bindArContainerResizeObserver();
-    forceLayoutFromViewport();
+    softLayoutSync();
   }
 
   window.ArScene = {

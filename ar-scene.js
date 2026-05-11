@@ -33,6 +33,41 @@
   }
 
   /**
+   * Embedded AR.js often starts with wrong internal size → black “camera”. Push the real
+   * #ar-container pixel size into arjs (display + processing canvas).
+   */
+  function syncArDisplayToContainer() {
+    var scene = document.getElementById('ar-scene');
+    var box = document.getElementById('ar-container');
+    if (!scene || !box) return;
+    var r = box.getBoundingClientRect();
+    var w = Math.floor(Math.max(2, r.width));
+    var h = Math.floor(Math.max(2, r.height));
+    if (w < 8 || h < 8) return;
+    scene.setAttribute(
+      'arjs',
+      'sourceType: webcam; trackingMethod: best; debugUIEnabled: false; displayWidth: ' +
+        w +
+        '; displayHeight: ' +
+        h +
+        '; canvasWidth: ' +
+        w +
+        '; canvasHeight: ' +
+        h +
+        ';'
+    );
+    window.dispatchEvent(new Event('resize'));
+  }
+
+  var resizeTimer = null;
+  function onWindowResize() {
+    if (resizeTimer) clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function () {
+      syncArDisplayToContainer();
+    }, 120);
+  }
+
+  /**
    * @param {(err: Error|null) => void} onReady
    */
   function mountSceneIfNeeded(onReady) {
@@ -40,6 +75,7 @@
     if (scene) {
       function fire() {
         try {
+          syncArDisplayToContainer();
           onReady(null);
         } catch (e) {
           onReady(e);
@@ -51,6 +87,11 @@
           scene.removeEventListener('loaded', once);
           fire();
         });
+      }
+      if (!document.body.dataset.arResizeBound) {
+        document.body.dataset.arResizeBound = '1';
+        window.addEventListener('resize', onWindowResize);
+        window.addEventListener('orientationchange', onWindowResize);
       }
       return;
     }
@@ -76,6 +117,10 @@
 
     function fire() {
       try {
+        syncArDisplayToContainer();
+        setTimeout(syncArDisplayToContainer, 80);
+        setTimeout(syncArDisplayToContainer, 350);
+        setTimeout(syncArDisplayToContainer, 800);
         onReady(null);
       } catch (e) {
         onReady(e);
@@ -89,15 +134,17 @@
       });
     }
 
-    // AR.js resize kludge (also used inside AR.js system) — helps embedded canvas pick up layout.
-    setTimeout(function () {
-      window.dispatchEvent(new Event('resize'));
-    }, 100);
+    if (!document.body.dataset.arResizeBound) {
+      document.body.dataset.arResizeBound = '1';
+      window.addEventListener('resize', onWindowResize);
+      window.addEventListener('orientationchange', onWindowResize);
+    }
   }
 
   window.ArScene = {
     whenSceneReady: whenSceneReady,
     getArHandles: getArHandles,
     mountSceneIfNeeded: mountSceneIfNeeded,
+    syncArDisplayToContainer: syncArDisplayToContainer,
   };
 })();

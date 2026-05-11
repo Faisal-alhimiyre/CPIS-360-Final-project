@@ -5,7 +5,7 @@
   <!-- Mobile AR needs viewport + no weird zoom -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>AR Building Visualizer (HIRO)</title>
-  <link rel="stylesheet" href="style.css?v=markerfix-6" />
+  <link rel="stylesheet" href="style.css?v=markerfix-7" />
   <!--
     TESTING (Live Server in VS Code / Cursor)
     -----------------------------------------
@@ -20,15 +20,15 @@
     https://raw.githubusercontent.com/AR-js-org/ARToolkit5/master/bin/HIRO.jpg
   -->
   <!-- Stable marker stack: A-Frame 1.2 + AR.js 3.4.5 (widely used in HIRO tutorials). 1.6+r164 + 3.4.8 caused black camera / fragile compositing here. -->
-  <script src="https://cdn.jsdelivr.net/npm/aframe@1.2.0/dist/aframe.min.js?v=markerfix-6"></script>
-  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.5/aframe/build/aframe-ar.js?v=markerfix-6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/aframe@1.2.0/dist/aframe.min.js?v=markerfix-7"></script>
+  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.5/aframe/build/aframe-ar.js?v=markerfix-7"></script>
 </head>
 <body>
   <!-- UI layer sits above the AR canvas -->
   <div id="ui-layer">
     <header class="app-header">
       <h1>AR Building Visualizer</h1>
-      <p class="subtitle"><strong>Deploy check (markerfix-6):</strong> AR reset to <strong>A-Frame 1.2 + AR.js 3.4.5</strong> (see <code>?v=markerfix-6</code>). If Network still shows 1.6 or 3.4.8, Pages has not deployed this commit.</p>
+      <p class="subtitle"><strong>Deploy check (markerfix-7):</strong> embed AR now syncs <code>displayWidth/Height</code> to the lower panel (fixes black webcam). Scripts <code>?v=markerfix-7</code>.</p>
     </header>
 
     <details class="help-panel">
@@ -94,6 +94,7 @@
     <a-scene
       embedded
       vr-mode-ui="enabled: false"
+      style="width: 100%; height: 100%; min-height: 280px;"
       arjs="sourceType: webcam; trackingMethod: best; debugUIEnabled: false;"
       id="ar-scene"
     >

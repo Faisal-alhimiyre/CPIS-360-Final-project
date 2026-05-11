@@ -1,5 +1,5 @@
 /* ---------------------------------------------------------------------------
-   markerfix-23: videoTexture + no ar-display-fix; ?v= redirect on ar pages.
+   markerfix-24: videoTexture false, #arjs-video z-index, ar-stack.js, AR.js 3.4.2 pin.
    --------------------------------------------------------------------------- */
 
 :root {

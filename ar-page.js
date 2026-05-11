@@ -18,7 +18,7 @@
   function start() {
     var raw = sessionStorage.getItem(STORAGE_KEY);
     if (!raw) {
-      window.location.replace('index.html?v=markerfix-23');
+      window.location.replace('index.html?v=markerfix-24');
       return;
     }
 
@@ -27,7 +27,7 @@
       spec = JSON.parse(raw);
     } catch (e) {
       sessionStorage.removeItem(STORAGE_KEY);
-      window.location.replace('index.html?v=markerfix-23');
+      window.location.replace('index.html?v=markerfix-24');
       return;
     }
 

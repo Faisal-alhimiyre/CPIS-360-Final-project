@@ -6,7 +6,6 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <title>AR camera — Building visualizer</title>
-  <!-- Inline layout only: avoids CSS conflicts. Flex + min-height:0 fixes embedded a-scene height. -->
   <style>
     html,
     body {
@@ -17,14 +16,27 @@
       overflow: hidden;
       background: #000;
     }
-    /* AR.js + artoolkit assume a full-viewport source; embedded flex slices often stay black. */
+    /* AR.js appends #arjs-video to body with inline z-index:-2; lift feed above body bg. */
+    #arjs-video {
+      position: fixed !important;
+      left: 0 !important;
+      top: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      object-fit: cover !important;
+      opacity: 1 !important;
+      visibility: visible !important;
+      z-index: 1 !important;
+      margin: 0 !important;
+    }
+    /* Transparent WebGL canvas above the live video. */
     #ar-scene {
       position: fixed;
       inset: 0;
       width: 100%;
       height: 100%;
       display: block;
-      z-index: 0;
+      z-index: 2;
     }
     .ar-bar {
       position: fixed;
@@ -63,14 +75,14 @@
       color: #9d174d;
     }
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/aframe@1.2.0/dist/aframe.min.js?v=markerfix-23"></script>
-  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.5/aframe/build/aframe-ar.js?v=markerfix-23"></script>
+  <script src="https://cdn.jsdelivr.net/npm/aframe@1.2.0/dist/aframe.min.js?v=markerfix-24"></script>
+  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.2/aframe/build/aframe-ar.js?v=markerfix-24"></script>
 </head>
 <body>
   <script>
     (function () {
       try {
-        var want = 'markerfix-23';
+        var want = 'markerfix-24';
         var u = new URL(window.location.href);
         if (u.searchParams.get('v') !== want) {
           u.searchParams.set('v', want);
@@ -81,7 +93,7 @@
     })();
   </script>
   <div class="ar-bar">
-    <a href="index.html?v=markerfix-23">← Edit building</a>
+    <a href="index.html?v=markerfix-24">← Edit building</a>
     <span id="ar-tracking-hint">Point at the HIRO marker. Tap the door for a transparent front wall.</span>
     <p id="ar-page-error" role="alert"></p>
   </div>
@@ -90,7 +102,7 @@
     id="ar-scene"
     vr-mode-ui="enabled: false"
     renderer="alpha: true; antialias: true"
-    arjs="sourceType: webcam; videoTexture: true; trackingMethod: best; debugUIEnabled: false;"
+    arjs="sourceType: webcam; videoTexture: false; trackingMethod: best; debugUIEnabled: false;"
   >
     <a-marker preset="hiro" id="hiro-marker" emitevents="true">
       <a-entity id="building-root" position="0 0 0"></a-entity>
@@ -107,11 +119,12 @@
     </a-entity>
   </a-scene>
 
-  <script src="generator.js?v=markerfix-23"></script>
-  <script src="interactions.js?v=markerfix-23"></script>
-  <script src="ui.js?v=markerfix-23"></script>
-  <script src="app-core.js?v=markerfix-23"></script>
-  <script src="ar-scene.js?v=markerfix-23"></script>
-  <script src="ar-page.js?v=markerfix-23"></script>
+  <script src="generator.js?v=markerfix-24"></script>
+  <script src="interactions.js?v=markerfix-24"></script>
+  <script src="ui.js?v=markerfix-24"></script>
+  <script src="app-core.js?v=markerfix-24"></script>
+  <script src="ar-scene.js?v=markerfix-24"></script>
+  <script src="ar-stack.js?v=markerfix-24"></script>
+  <script src="ar-page.js?v=markerfix-24"></script>
 </body>
 </html>

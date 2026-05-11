@@ -1,5 +1,5 @@
 /* ---------------------------------------------------------------------------
-   markerfix-21: tick-based transparent clear; removed ar-canvas-sync (resize fights AR.js).
+   markerfix-22: ar.html forces ?v=; transparent clear via renderer.render hook.
    --------------------------------------------------------------------------- */
 
 :root {

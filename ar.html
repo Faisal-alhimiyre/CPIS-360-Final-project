@@ -63,12 +63,25 @@
       color: #9d174d;
     }
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/aframe@1.2.0/dist/aframe.min.js?v=markerfix-21"></script>
-  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.5/aframe/build/aframe-ar.js?v=markerfix-21"></script>
+  <script src="https://cdn.jsdelivr.net/npm/aframe@1.2.0/dist/aframe.min.js?v=markerfix-22"></script>
+  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.5/aframe/build/aframe-ar.js?v=markerfix-22"></script>
 </head>
 <body>
+  <script>
+    (function () {
+      try {
+        var want = 'markerfix-22';
+        var u = new URL(window.location.href);
+        if (u.searchParams.get('v') !== want) {
+          u.searchParams.set('v', want);
+          u.searchParams.set('c', String(Date.now()));
+          window.location.replace(u.href);
+        }
+      } catch (e) {}
+    })();
+  </script>
   <div class="ar-bar">
-    <a href="index.html?v=markerfix-21">← Edit building</a>
+    <a href="index.html?v=markerfix-22">← Edit building</a>
     <span id="ar-tracking-hint">Point at the HIRO marker. Tap the door for a transparent front wall.</span>
     <p id="ar-page-error" role="alert"></p>
   </div>
@@ -94,12 +107,12 @@
     </a-entity>
   </a-scene>
 
-  <script src="generator.js?v=markerfix-21"></script>
-  <script src="interactions.js?v=markerfix-21"></script>
-  <script src="ui.js?v=markerfix-21"></script>
-  <script src="app-core.js?v=markerfix-21"></script>
-  <script src="ar-scene.js?v=markerfix-21"></script>
-  <script src="ar-display-fix.js?v=markerfix-21"></script>
-  <script src="ar-page.js?v=markerfix-21"></script>
+  <script src="generator.js?v=markerfix-22"></script>
+  <script src="interactions.js?v=markerfix-22"></script>
+  <script src="ui.js?v=markerfix-22"></script>
+  <script src="app-core.js?v=markerfix-22"></script>
+  <script src="ar-scene.js?v=markerfix-22"></script>
+  <script src="ar-display-fix.js?v=markerfix-22"></script>
+  <script src="ar-page.js?v=markerfix-22"></script>
 </body>
 </html>

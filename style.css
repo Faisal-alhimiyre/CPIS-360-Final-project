@@ -231,7 +231,8 @@ button {
   top: min(48vh, 380px);
   bottom: 0;
   z-index: 0;
-  background: transparent;
+  /* Dark base behind transparent AR canvas (webcam shows through where AR.js clears alpha) */
+  background: #0a0a0a;
   overflow: hidden;
 }
 

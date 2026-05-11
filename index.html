@@ -5,7 +5,7 @@
   <!-- Mobile AR needs viewport + no weird zoom -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>AR Building Visualizer (HIRO)</title>
-  <link rel="stylesheet" href="style.css?v=markerfix-4" />
+  <link rel="stylesheet" href="style.css?v=markerfix-5" />
   <!--
     TESTING (Live Server in VS Code / Cursor)
     -----------------------------------------
@@ -20,15 +20,15 @@
     https://raw.githubusercontent.com/AR-js-org/ARToolkit5/master/bin/HIRO.jpg
   -->
   <!-- A-Frame + AR.js (marker build). Bump ?v= after edits so phones drop old cached JS. -->
-  <script src="https://aframe.io/releases/1.6.0/aframe.min.js?v=markerfix-4"></script>
-  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.8/aframe/build/aframe-ar.js?v=markerfix-4"></script>
+  <script src="https://aframe.io/releases/1.6.0/aframe.min.js?v=markerfix-5"></script>
+  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.8/aframe/build/aframe-ar.js?v=markerfix-5"></script>
 </head>
 <body>
   <!-- UI layer sits above the AR canvas -->
   <div id="ui-layer">
     <header class="app-header">
       <h1>AR Building Visualizer</h1>
-      <p class="subtitle"><strong>Deploy check (markerfix-4):</strong> golden top bar + scripts <code>?v=markerfix-4</code>. Webcam was hidden behind the cyan AR panel (z-index); this build fixes stacking.</p>
+      <p class="subtitle"><strong>Deploy check (markerfix-5):</strong> scripts <code>?v=markerfix-5</code>. Black AR view was caused by <code>renderer alpha:false</code> blocking AR.js camera compositing — removed.</p>
     </header>
 
     <details class="help-panel">
@@ -94,10 +94,13 @@
     <a-scene
       embedded
       vr-mode-ui="enabled: false"
-      renderer="logarithmicDepthBuffer: true; colorManagement: true; alpha: false;"
+      renderer="logarithmicDepthBuffer: true; alpha: true; colorManagement: false;"
       arjs="sourceType: webcam; debugUIEnabled: false; trackingMethod: best;"
       id="ar-scene"
     >
+      <!-- A-Frame 1.6 + Three r164: explicit lights help flat / MeshBasic materials stay visible -->
+      <a-light type="ambient" color="#ffffff" intensity="0.85"></a-light>
+      <a-light type="directional" position="0.5 1 0.3" color="#ffffff" intensity="0.55"></a-light>
       <a-entity id="ar-camera" camera>
         <a-cursor
           id="ar-cursor"

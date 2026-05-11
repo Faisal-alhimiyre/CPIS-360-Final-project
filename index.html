@@ -5,7 +5,7 @@
   <!-- Mobile AR needs viewport + no weird zoom -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>AR Building Visualizer (HIRO)</title>
-  <link rel="stylesheet" href="style.css?v=markerfix-5" />
+  <link rel="stylesheet" href="style.css?v=markerfix-6" />
   <!--
     TESTING (Live Server in VS Code / Cursor)
     -----------------------------------------
@@ -19,16 +19,16 @@
     HIRO marker image (print or display on another device):
     https://raw.githubusercontent.com/AR-js-org/ARToolkit5/master/bin/HIRO.jpg
   -->
-  <!-- A-Frame + AR.js (marker build). Bump ?v= after edits so phones drop old cached JS. -->
-  <script src="https://aframe.io/releases/1.6.0/aframe.min.js?v=markerfix-5"></script>
-  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.8/aframe/build/aframe-ar.js?v=markerfix-5"></script>
+  <!-- Stable marker stack: A-Frame 1.2 + AR.js 3.4.5 (widely used in HIRO tutorials). 1.6+r164 + 3.4.8 caused black camera / fragile compositing here. -->
+  <script src="https://unpkg.com/aframe@1.2.0/dist/aframe.min.js?v=markerfix-6"></script>
+  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.5/aframe/build/aframe-ar.js?v=markerfix-6"></script>
 </head>
 <body>
   <!-- UI layer sits above the AR canvas -->
   <div id="ui-layer">
     <header class="app-header">
       <h1>AR Building Visualizer</h1>
-      <p class="subtitle"><strong>Deploy check (markerfix-5):</strong> scripts <code>?v=markerfix-5</code>. Black AR view was caused by <code>renderer alpha:false</code> blocking AR.js camera compositing — removed.</p>
+      <p class="subtitle"><strong>Deploy check (markerfix-6):</strong> AR reset to <strong>A-Frame 1.2 + AR.js 3.4.5</strong> (see <code>?v=markerfix-6</code>). If Network still shows 1.6 or 3.4.8, Pages has not deployed this commit.</p>
     </header>
 
     <details class="help-panel">

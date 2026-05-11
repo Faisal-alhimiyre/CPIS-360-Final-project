@@ -1,9 +1,9 @@
 /**
- * ar-canvas-sync.js (markerfix-17)
+ * ar-canvas-sync.js (markerfix-18)
  * --------------------------------
- * 1) Shows #arjs-video in a small PIP so you can SEE if getUserMedia works (green border).
- * 2) A few timed canvas syncs — NOT a tight loop (that fought A-Frame and kept the main view black).
- * 3) One renderer.setSize from the scene’s layout so WebGL buffer matches the CSS box.
+ * AR.js uses #arjs-video’s laid-out size when syncing the WebGL canvas. A “corner PIP”
+ * shrinks that element and breaks tracking — do NOT restyle #arjs-video here.
+ * Sparse sync only: copyElementSizeTo + setSize a few times after render starts.
  */
 
 (function () {
@@ -12,9 +12,9 @@
   var sentinel = document.createElement('div');
   sentinel.id = 'cpis-deploy-sentinel';
   sentinel.textContent =
-    'markerfix-17 — green box = live webcam PIP. Main view should follow after sync. (9s)';
+    'markerfix-18 — full-frame camera (no PIP). Yellow bar = new JS. (6s)';
   sentinel.style.cssText =
-    'position:fixed;bottom:0;left:0;right:0;z-index:2147483647;background:#ffef00;color:#000;font:700 15px system-ui,sans-serif;padding:12px;text-align:center;border-top:4px solid red;';
+    'position:fixed;bottom:0;left:0;right:0;z-index:2147483647;background:#ffef00;color:#000;font:700 14px system-ui,sans-serif;padding:10px;text-align:center;border-top:3px solid red;';
   function mountSentinel() {
     if (document.body) document.body.appendChild(sentinel);
   }
@@ -22,33 +22,7 @@
   else document.addEventListener('DOMContentLoaded', mountSentinel);
   setTimeout(function () {
     if (sentinel.parentNode) sentinel.parentNode.removeChild(sentinel);
-  }, 9000);
-
-  function injectPipCss() {
-    if (document.getElementById('cpis-arjs-video-pip-style')) return;
-    var s = document.createElement('style');
-    s.id = 'cpis-arjs-video-pip-style';
-    s.textContent =
-      '#arjs-video{position:fixed!important;bottom:88px!important;right:10px!important;width:min(200px,32vw)!important;height:auto!important;max-height:180px!important;z-index:60!important;opacity:0.92!important;object-fit:cover!important;pointer-events:none!important;border:4px solid #16a34a!important;box-sizing:border-box!important;margin:0!important;}';
-    document.head.appendChild(s);
-  }
-
-  function watchVideoNode() {
-    if (document.getElementById('arjs-video')) {
-      injectPipCss();
-      return;
-    }
-    var mo = new MutationObserver(function () {
-      if (document.getElementById('arjs-video')) {
-        mo.disconnect();
-        injectPipCss();
-      }
-    });
-    mo.observe(document.body, { childList: true, subtree: true });
-    setTimeout(function () {
-      mo.disconnect();
-    }, 15000);
-  }
+  }, 6000);
 
   function syncMainCanvas(scene) {
     try {
@@ -85,7 +59,6 @@
   }
 
   function kick() {
-    watchVideoNode();
     var scene = document.getElementById('ar-scene');
     if (!scene) return;
     function arm() {

@@ -1,5 +1,5 @@
 /* ---------------------------------------------------------------------------
-   markerfix-17: webcam PIP + sparse canvas sync (see ar-canvas-sync.js).
+   markerfix-18: no PIP on #arjs-video (PIP broke tracking); sparse canvas sync.
    --------------------------------------------------------------------------- */
 
 :root {

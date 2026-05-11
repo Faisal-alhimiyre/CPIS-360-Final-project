@@ -18,7 +18,7 @@
   function start() {
     var raw = sessionStorage.getItem(STORAGE_KEY);
     if (!raw) {
-      window.location.replace('index.html?v=markerfix-17');
+      window.location.replace('index.html?v=markerfix-18');
       return;
     }
 
@@ -27,7 +27,7 @@
       spec = JSON.parse(raw);
     } catch (e) {
       sessionStorage.removeItem(STORAGE_KEY);
-      window.location.replace('index.html?v=markerfix-17');
+      window.location.replace('index.html?v=markerfix-18');
       return;
     }
 
@@ -49,6 +49,21 @@
       if (!scene) {
         setArError('Scene missing.');
         return;
+      }
+
+      var hint = document.getElementById('ar-tracking-hint');
+      var markerEl = document.getElementById('hiro-marker');
+      if (markerEl && hint) {
+        var baseHint = hint.textContent;
+        markerEl.addEventListener('markerFound', function () {
+          hint.textContent =
+            'HIRO seen — building should sit on the marker. Tap the door for a transparent front wall.';
+          hint.style.color = '#15803d';
+        });
+        markerEl.addEventListener('markerLost', function () {
+          hint.textContent = baseHint;
+          hint.style.color = '';
+        });
       }
 
       var built = false;

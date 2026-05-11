@@ -1,5 +1,5 @@
 /* ---------------------------------------------------------------------------
-   markerfix-18: no PIP on #arjs-video (PIP broke tracking); sparse canvas sync.
+   markerfix-19: fullscreen a-scene (no embedded); canvas sync without setSize false.
    --------------------------------------------------------------------------- */
 
 :root {

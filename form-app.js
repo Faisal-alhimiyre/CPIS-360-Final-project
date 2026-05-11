@@ -17,7 +17,7 @@
         window.Ui.setMessage('Could not save your inputs. Allow site storage or try another browser.');
         return;
       }
-      window.location.href = 'ar.html?v=markerfix-18&c=' + String(Date.now());
+      window.location.href = 'ar.html?v=markerfix-19&c=' + String(Date.now());
     });
   }
 

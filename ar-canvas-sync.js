@@ -1,9 +1,10 @@
 /**
- * ar-canvas-sync.js (markerfix-18)
+ * ar-canvas-sync.js (markerfix-19)
  * --------------------------------
- * AR.js uses #arjs-video’s laid-out size when syncing the WebGL canvas. A “corner PIP”
- * shrinks that element and breaks tracking — do NOT restyle #arjs-video here.
- * Sparse sync only: copyElementSizeTo + setSize a few times after render starts.
+ * AR.js: copyElementSizeTo(canvas) matches the webcam element to the WebGL canvas.
+ * Do NOT call setSize(w,h,false) here — that updates the drawing buffer but skips
+ * updating canvas CSS (Three.js), which often yields a black or wrong-sized view.
+ * Fullscreen a-scene (no embedded) matches what AR.js artoolkit expects on resize.
  */
 
 (function () {
@@ -12,7 +13,7 @@
   var sentinel = document.createElement('div');
   sentinel.id = 'cpis-deploy-sentinel';
   sentinel.textContent =
-    'markerfix-18 — full-frame camera (no PIP). Yellow bar = new JS. (6s)';
+    'markerfix-19 — fullscreen AR + fixed canvas sizing. (5s)';
   sentinel.style.cssText =
     'position:fixed;bottom:0;left:0;right:0;z-index:2147483647;background:#ffef00;color:#000;font:700 14px system-ui,sans-serif;padding:10px;text-align:center;border-top:3px solid red;';
   function mountSentinel() {
@@ -22,7 +23,7 @@
   else document.addEventListener('DOMContentLoaded', mountSentinel);
   setTimeout(function () {
     if (sentinel.parentNode) sentinel.parentNode.removeChild(sentinel);
-  }, 6000);
+  }, 5000);
 
   function syncMainCanvas(scene) {
     try {
@@ -30,15 +31,10 @@
       if (!ar || !ar._arSession || !ar._arSession.arSource || !scene.renderer) return false;
       var arSource = ar._arSession.arSource;
       var canvas = scene.renderer.domElement;
+      if (typeof arSource.onResizeElement === 'function') {
+        arSource.onResizeElement();
+      }
       arSource.copyElementSizeTo(canvas);
-
-      var host = canvas.closest('a-scene') || canvas.parentElement || canvas;
-      var r = host.getBoundingClientRect();
-      var w = Math.max(8, Math.floor(r.width));
-      var h = Math.max(8, Math.floor(r.height));
-      var pr = Math.min(window.devicePixelRatio || 1, 2);
-      scene.renderer.setPixelRatio(pr);
-      scene.renderer.setSize(w, h, false);
       window.dispatchEvent(new Event('resize'));
       return true;
     } catch (e) {
@@ -47,7 +43,7 @@
   }
 
   function scheduleSyncAttempts(scene) {
-    var delays = [0, 250, 700, 1400, 2800];
+    var delays = [0, 120, 400, 1000, 2200, 4500];
     var i;
     for (i = 0; i < delays.length; i++) {
       (function (ms) {
@@ -58,11 +54,24 @@
     }
   }
 
+  function bindResize(scene) {
+    var t;
+    function fire() {
+      clearTimeout(t);
+      t = setTimeout(function () {
+        syncMainCanvas(scene);
+      }, 80);
+    }
+    window.addEventListener('resize', fire);
+    window.addEventListener('orientationchange', fire);
+  }
+
   function kick() {
     var scene = document.getElementById('ar-scene');
     if (!scene) return;
     function arm() {
       scheduleSyncAttempts(scene);
+      bindResize(scene);
     }
     if (scene.hasLoaded && scene.renderer) {
       arm();
@@ -75,7 +84,7 @@
       },
       { once: true }
     );
-    setTimeout(arm, 2400);
+    setTimeout(arm, 2000);
   }
 
   if (document.readyState === 'loading') {

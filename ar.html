@@ -17,13 +17,25 @@
       overflow: hidden;
       background: #000;
     }
-    body {
-      display: flex;
-      flex-direction: column;
+    /* AR.js + artoolkit assume a full-viewport source; embedded flex slices often stay black. */
+    #ar-scene {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      z-index: 0;
     }
     .ar-bar {
-      flex: 0 0 auto;
-      z-index: 10;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px 12px;
       padding: 10px 12px;
       padding-top: max(10px, env(safe-area-inset-top, 0px));
       background: rgba(224, 242, 254, 0.96);
@@ -35,38 +47,35 @@
       font-weight: 700;
       color: #6d28d9;
       text-decoration: none;
-      margin-right: 12px;
+      flex-shrink: 0;
     }
     .ar-bar a:hover {
       text-decoration: underline;
     }
-    #ar-scene {
-      flex: 1 1 auto;
-      min-height: 0;
-      width: 100%;
-      display: block;
+    .ar-bar #ar-tracking-hint {
+      flex: 1 1 200px;
+      min-width: 0;
     }
     #ar-page-error {
-      margin: 6px 0 0;
+      flex: 1 0 100%;
+      margin: 0;
       font-weight: 600;
       color: #9d174d;
     }
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/aframe@1.2.0/dist/aframe.min.js?v=markerfix-18"></script>
-  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.5/aframe/build/aframe-ar.js?v=markerfix-18"></script>
+  <script src="https://cdn.jsdelivr.net/npm/aframe@1.2.0/dist/aframe.min.js?v=markerfix-19"></script>
+  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.5/aframe/build/aframe-ar.js?v=markerfix-19"></script>
 </head>
 <body>
   <div class="ar-bar">
-    <a href="index.html?v=markerfix-18">← Edit building</a>
+    <a href="index.html?v=markerfix-19">← Edit building</a>
     <span id="ar-tracking-hint">Point at the HIRO marker. Tap the door for a transparent front wall.</span>
     <p id="ar-page-error" role="alert"></p>
   </div>
 
   <a-scene
     id="ar-scene"
-    embedded
     vr-mode-ui="enabled: false"
-    renderer="alpha: true; antialias: true"
     arjs="sourceType: webcam; trackingMethod: best; debugUIEnabled: false;"
   >
     <a-marker preset="hiro" id="hiro-marker" emitevents="true">
@@ -84,12 +93,12 @@
     </a-entity>
   </a-scene>
 
-  <script src="generator.js?v=markerfix-18"></script>
-  <script src="interactions.js?v=markerfix-18"></script>
-  <script src="ui.js?v=markerfix-18"></script>
-  <script src="app-core.js?v=markerfix-18"></script>
-  <script src="ar-scene.js?v=markerfix-18"></script>
-  <script src="ar-canvas-sync.js?v=markerfix-18"></script>
-  <script src="ar-page.js?v=markerfix-18"></script>
+  <script src="generator.js?v=markerfix-19"></script>
+  <script src="interactions.js?v=markerfix-19"></script>
+  <script src="ui.js?v=markerfix-19"></script>
+  <script src="app-core.js?v=markerfix-19"></script>
+  <script src="ar-scene.js?v=markerfix-19"></script>
+  <script src="ar-canvas-sync.js?v=markerfix-19"></script>
+  <script src="ar-page.js?v=markerfix-19"></script>
 </body>
 </html>

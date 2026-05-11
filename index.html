@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <!-- Mobile AR needs viewport + no weird zoom -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>AR Building Visualizer (HIRO)</title>
+  <link rel="stylesheet" href="style.css" />
+  <!--
+    TESTING (Live Server in VS Code / Cursor)
+    -----------------------------------------
+    1. Install "Live Server" extension if needed.
+    2. Right-click index.html → "Open with Live Server".
+    3. Allow camera when the browser asks (HTTPS or localhost is best; Live Server uses http://127.0.0.1 which usually works for getUserMedia).
+    4. Print the HIRO marker (see on-page "HIRO marker" link) or open it on a second screen; place it flat with good light.
+    5. Fill the form → Generate. Point the camera at the marker until the building locks on.
+    6. Tap the door (or the large invisible tap zone in front of it) to make the front wall nearly transparent and see colored room blocks inside.
+
+    HIRO marker image (print or display on another device):
+    https://raw.githubusercontent.com/AR-js-org/ARToolkit5/master/bin/HIRO.jpg
+  -->
+  <!-- A-Frame core (AR.js builds on top of it) -->
+  <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+  <!-- AR.js A-Frame integration (marker tracking, includes HIRO preset) -->
+  <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+</head>
+<body>
+  <!-- UI layer sits above the AR canvas -->
+  <div id="ui-layer">
+    <header class="app-header">
+      <h1>AR Building Visualizer</h1>
+      <p class="subtitle">Form → HIRO marker → 3D shell + schematic rooms</p>
+    </header>
+
+    <details class="help-panel">
+      <summary>How to test &amp; HIRO marker</summary>
+      <ol>
+        <li>Use <strong>Live Server</strong> on this folder and open <code>index.html</code>.</li>
+        <li>Allow <strong>camera</strong> access.</li>
+        <li>Open or print the HIRO image:
+          <a href="https://raw.githubusercontent.com/AR-js-org/ARToolkit5/master/bin/HIRO.jpg" target="_blank" rel="noopener">HIRO marker (official)</a>
+        </li>
+        <li>Submit the form, then point your phone at the marker.</li>
+        <li><strong>Tap the door</strong> (big touch zone) to toggle a transparent front wall.</li>
+      </ol>
+    </details>
+
+    <form id="building-form" novalidate>
+      <fieldset>
+        <legend>Building</legend>
+        <label>Width (m) <input type="number" id="width" name="width" min="0.2" max="20" step="0.1" value="2" required /></label>
+        <label>Depth (m) <input type="number" id="depth" name="depth" min="0.2" max="20" step="0.1" value="1.5" required /></label>
+        <label>Total height (m) <input type="number" id="height" name="height" min="0.5" max="30" step="0.1" value="2" required /></label>
+        <label>Floors <input type="number" id="floors" name="floors" min="1" max="20" step="1" value="2" required /></label>
+        <label>Apartments (per floor, even slices along width) <input type="number" id="apartments" name="apartments" min="1" max="12" step="1" value="2" required /></label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Apartment template (repeated on every floor)</legend>
+        <p class="hint">MVP: same layout for all apartments on all floors.</p>
+        <label>Bedrooms per apartment <input type="number" id="bedrooms" name="bedrooms" min="0" max="10" step="1" value="2" /></label>
+        <label>Kitchens per apartment <input type="number" id="kitchens" name="kitchens" min="0" max="5" step="1" value="1" /></label>
+        <label>Bathrooms per apartment <input type="number" id="bathrooms" name="bathrooms" min="0" max="10" step="1" value="1" /></label>
+      </fieldset>
+
+      <div class="form-actions">
+        <button type="submit" id="btn-generate">Generate / update building</button>
+        <button type="button" id="btn-toggle-ui" title="Hide panel to see AR better">Hide form</button>
+      </div>
+      <p id="form-message" class="form-message" role="status"></p>
+    </form>
+  </div>
+
+  <!--
+    embedded: scene lives in a normal div (not fullscreen takeover)
+    arjs: webcam source, default marker mode works with preset="hiro"
+  -->
+  <div id="ar-container">
+    <a-scene
+      embedded
+      vr-mode-ui="enabled: false"
+      renderer="logarithmicDepthBuffer: true; colorManagement: true;"
+      arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false; trackingMethod: best;"
+      id="ar-scene"
+    >
+      <!-- HIRO is built into AR.js as a preset pattern -->
+      <a-marker preset="hiro" id="hiro-marker" emitevents="true">
+        <!-- All generated building content is parented here so it tracks the marker -->
+        <a-entity id="building-root" position="0 0 0"></a-entity>
+      </a-marker>
+
+      <!-- AR.js controls the camera transform; we only add cursor for taps/clicks -->
+      <a-entity id="ar-camera" camera>
+        <a-cursor
+          id="ar-cursor"
+          raycaster="objects: .clickable; far: 25"
+          fuse="false"
+          scale="0.01 0.01 0.01"
+          color="#4CC3D9"
+          animation__click="property: scale; startEvents: click; easing: easeInCubic; dur: 150; from: 0.1 0.1 0.1; to: 0.01 0.01 0.01"
+        ></a-cursor>
+      </a-entity>
+    </a-scene>
+  </div>
+
+  <!-- Order: scene helpers → generation → interactions → UI → app bootstrap -->
+  <script src="ar-scene.js"></script>
+  <script src="generator.js"></script>
+  <script src="interactions.js"></script>
+  <script src="ui.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

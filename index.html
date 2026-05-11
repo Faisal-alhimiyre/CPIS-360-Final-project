@@ -5,7 +5,7 @@
   <!-- Mobile AR needs viewport + no weird zoom -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>AR Building Visualizer (HIRO)</title>
-  <link rel="stylesheet" href="style.css?v=markerfix-8" />
+  <link rel="stylesheet" href="style.css?v=markerfix-9" />
   <!--
     TESTING (Live Server in VS Code / Cursor)
     -----------------------------------------
@@ -20,15 +20,15 @@
     https://raw.githubusercontent.com/AR-js-org/ARToolkit5/master/bin/HIRO.jpg
   -->
   <!-- Stable marker stack: A-Frame 1.2 + AR.js 3.4.5 (widely used in HIRO tutorials). 1.6+r164 + 3.4.8 caused black camera / fragile compositing here. -->
-  <script src="https://cdn.jsdelivr.net/npm/aframe@1.2.0/dist/aframe.min.js?v=markerfix-8"></script>
-  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.5/aframe/build/aframe-ar.js?v=markerfix-8"></script>
+  <script src="https://cdn.jsdelivr.net/npm/aframe@1.2.0/dist/aframe.min.js?v=markerfix-9"></script>
+  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.5/aframe/build/aframe-ar.js?v=markerfix-9"></script>
 </head>
 <body>
   <!-- UI layer sits above the AR canvas -->
   <div id="ui-layer">
     <header class="app-header">
       <h1>AR Building Visualizer</h1>
-      <p class="subtitle"><strong>Deploy check (markerfix-8):</strong> UI is <strong>lilac + mint</strong> (not yellow). AR.js is patched to size the webcam from <code>#ar-container</code> instead of the full window. In DevTools → Network, scripts must show <code>?v=markerfix-8</code>; if you still see <code>markerfix-6</code>, GitHub Pages is serving an old <code>index.html</code> — push again and hard-refresh.</p>
+      <p class="subtitle"><strong>Deploy check (markerfix-9):</strong> UI is <strong>sky blue + orange</strong> (not purple). AR runs in a <strong>fullscreen</strong> layer under this form so AR.js window sizing matches the canvas. Network tab should show <code>?v=markerfix-9</code> on all scripts.</p>
     </header>
 
     <details class="help-panel">
@@ -94,7 +94,8 @@
     <a-scene
       embedded
       vr-mode-ui="enabled: false"
-      style="width: 100%; height: 100%; min-height: 280px;"
+      renderer="alpha: true; antialias: true"
+      style="width: 100%; height: 100%; min-height: 100vh;"
       arjs="sourceType: webcam; trackingMethod: best; debugUIEnabled: false;"
       id="ar-scene"
     >
@@ -115,10 +116,10 @@
   </template>
 
   <!-- Order: scene helpers → generation → interactions → UI → app bootstrap -->
-  <script src="ar-scene.js?v=markerfix-8"></script>
-  <script src="generator.js?v=markerfix-8"></script>
-  <script src="interactions.js?v=markerfix-8"></script>
-  <script src="ui.js?v=markerfix-8"></script>
-  <script src="app.js?v=markerfix-8"></script>
+  <script src="ar-scene.js?v=markerfix-9"></script>
+  <script src="generator.js?v=markerfix-9"></script>
+  <script src="interactions.js?v=markerfix-9"></script>
+  <script src="ui.js?v=markerfix-9"></script>
+  <script src="app.js?v=markerfix-9"></script>
 </body>
 </html>

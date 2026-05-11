@@ -63,6 +63,10 @@
       } else if (this.domElement.nodeName === 'VIDEO') {
         sourceWidth = this.domElement.videoWidth;
         sourceHeight = this.domElement.videoHeight;
+        if (!sourceWidth || !sourceHeight) {
+          sourceWidth = this.domElement.clientWidth || 640;
+          sourceHeight = this.domElement.clientHeight || 480;
+        }
       } else {
         return;
       }
@@ -119,6 +123,17 @@
     }
   }
 
+  function bindVideoMetadataResize(scene, arSource) {
+    var v = arSource.domElement;
+    if (!v || v.nodeName !== 'VIDEO' || v.dataset.cpisMetaBound === '1') return;
+    v.dataset.cpisMetaBound = '1';
+    function kick() {
+      forceArPipelineResize(scene);
+      syncArDisplayToContainer();
+    }
+    v.addEventListener('loadedmetadata', kick);
+  }
+
   function ensureEmbeddedArPatch(scene) {
     if (scene.dataset.cpisArPatch === '1') return;
     if (scene.dataset.cpisArPatchPending === '1') return;
@@ -141,6 +156,7 @@
       if (scene.dataset.cpisArPatch === '1') return;
       scene.dataset.cpisArPatch = '1';
       patchArSourceForEmbeddedPanel(src);
+      bindVideoMetadataResize(scene, src);
       forceArPipelineResize(scene);
     }, 40);
   }

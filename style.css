@@ -1,19 +1,19 @@
 /* ---------------------------------------------------------------------------
-   markerfix-8: unmistakable palette swap (was golden). Confirms deploy/cache.
+   markerfix-9: “paper + sky” palette (was lilac/mint). AR layer is fullscreen.
    --------------------------------------------------------------------------- */
 
 :root {
-  --bg-page: #ede9fe;
-  --bg-panel: #ddd6fe;
-  --border: #7c3aed;
-  --text: #1e1b4b;
-  --text-muted: #4c1d95;
-  --heading: #312e81;
-  --accent: #059669;
-  --accent-hover: #047857;
-  --input-bg: #f5f3ff;
+  --bg-page: #e0f2fe;
+  --bg-panel: #bae6fd;
+  --border: #0369a1;
+  --text: #0c4a6e;
+  --text-muted: #075985;
+  --heading: #0a3d5c;
+  --accent: #ea580c;
+  --accent-hover: #c2410c;
+  --input-bg: #f0f9ff;
   --message: #9d174d;
-  --link: #0369a1;
+  --link: #6d28d9;
 }
 
 *,
@@ -45,7 +45,7 @@ body {
   /* Leave space for the fixed “Hide form” control (it sits outside this panel). */
   padding: 14px 120px 16px 16px;
   background: var(--bg-panel);
-  border-bottom: 6px solid #10b981;
+  border-bottom: 6px solid #ea580c;
 }
 
 #ui-layer.hidden {
@@ -183,7 +183,7 @@ button {
 
 #btn-generate {
   flex: 1 1 200px;
-  color: #ecfdf5;
+  color: #fff7ed;
   background: var(--accent);
   border-color: var(--accent);
 }
@@ -202,13 +202,13 @@ button {
   min-height: 44px;
   padding: 10px 14px;
   font-size: 0.85rem;
-  color: #faf5ff;
-  background: #6d28d9;
-  border: 2px solid #5b21b6;
+  color: #f0f9ff;
+  background: #0369a1;
+  border: 2px solid #075985;
 }
 
 .form-floating-toggle:hover {
-  background: #5b21b6;
+  background: #075985;
 }
 
 .form-message {
@@ -220,25 +220,30 @@ button {
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
 }
 
-/* AR area — AR.js puts the webcam <video> on the body with a negative z-index. This panel
-   used z-index: 1 + solid cyan, which sat ON TOP of the video, so you only saw empty color. */
+/*
+  Full-viewport AR layer (under #ui-layer). AR.js + A-Frame size the pipeline from
+  window dimensions; a short “strip only” container stayed out of sync → black canvas.
+  Form stays on top (z-index 30); only the canvas receives pointer events.
+*/
 #ar-container {
   position: fixed;
-  left: 0;
-  right: 0;
-  top: min(48vh, 380px);
-  bottom: 0;
+  inset: 0;
   z-index: 0;
-  min-height: 40vh;
-  background: #0a0a0a;
   overflow: hidden;
+  pointer-events: none;
+  background: var(--bg-page);
+}
+
+body.ar-mounted #ar-container {
+  background: transparent;
 }
 
 #ar-container a-scene {
+  pointer-events: auto;
   width: 100%;
   height: 100%;
   display: block;
-  min-height: 200px;
+  min-height: 100vh;
 }
 
 .ar-placeholder {

@@ -1,16 +1,16 @@
 /**
  * ar-scene.js
  * -----------
- * ar.html (body.ar-fullscreen): non-embedded scene — native AR.js window sizing, no patches.
- * Legacy: template clone into #ar-container + embedded patch (split layout) if still used.
+ * AR.js + A-Frame: artoolkit path skips copyElementSizeTo(renderer.domElement) for A-Frame
+ * (see AR.js threex/arjs-source.js). Without that, the WebGL canvas can stay wrong-sized → black.
+ * We patch embedded split sizing and explicitly sync the webcam layout onto the A-Frame canvas.
  */
 
 (function () {
   'use strict';
 
-  function isArFullscreen() {
-    return document.body.classList.contains('ar-fullscreen');
-  }
+  var lastArjsW = 0;
+  var lastArjsH = 0;
 
   function whenSceneReady(sceneId, callback) {
     var scene = document.getElementById(sceneId);
@@ -111,6 +111,20 @@
     };
   }
 
+  /** AR.js omits this for A-Frame; the marker pipeline needs the main canvas sized like the video. */
+  function copyVideoLayoutToAframeCanvas(scene) {
+    try {
+      var ar = scene.systems && scene.systems.arjs;
+      if (!ar || !ar._arSession || !ar._arSession.arSource) return;
+      var arSource = ar._arSession.arSource;
+      var canvas = scene.renderer && scene.renderer.domElement;
+      if (!canvas || !arSource.copyElementSizeTo) return;
+      arSource.copyElementSizeTo(canvas);
+    } catch (e) {
+      /* session boot */
+    }
+  }
+
   function forceArPipelineResize(scene) {
     try {
       var ar = scene.systems && scene.systems.arjs;
@@ -135,8 +149,6 @@
   }
 
   function ensureEmbeddedArPatch(scene) {
-    if (isArFullscreen()) return;
-
     if (scene.dataset.cpisArPatch === '1') return;
     if (scene.dataset.cpisArPatchPending === '1') return;
     scene.dataset.cpisArPatchPending = '1';
@@ -158,6 +170,14 @@
       if (scene.dataset.cpisArPatch === '1') return;
       scene.dataset.cpisArPatch = '1';
       patchArSourceForEmbeddedPanel(src);
+      if (!src.__cpisOnResizeWrap && typeof src.onResize === 'function') {
+        src.__cpisOnResizeWrap = true;
+        var origOnResize = src.onResize.bind(src);
+        src.onResize = function (arToolkitContext, renderer, camera) {
+          origOnResize(arToolkitContext, renderer, camera);
+          copyVideoLayoutToAframeCanvas(scene);
+        };
+      }
       bindVideoMetadataResize(scene, src);
       forceArPipelineResize(scene);
     }, 40);
@@ -188,26 +208,22 @@
     );
   }
 
-  /** Fullscreen page: only sync arjs + resize pipeline (no inline pixel hacks). */
   function softLayoutSync() {
-    if (isArFullscreen()) {
+    var box = document.getElementById('ar-container');
+    if (box) {
+      forceLayoutFromViewport();
+    } else {
       syncArDisplayToContainer();
-      return;
     }
-    forceLayoutFromViewport();
   }
 
-  /**
-   * Legacy embedded split layout: pin container + scene in px so % heights resolve.
-   */
   function forceLayoutFromViewport() {
-    if (isArFullscreen()) {
+    var box = document.getElementById('ar-container');
+    var scene = document.getElementById('ar-scene');
+    if (!box || !scene) {
       syncArDisplayToContainer();
       return;
     }
-    var box = document.getElementById('ar-container');
-    var scene = document.getElementById('ar-scene');
-    if (!box || !scene) return;
     var w = Math.max(2, window.innerWidth);
     var h = Math.max(2, window.innerHeight);
     box.style.width = w + 'px';
@@ -233,12 +249,6 @@
     var scene = document.getElementById('ar-scene');
     if (!scene) return;
 
-    if (isArFullscreen()) {
-      window.dispatchEvent(new Event('resize'));
-      forceArPipelineResize(scene);
-      return;
-    }
-
     var box = document.getElementById('ar-container');
     var w;
     var h;
@@ -251,18 +261,23 @@
       h = Math.floor(Math.max(2, window.innerHeight));
     }
     if (w < 8 || h < 8) return;
-    scene.setAttribute(
-      'arjs',
-      'sourceType: webcam; trackingMethod: best; debugUIEnabled: false; displayWidth: ' +
-        w +
-        '; displayHeight: ' +
-        h +
-        '; canvasWidth: ' +
-        w +
-        '; canvasHeight: ' +
-        h +
-        ';'
-    );
+
+    if (Math.abs(w - lastArjsW) > 2 || Math.abs(h - lastArjsH) > 2) {
+      lastArjsW = w;
+      lastArjsH = h;
+      scene.setAttribute(
+        'arjs',
+        'sourceType: webcam; trackingMethod: best; debugUIEnabled: false; displayWidth: ' +
+          w +
+          '; displayHeight: ' +
+          h +
+          '; canvasWidth: ' +
+          w +
+          '; canvasHeight: ' +
+          h +
+          ';'
+      );
+    }
     window.dispatchEvent(new Event('resize'));
     forceArPipelineResize(scene);
   }

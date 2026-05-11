@@ -1,5 +1,5 @@
 /* ---------------------------------------------------------------------------
-   markerfix-12: ar.html — non-embedded a-scene + body.ar-fullscreen (no AR.js patches).
+   markerfix-13: embedded AR + copy webcam layout onto A-Frame canvas (AR.js skips it).
    --------------------------------------------------------------------------- */
 
 :root {
@@ -287,13 +287,7 @@ html.ar-page-doc body.ar-page {
   color: var(--message);
 }
 
-/* Non-embedded scene: let A-Frame own layout; only stack below the header. */
-body.ar-fullscreen #ar-scene {
-  z-index: 0;
-}
-
-/* Legacy: embedded scene inside #ar-container (if used again). */
-body.ar-page:not(.ar-fullscreen) #ar-container {
+body.ar-page #ar-container {
   position: fixed;
   inset: 0;
   z-index: 0;
@@ -307,11 +301,11 @@ body.ar-page:not(.ar-fullscreen) #ar-container {
   background: #000;
 }
 
-body.ar-page:not(.ar-fullscreen).ar-mounted #ar-container {
+body.ar-page.ar-mounted #ar-container {
   background: #000;
 }
 
-body.ar-page:not(.ar-fullscreen) #ar-container a-scene {
+body.ar-page #ar-container a-scene {
   pointer-events: auto;
   width: 100%;
   height: 100%;

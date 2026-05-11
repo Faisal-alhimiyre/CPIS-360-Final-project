@@ -98,7 +98,7 @@
         setMessage(err);
         return;
       }
-      setMessage('Model ready — point at the HIRO marker. Tip: keep the marker flat and well lit.');
+      setMessage('Inputs look good — opening the camera page…');
       onSubmitValid(spec);
     });
 

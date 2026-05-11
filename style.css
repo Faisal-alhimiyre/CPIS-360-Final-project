@@ -1,5 +1,5 @@
 /* ---------------------------------------------------------------------------
-   markerfix-9: “paper + sky” palette (was lilac/mint). AR layer is fullscreen.
+   markerfix-10: form on index.html; fullscreen AR on ar.html (two pages).
    --------------------------------------------------------------------------- */
 
 :root {
@@ -45,7 +45,13 @@ body {
   /* Leave space for the fixed “Hide form” control (it sits outside this panel). */
   padding: 14px 120px 16px 16px;
   background: var(--bg-panel);
-  border-bottom: 6px solid #ea580c;
+  border-bottom: 6px solid #059669;
+}
+
+body.form-page #ui-layer {
+  max-height: none;
+  bottom: 0;
+  padding-bottom: 24px;
 }
 
 #ui-layer.hidden {
@@ -221,29 +227,77 @@ button {
 }
 
 /*
-  Full-viewport AR layer (under #ui-layer). AR.js + A-Frame size the pipeline from
-  window dimensions; a short “strip only” container stayed out of sync → black canvas.
-  Form stays on top (z-index 30); only the canvas receives pointer events.
+  Full-viewport AR (ar.html only). body.ar-page — no form overlay on the canvas.
 */
-#ar-container {
+body.ar-page {
+  overflow: hidden;
+  height: 100%;
+}
+
+.ar-page-header {
   position: fixed;
-  inset: 0;
+  z-index: 100;
+  left: 0;
+  right: 0;
+  top: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+  padding: 10px 14px;
+  padding-top: max(10px, env(safe-area-inset-top, 0px));
+  background: rgba(224, 242, 254, 0.94);
+  border-bottom: 2px solid var(--border);
+  pointer-events: auto;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+
+.ar-page-back {
+  font-weight: 700;
+  color: var(--link);
+  text-decoration: none;
+}
+
+.ar-page-back:hover {
+  text-decoration: underline;
+}
+
+.ar-page-hint {
+  flex: 1 1 200px;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.ar-page-error {
+  flex: 1 1 100%;
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--message);
+}
+
+body.ar-page #ar-container {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 52px;
   z-index: 0;
   overflow: hidden;
   pointer-events: none;
-  background: var(--bg-page);
+  background: #000;
 }
 
-body.ar-mounted #ar-container {
+body.ar-page.ar-mounted #ar-container {
   background: transparent;
 }
 
-#ar-container a-scene {
+body.ar-page #ar-container a-scene {
   pointer-events: auto;
   width: 100%;
   height: 100%;
   display: block;
-  min-height: 100vh;
+  min-height: calc(100vh - 52px);
 }
 
 .ar-placeholder {
@@ -283,10 +337,6 @@ body.ar-mounted #ar-container {
   font-size: 0.9rem;
   line-height: 1.5;
   color: var(--text-muted);
-}
-
-body.ui-fullscreen #ar-container {
-  top: 0;
 }
 
 body.ui-fullscreen #ui-layer {

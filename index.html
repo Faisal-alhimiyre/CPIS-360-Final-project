@@ -2,46 +2,30 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <!-- Mobile AR needs viewport + no weird zoom -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>AR Building Visualizer (HIRO)</title>
-  <link rel="stylesheet" href="style.css?v=markerfix-9" />
-  <!--
-    TESTING (Live Server in VS Code / Cursor)
-    -----------------------------------------
-    1. Install "Live Server" extension if needed.
-    2. Right-click index.html → "Open with Live Server".
-    3. Allow camera when the browser asks (HTTPS or localhost is best; Live Server uses http://127.0.0.1 which usually works for getUserMedia).
-    4. Print the HIRO marker (see on-page "HIRO marker" link) or open it on a second screen; place it flat with good light.
-    5. Fill the form → tap Generate (camera starts only then). Point at the HIRO marker until the building locks on.
-    6. Tap the door (or the large invisible tap zone in front of it) to make the front wall nearly transparent and see colored room blocks inside.
-
-    HIRO marker image (print or display on another device):
-    https://raw.githubusercontent.com/AR-js-org/ARToolkit5/master/bin/HIRO.jpg
-  -->
-  <!-- Stable marker stack: A-Frame 1.2 + AR.js 3.4.5 (widely used in HIRO tutorials). 1.6+r164 + 3.4.8 caused black camera / fragile compositing here. -->
-  <script src="https://cdn.jsdelivr.net/npm/aframe@1.2.0/dist/aframe.min.js?v=markerfix-9"></script>
-  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.5/aframe/build/aframe-ar.js?v=markerfix-9"></script>
+  <title>AR Building Visualizer — setup</title>
+  <link rel="stylesheet" href="style.css?v=markerfix-10" />
+  <!-- AR (A-Frame + AR.js) loads only on ar.html after you submit this form. -->
 </head>
-<body>
-  <!-- UI layer sits above the AR canvas -->
+<body class="form-page">
   <div id="ui-layer">
     <header class="app-header">
       <h1>AR Building Visualizer</h1>
-      <p class="subtitle"><strong>Deploy check (markerfix-9):</strong> UI is <strong>sky blue + orange</strong> (not purple). AR runs in a <strong>fullscreen</strong> layer under this form so AR.js window sizing matches the canvas. Network tab should show <code>?v=markerfix-9</code> on all scripts.</p>
+      <p class="subtitle"><strong>Deploy check (markerfix-10):</strong> two-step flow — fill the form here, then you are taken to a <strong>fullscreen camera page</strong> (<code>ar.html</code>). Open that page from this site (same folder on GitHub Pages).</p>
     </header>
 
     <details class="help-panel">
       <summary>How to test &amp; HIRO marker</summary>
       <ol>
         <li>Use <strong>Live Server</strong> on this folder and open <code>index.html</code>.</li>
-        <li>Fill the form, then tap <strong>Generate</strong> — the <strong>camera starts only then</strong> (so you can read the steps first).</li>
+        <li>Fill the form, then tap <strong>Open camera &amp; build in AR</strong> — the next page starts the webcam.</li>
         <li>Allow <strong>camera</strong> when the browser asks.</li>
         <li>Open or print the HIRO image:
           <a href="https://raw.githubusercontent.com/AR-js-org/ARToolkit5/master/bin/HIRO.jpg" target="_blank" rel="noopener">HIRO marker (official)</a>
         </li>
-        <li>Point your phone at the marker until the building sticks.</li>
+        <li>Point your device at the marker until the building sticks.</li>
         <li><strong>Tap the door</strong> (big touch zone) to toggle a transparent front wall.</li>
+        <li>Use <strong>← Edit building</strong> on the camera page to change inputs.</li>
       </ol>
     </details>
 
@@ -68,58 +52,15 @@
       </fieldset>
 
       <div class="form-actions">
-        <button type="submit" id="btn-generate">Generate / update building</button>
+        <button type="submit" id="btn-generate">Open camera &amp; build in AR</button>
       </div>
       <p id="form-message" class="form-message" role="status"></p>
     </form>
   </div>
 
-  <!-- Outside #ui-layer so it stays tappable when the panel is hidden (see style.css). -->
   <button type="button" id="btn-toggle-ui" class="form-floating-toggle" title="Show or hide the form panel">Hide form</button>
 
-  <!-- No live camera until the user submits the form (see app.js + ArScene.mountSceneIfNeeded). -->
-  <div id="ar-container">
-    <div id="ar-placeholder" class="ar-placeholder" aria-live="polite">
-      <div class="ar-placeholder-inner">
-        <span class="ar-placeholder-icon" aria-hidden="true">📷</span>
-        <p class="ar-placeholder-title">Camera stays off until you are ready</p>
-        <p class="ar-placeholder-text">Enter your building details above, then tap <strong>Generate</strong>. The webcam will start and the 3D model will load so you can point at the HIRO marker.</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Cloned into #ar-container on first successful Generate (starts webcam + AR tracking). -->
-  <template id="ar-scene-template">
-    <!-- Classic HIRO layout (marker before camera). Do not set videoTexture:true — it skips AR session setup for markers. -->
-    <a-scene
-      embedded
-      vr-mode-ui="enabled: false"
-      renderer="alpha: true; antialias: true"
-      style="width: 100%; height: 100%; min-height: 100vh;"
-      arjs="sourceType: webcam; trackingMethod: best; debugUIEnabled: false;"
-      id="ar-scene"
-    >
-      <a-marker preset="hiro" id="hiro-marker" emitevents="true">
-        <a-entity id="building-root" position="0 0 0"></a-entity>
-      </a-marker>
-      <a-entity id="ar-camera" camera>
-        <a-cursor
-          id="ar-cursor"
-          raycaster="objects: .clickable; far: 25"
-          fuse="false"
-          scale="0.01 0.01 0.01"
-          color="#4CC3D9"
-          animation__click="property: scale; startEvents: click; easing: easeInCubic; dur: 150; from: 0.1 0.1 0.1; to: 0.01 0.01 0.01"
-        ></a-cursor>
-      </a-entity>
-    </a-scene>
-  </template>
-
-  <!-- Order: scene helpers → generation → interactions → UI → app bootstrap -->
-  <script src="ar-scene.js?v=markerfix-9"></script>
-  <script src="generator.js?v=markerfix-9"></script>
-  <script src="interactions.js?v=markerfix-9"></script>
-  <script src="ui.js?v=markerfix-9"></script>
-  <script src="app.js?v=markerfix-9"></script>
+  <script src="ui.js?v=markerfix-10"></script>
+  <script src="form-app.js?v=markerfix-10"></script>
 </body>
 </html>

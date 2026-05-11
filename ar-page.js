@@ -1,8 +1,8 @@
 /**
  * ar-page.js
  * ----------
- * ar.html: wait until the AR webcam pipeline is up BEFORE injecting lots of geometry.
- * Building immediately on a-scene "loaded" caused a visible flash then a black screen.
+ * Inject building geometry once the AR webcam element is ready.
+ * Avoid extra timers that dispatch resize and fight AR.js (flash then black).
  */
 
 (function () {
@@ -18,7 +18,7 @@
   function start() {
     var raw = sessionStorage.getItem(STORAGE_KEY);
     if (!raw) {
-      window.location.replace('index.html?v=markerfix-20');
+      window.location.replace('index.html?v=markerfix-21');
       return;
     }
 
@@ -27,7 +27,7 @@
       spec = JSON.parse(raw);
     } catch (e) {
       sessionStorage.removeItem(STORAGE_KEY);
-      window.location.replace('index.html?v=markerfix-20');
+      window.location.replace('index.html?v=markerfix-21');
       return;
     }
 
@@ -76,50 +76,31 @@
           return;
         }
         setArError('');
-        window.dispatchEvent(new Event('resize'));
       }
 
-      // Best: AR.js fires this when #arjs-video exists and the stream is attached.
       window.addEventListener(
         'arjs-video-loaded',
         function onVideo() {
           window.removeEventListener('arjs-video-loaded', onVideo);
-          setTimeout(tryBuild, 300);
+          setTimeout(tryBuild, 400);
         },
         { once: true }
       );
 
-      // If the event already fired before we subscribed, poll for the video element.
       var pollId = setInterval(function () {
         var v = document.querySelector('#arjs-video');
         if (v && v.srcObject && v.readyState >= 2) {
           clearInterval(pollId);
-          setTimeout(tryBuild, 300);
+          setTimeout(tryBuild, 400);
         }
-      }, 100);
+      }, 120);
       setTimeout(function () {
         clearInterval(pollId);
-      }, 8000);
+      }, 12000);
 
-      // A-Frame scene graph is ready (may still be before webcam is fully wired).
-      function afterSceneLoaded() {
-        setTimeout(tryBuild, 1400);
-      }
-      if (scene.hasLoaded) {
-        afterSceneLoaded();
-      } else {
-        scene.addEventListener(
-          'loaded',
-          function once() {
-            scene.removeEventListener('loaded', once);
-            afterSceneLoaded();
-          },
-          { once: true }
-        );
-      }
-
-      // Last resort if neither path fired (very slow devices).
-      setTimeout(tryBuild, 4000);
+      setTimeout(function () {
+        if (!built) tryBuild();
+      }, 10000);
     });
   }
 

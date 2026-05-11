@@ -1,54 +1,48 @@
 /**
- * ar-display-fix.js (markerfix-20)
+ * ar-display-fix.js (markerfix-21)
  * -------------------------------
- * AR.js stacks #arjs-video under the WebGL canvas (video z-index -2). A-Frame’s
- * default clear is opaque black, so the feed is running but invisible. We force
- * a transparent clear and no scene.background every frame while the scene runs.
+ * Webcam sits under the WebGL canvas (AR.js). The canvas must clear transparent.
+ * A separate requestAnimationFrame loop fought A-Frame’s own render pass — one
+ * transparent frame then opaque black forever (“flash then black”). This uses
+ * an A-Frame component tick so setClearColor runs in the same frame pipeline.
  */
 
 (function () {
   'use strict';
 
-  function apply(scene) {
-    if (!scene || !scene.renderer || !scene.object3D) return;
-    scene.renderer.setClearColor(0x000000, 0);
-    scene.object3D.background = null;
+  if (typeof AFRAME === 'undefined') return;
+
+  AFRAME.registerComponent('cpis-transparent-clear', {
+    tick: function () {
+      var scene = this.el.sceneEl;
+      if (!scene || !scene.renderer || !scene.object3D) return;
+      scene.renderer.setClearColor(0x000000, 0);
+      scene.object3D.background = null;
+    },
+  });
+
+  function deployBar() {
+    var sen = document.createElement('div');
+    sen.textContent = 'markerfix-21 — transparent clear on A-Frame tick (fixes flash-then-black). (4s)';
+    sen.style.cssText =
+      'position:fixed;bottom:0;left:0;right:0;z-index:2147483647;background:#ffef00;color:#000;font:700 13px system-ui,sans-serif;padding:8px;text-align:center;';
+    if (document.body) document.body.appendChild(sen);
+    setTimeout(function () {
+      if (sen.parentNode) sen.parentNode.removeChild(sen);
+    }, 4000);
   }
 
-  function startLoop(scene) {
-    if (!scene || scene._cpisClearLoop) return;
-    scene._cpisClearLoop = true;
-    function loop() {
-      apply(scene);
-      requestAnimationFrame(loop);
-    }
-    requestAnimationFrame(loop);
-  }
-
-  function boot() {
+  function attach() {
     var scene = document.getElementById('ar-scene');
-    if (!scene) return;
-    if (scene.hasLoaded) {
-      apply(scene);
-      startLoop(scene);
-    } else {
-      scene.addEventListener(
-        'loaded',
-        function () {
-          apply(scene);
-          startLoop(scene);
-        },
-        { once: true }
-      );
+    if (scene && !scene.hasAttribute('cpis-transparent-clear')) {
+      scene.setAttribute('cpis-transparent-clear', '');
     }
-    scene.addEventListener('renderstart', function () {
-      apply(scene);
-    });
+    deployBar();
   }
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', boot);
+    document.addEventListener('DOMContentLoaded', attach);
   } else {
-    boot();
+    attach();
   }
 })();

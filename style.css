@@ -1,5 +1,5 @@
 /* ---------------------------------------------------------------------------
-   markerfix-20: ar-display-fix.js transparent clear + renderer alpha for AR.js video under canvas.
+   markerfix-21: tick-based transparent clear; removed ar-canvas-sync (resize fights AR.js).
    --------------------------------------------------------------------------- */
 
 :root {

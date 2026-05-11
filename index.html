@@ -4,14 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>AR Building Visualizer — setup</title>
-  <link rel="stylesheet" href="style.css?v=markerfix-20" />
+  <link rel="stylesheet" href="style.css?v=markerfix-21" />
   <!-- AR (A-Frame + AR.js) loads only on ar.html after you submit this form. -->
 </head>
 <body class="form-page">
   <div id="ui-layer">
     <header class="app-header">
       <h1>AR Building Visualizer</h1>
-      <p class="subtitle"><strong>Deploy check (markerfix-20):</strong> transparent WebGL clear so the live video under the canvas is visible (AR.js stacks video at z-index -2). <a href="ar-test.html?v=markerfix-20" target="_blank" rel="noopener">Minimal AR test</a>. Use the form so <code>?v=markerfix-20</code> matches.</p>
+      <p class="subtitle"><strong>Deploy check (markerfix-21):</strong> transparent clear runs on A-Frame <code>tick</code> (fixes flash-then-black from a separate rAF loop). <a href="ar-test.html?v=markerfix-21" target="_blank" rel="noopener">Minimal AR test</a>. Form → <code>?v=markerfix-21</code>.</p>
     </header>
 
     <details class="help-panel">
@@ -60,7 +60,7 @@
 
   <button type="button" id="btn-toggle-ui" class="form-floating-toggle" title="Show or hide the form panel">Hide form</button>
 
-  <script src="ui.js?v=markerfix-20"></script>
-  <script src="form-app.js?v=markerfix-20"></script>
+  <script src="ui.js?v=markerfix-21"></script>
+  <script src="form-app.js?v=markerfix-21"></script>
 </body>
 </html>

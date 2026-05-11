@@ -1,19 +1,20 @@
 /* ---------------------------------------------------------------------------
-   Light “real estate” theme — flat solid colors, minimal decoration, no gradients
+   Deploy visibility: bright golden form strip so you can tell “new build” vs
+   old GitHub Pages / wrong tab. (Revert palette later if you want subtle UI.)
    --------------------------------------------------------------------------- */
 
 :root {
-  --bg-page: #f2efe8;
-  --bg-panel: #ffffff;
-  --border: #d1c9bc;
-  --text: #2a2a2a;
-  --text-muted: #5c5c5c;
-  --heading: #1e3a5f;
-  --accent: #2f5233;
-  --accent-hover: #243d27;
-  --input-bg: #ffffff;
-  --message: #8b6914;
-  --link: #1e3a5f;
+  --bg-page: #fef9c3;
+  --bg-panel: #fef08a;
+  --border: #ca8a04;
+  --text: #422006;
+  --text-muted: #713f12;
+  --heading: #78350f;
+  --accent: #b45309;
+  --accent-hover: #92400e;
+  --input-bg: #fffbeb;
+  --message: #991b1b;
+  --link: #1e3a8a;
 }
 
 *,
@@ -45,7 +46,8 @@ body {
   /* Leave space for the fixed “Hide form” control (it sits outside this panel). */
   padding: 14px 120px 16px 16px;
   background: var(--bg-panel);
-  border-bottom: 2px solid var(--border);
+  /* Thick “beacon” line — old deploys did not have this */
+  border-bottom: 6px solid #0e7490;
 }
 
 #ui-layer.hidden {
@@ -98,11 +100,11 @@ body {
 
 /* Fieldsets */
 form#building-form fieldset {
-  border: 1px solid var(--border);
+  border: 2px solid var(--border);
   border-radius: 4px;
   margin: 0 0 12px;
   padding: 14px 12px 12px;
-  background: var(--bg-panel);
+  background: var(--input-bg);
 }
 
 form#building-form legend {
@@ -202,13 +204,13 @@ button {
   min-height: 44px;
   padding: 10px 14px;
   font-size: 0.85rem;
-  color: var(--heading);
-  background: var(--bg-panel);
-  border: 2px solid var(--heading);
+  color: #fffbeb;
+  background: #0e7490;
+  border: 2px solid #155e75;
 }
 
 .form-floating-toggle:hover {
-  background: var(--bg-page);
+  background: #155e75;
 }
 
 .form-message {
@@ -228,7 +230,7 @@ button {
   top: min(48vh, 380px);
   bottom: 0;
   z-index: 1;
-  background: #e8e4dc;
+  background: #cffafe;
 }
 
 #ar-container a-scene {

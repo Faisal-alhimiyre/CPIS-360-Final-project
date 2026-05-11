@@ -20,12 +20,12 @@
     https://raw.githubusercontent.com/AR-js-org/ARToolkit5/master/bin/HIRO.jpg
   -->
   <!--
-    A-Frame + AR.js must match (see changeMatrixMode errors with wrong pairs).
-    Load A-Frame from jsDelivr — if you still see "A-Frame Version: 1.4.2" in the console,
-    your browser was caching the old https://aframe.io/... script; hard refresh after deploy.
+    AR.js 3.4.5 + A-Frame 1.4.x often crashes: changeMatrixMode (library mismatch).
+    AR.js 3.4.6+ targets newer A-Frame / Three (see AR.js CHANGELOG). This pair should load together.
+    ?v=... reduces stale CDN cache after you deploy.
   -->
-  <script src="https://cdn.jsdelivr.net/npm/aframe@1.2.0/dist/aframe.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.5/aframe/build/aframe-ar.js"></script>
+  <script src="https://aframe.io/releases/1.6.0/aframe.min.js?v=cpis360-20260511"></script>
+  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.8/aframe/build/aframe-ar.js?v=cpis360-20260511"></script>
 </head>
 <body>
   <!-- UI layer sits above the AR canvas -->

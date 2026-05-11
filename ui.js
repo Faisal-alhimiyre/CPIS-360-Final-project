@@ -98,7 +98,7 @@
         setMessage(err);
         return;
       }
-      setMessage('Building updated. Aim at the HIRO marker.');
+      setMessage('Model ready — point at the HIRO marker. Tip: keep the marker flat and well lit.');
       onSubmitValid(spec);
     });
 

@@ -295,6 +295,14 @@
     // We draw shell then rooms so interior exists; transparent front wall still shows interior.
     addShell(buildingRoot, spec);
     addInteriorRooms(buildingRoot, spec);
+
+    // AR marker is only a few cm wide in the real world. If the user types "120 m" the raw model would be
+    // enormous — you would be "inside" a solid wall and see nothing. Uniformly scale so the longest edge
+    // fits roughly on the marker (~2.3 m in virtual space is a comfortable phone AR size).
+    var maxDim = Math.max(spec.width, spec.depth, spec.height);
+    var AR_MAX_EXTENT = 2.3;
+    var s = maxDim > AR_MAX_EXTENT ? AR_MAX_EXTENT / maxDim : 1;
+    buildingRoot.setAttribute('scale', s + ' ' + s + ' ' + s);
   }
 
   window.BuildingGenerator = {

@@ -1,6 +1,20 @@
 /* ---------------------------------------------------------------------------
-   Global layout: form overlay + embedded AR scene below (good for Live Server)
+   Light “real estate” theme — flat solid colors, minimal decoration, no gradients
    --------------------------------------------------------------------------- */
+
+:root {
+  --bg-page: #f2efe8;
+  --bg-panel: #ffffff;
+  --border: #d1c9bc;
+  --text: #2a2a2a;
+  --text-muted: #5c5c5c;
+  --heading: #1e3a5f;
+  --accent: #2f5233;
+  --accent-hover: #243d27;
+  --input-bg: #ffffff;
+  --message: #8b6914;
+  --link: #1e3a5f;
+}
 
 *,
 *::before,
@@ -14,12 +28,12 @@ body {
   padding: 0;
   width: 100%;
   height: 100%;
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  background: #0f1419;
-  color: #e8eef5;
+  font-family: Georgia, "Times New Roman", Times, serif;
+  color: var(--text);
+  background: var(--bg-page);
 }
 
-/* UI floats above the 3D canvas */
+/* Form + header panel */
 #ui-layer {
   position: fixed;
   z-index: 10;
@@ -28,129 +42,193 @@ body {
   top: 0;
   max-height: 48vh;
   overflow: auto;
-  padding: 12px 14px 14px;
-  background: rgba(15, 20, 25, 0.92);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(6px);
+  /* Leave space for the fixed “Hide form” control (it sits outside this panel). */
+  padding: 14px 120px 16px 16px;
+  background: var(--bg-panel);
+  border-bottom: 2px solid var(--border);
 }
 
 #ui-layer.hidden {
   transform: translateY(-100%);
   opacity: 0;
   pointer-events: none;
-  transition: transform 0.25s ease, opacity 0.25s ease;
+  transition: transform 0.22s ease, opacity 0.22s ease;
 }
 
 .app-header h1 {
   margin: 0 0 4px;
-  font-size: 1.15rem;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--heading);
+  font-family: Georgia, "Times New Roman", Times, serif;
 }
 
 .subtitle {
-  margin: 0 0 10px;
-  font-size: 0.85rem;
-  color: #a8b3c2;
+  margin: 0 0 12px;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
 }
 
 .help-panel {
-  margin-bottom: 10px;
-  font-size: 0.85rem;
-  color: #c9d4e3;
+  margin-bottom: 12px;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  padding: 10px 12px;
+  background: var(--bg-page);
+  border: 1px solid var(--border);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
 }
 
 .help-panel summary {
   cursor: pointer;
   font-weight: 600;
+  color: var(--heading);
 }
 
 .help-panel ol {
   margin: 8px 0 0;
-  padding-left: 1.2rem;
+  padding-left: 1.25rem;
 }
 
 .help-panel a {
-  color: #7ec8ff;
-}
-
-/* Form: two columns on wide screens, one column on phones */
-form#building-form fieldset {
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 8px;
-  margin: 0 0 10px;
-  padding: 10px 12px;
-}
-
-form#building-form legend {
-  padding: 0 6px;
+  color: var(--link);
   font-weight: 600;
 }
 
-.hint {
-  margin: 0 0 8px;
-  font-size: 0.8rem;
-  color: #9aa7b8;
+/* Fieldsets */
+form#building-form fieldset {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  margin: 0 0 12px;
+  padding: 14px 12px 12px;
+  background: var(--bg-panel);
 }
 
-form#building-form label {
-  display: inline-flex;
+form#building-form legend {
+  padding: 2px 8px;
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: var(--heading);
+  background: var(--bg-page);
+  border: 1px solid var(--border);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+
+.hint {
+  margin: 0 0 10px;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+
+form#building-form .field-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(158px, 1fr));
+  gap: 10px;
+}
+
+form#building-form label.field {
+  display: flex;
   flex-direction: column;
-  gap: 4px;
-  margin: 6px 12px 6px 0;
-  min-width: 140px;
-  font-size: 0.85rem;
+  gap: 6px;
+  margin: 0;
+  min-width: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+
+form#building-form label.field span.label-text {
+  display: block;
 }
 
 form#building-form input[type="number"] {
-  padding: 10px 10px; /* larger touch targets on mobile */
-  border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.06);
-  color: #fff;
-  min-height: 44px;
+  width: 100%;
+  padding: 12px 10px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: var(--input-bg);
+  color: var(--text);
+  min-height: 46px;
+  font-size: 1rem;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+
+form#building-form input[type="number"]:focus {
+  outline: 2px solid var(--heading);
+  outline-offset: 1px;
+  border-color: var(--heading);
 }
 
 .form-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  margin-top: 8px;
+  margin-top: 4px;
 }
 
 button {
-  padding: 12px 16px;
-  min-height: 44px;
-  border-radius: 8px;
-  border: none;
+  padding: 12px 18px;
+  min-height: 46px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
   cursor: pointer;
   font-size: 0.95rem;
   font-weight: 600;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
 }
 
 #btn-generate {
-  background: linear-gradient(180deg, #3b82f6, #2563eb);
-  color: #fff;
+  flex: 1 1 200px;
+  color: #ffffff;
+  background: var(--accent);
+  border-color: var(--accent);
 }
 
-#btn-toggle-ui {
-  background: rgba(255, 255, 255, 0.1);
-  color: #e8eef5;
+#btn-generate:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+/* Always on top of AR — never inside #ui-layer so “Show form” still works when panel is hidden */
+.form-floating-toggle {
+  position: fixed;
+  z-index: 100;
+  top: max(10px, env(safe-area-inset-top, 0px));
+  right: max(10px, env(safe-area-inset-right, 0px));
+  min-height: 44px;
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  color: var(--heading);
+  background: var(--bg-panel);
+  border: 2px solid var(--heading);
+}
+
+.form-floating-toggle:hover {
+  background: var(--bg-page);
 }
 
 .form-message {
   min-height: 1.25em;
-  margin: 8px 0 0;
-  font-size: 0.85rem;
-  color: #fbbf24;
+  margin: 10px 0 0;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--message);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
 }
 
-/* Embedded AR fills the rest of the viewport under the form */
+/* AR area */
 #ar-container {
   position: fixed;
   left: 0;
   right: 0;
-  top: min(48vh, 360px);
+  top: min(48vh, 380px);
   bottom: 0;
   z-index: 1;
+  background: #e8e4dc;
 }
 
 #ar-container a-scene {
@@ -159,7 +237,45 @@ button {
   display: block;
 }
 
-/* When form is hidden, give AR full screen */
+.ar-placeholder {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 16px;
+  text-align: center;
+  background: var(--bg-page);
+}
+
+.ar-placeholder-inner {
+  max-width: 340px;
+  padding: 22px 18px;
+  border-radius: 4px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+
+.ar-placeholder-icon {
+  display: block;
+  font-size: 2rem;
+  margin-bottom: 8px;
+}
+
+.ar-placeholder-title {
+  margin: 0 0 8px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--heading);
+}
+
+.ar-placeholder-text {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
 body.ui-fullscreen #ar-container {
   top: 0;
 }

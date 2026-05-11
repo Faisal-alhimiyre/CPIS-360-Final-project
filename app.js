@@ -38,22 +38,16 @@
   }
 
   function startApp() {
-    window.ArScene.whenSceneReady('ar-scene', function () {
-      var handles = window.ArScene.getArHandles();
-      if (handles && handles.scene && handles.buildingRoot) {
-        window.Interactions.setupDoorToggle(handles.scene, handles.buildingRoot);
-      }
-
-      window.Ui.bindForm(function (spec) {
+    // Camera + WebGL start only after a valid Generate (see mountSceneIfNeeded).
+    window.Ui.bindForm(function (spec) {
+      window.ArScene.mountSceneIfNeeded(function (err) {
+        if (err) {
+          console.error(err);
+          window.Ui.setMessage('Could not start AR scene. Check console / try another browser.');
+          return;
+        }
         rebuildFromSpec(spec);
       });
-
-      // First paint with whatever the form defaults are — student sees something immediately.
-      var spec = window.Ui.readBuildingSpecFromForm();
-      var err = window.Ui.validateSpec(spec);
-      if (!err) {
-        rebuildFromSpec(spec);
-      }
     });
   }
 

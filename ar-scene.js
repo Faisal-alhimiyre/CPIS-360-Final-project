@@ -42,9 +42,68 @@
     return { scene: scene, marker: marker, buildingRoot: buildingRoot };
   }
 
+  /**
+   * First successful form submit clones #ar-scene-template into #ar-container.
+   * That is when the browser asks for camera permission (user gesture from the button).
+   * Later submits reuse the same scene.
+   *
+   * @param {(err: Error|null) => void} onReady
+   */
+  function mountSceneIfNeeded(onReady) {
+    var scene = document.getElementById('ar-scene');
+    if (scene) {
+      function fire() {
+        try {
+          onReady(null);
+        } catch (e) {
+          onReady(e);
+        }
+      }
+      if (scene.hasLoaded) fire();
+      else scene.addEventListener('loaded', function once() {
+        scene.removeEventListener('loaded', once);
+        fire();
+      });
+      return;
+    }
+
+    var tpl = document.getElementById('ar-scene-template');
+    var container = document.getElementById('ar-container');
+    if (!tpl || !container) {
+      onReady(new Error('Missing #ar-scene-template or #ar-container'));
+      return;
+    }
+
+    var ph = document.getElementById('ar-placeholder');
+    if (ph) ph.remove();
+
+    container.appendChild(tpl.content.cloneNode(true));
+    document.body.classList.add('ar-mounted');
+
+    scene = document.getElementById('ar-scene');
+    if (!scene) {
+      onReady(new Error('Scene failed to mount'));
+      return;
+    }
+
+    function fire() {
+      try {
+        onReady(null);
+      } catch (e) {
+        onReady(e);
+      }
+    }
+    if (scene.hasLoaded) fire();
+    else scene.addEventListener('loaded', function once() {
+      scene.removeEventListener('loaded', once);
+      fire();
+    });
+  }
+
   // Expose on window so other plain scripts can call without a bundler.
   window.ArScene = {
     whenSceneReady: whenSceneReady,
     getArHandles: getArHandles,
+    mountSceneIfNeeded: mountSceneIfNeeded,
   };
 })();

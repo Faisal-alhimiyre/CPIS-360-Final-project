@@ -19,13 +19,9 @@
     HIRO marker image (print or display on another device):
     https://raw.githubusercontent.com/AR-js-org/ARToolkit5/master/bin/HIRO.jpg
   -->
-  <!--
-    AR.js 3.4.5 + A-Frame 1.4.x often crashes: changeMatrixMode (library mismatch).
-    AR.js 3.4.6+ targets newer A-Frame / Three (see AR.js CHANGELOG). This pair should load together.
-    ?v=... reduces stale CDN cache after you deploy.
-  -->
-  <script src="https://aframe.io/releases/1.6.0/aframe.min.js?v=cpis360-20260511"></script>
-  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.8/aframe/build/aframe-ar.js?v=cpis360-20260511"></script>
+  <!-- A-Frame + AR.js (marker build). ?v= helps avoid stale CDN cache after deploy. -->
+  <script src="https://aframe.io/releases/1.6.0/aframe.min.js?v=cpis360-20260512"></script>
+  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.8/aframe/build/aframe-ar.js?v=cpis360-20260512"></script>
 </head>
 <body>
   <!-- UI layer sits above the AR canvas -->
@@ -94,11 +90,12 @@
 
   <!-- Cloned into #ar-container on first successful Generate (starts webcam + AR tracking). -->
   <template id="ar-scene-template">
+    <!-- If videoTexture is true with webcam, AR.js skips building _arProfile/_arSession; a-marker still needs them → changeMatrixMode crash. -->
     <a-scene
       embedded
       vr-mode-ui="enabled: false"
       renderer="logarithmicDepthBuffer: true; colorManagement: true;"
-      arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false; trackingMethod: best;"
+      arjs="sourceType: webcam; videoTexture: false; debugUIEnabled: false; trackingMethod: best;"
       id="ar-scene"
     >
       <a-marker preset="hiro" id="hiro-marker" emitevents="true">

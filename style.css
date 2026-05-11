@@ -227,13 +227,14 @@ button {
 }
 
 /*
-  ar.html: fill the visual viewport; header does NOT shrink the AR layer (overlay).
+  ar.html: fill the visual viewport; header overlays the feed (no reserved top gap).
 */
-html:has(body.ar-page) {
+html.ar-page-doc {
   height: 100%;
+  margin: 0;
 }
 
-body.ar-page {
+html.ar-page-doc body.ar-page {
   margin: 0;
   overflow: hidden;
   min-height: 100vh;

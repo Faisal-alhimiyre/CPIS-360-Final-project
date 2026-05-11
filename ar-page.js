@@ -49,6 +49,13 @@
         return;
       }
       setArError('');
+      function kickLayout() {
+        if (window.ArScene.forceLayoutFromViewport) window.ArScene.forceLayoutFromViewport();
+      }
+      kickLayout();
+      requestAnimationFrame(kickLayout);
+      setTimeout(kickLayout, 120);
+      setTimeout(kickLayout, 450);
     });
   }
 

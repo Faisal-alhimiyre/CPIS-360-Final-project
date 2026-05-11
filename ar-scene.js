@@ -129,7 +129,7 @@
     v.dataset.cpisMetaBound = '1';
     function kick() {
       forceArPipelineResize(scene);
-      syncArDisplayToContainer();
+      forceLayoutFromViewport();
     }
     v.addEventListener('loadedmetadata', kick);
   }
@@ -168,7 +168,7 @@
     function kick() {
       ensureEmbeddedArPatch(scene);
       requestAnimationFrame(function () {
-        syncArDisplayToContainer();
+        forceLayoutFromViewport();
       });
     }
 
@@ -184,6 +184,35 @@
       },
       { once: true }
     );
+  }
+
+  /**
+   * Pin #ar-container + a-scene to the visual viewport in px. Embedded A-Frame + AR.js
+   * otherwise sometimes resolve height:100% to a tiny strip when the chain is ambiguous.
+   */
+  function forceLayoutFromViewport() {
+    var box = document.getElementById('ar-container');
+    var scene = document.getElementById('ar-scene');
+    if (!box || !scene) return;
+    var w = Math.max(2, window.innerWidth);
+    var h = Math.max(2, window.innerHeight);
+    box.style.width = w + 'px';
+    box.style.height = h + 'px';
+    box.style.minHeight = h + 'px';
+    scene.style.width = '100%';
+    scene.style.height = h + 'px';
+    scene.style.minHeight = h + 'px';
+    syncArDisplayToContainer();
+  }
+
+  function bindArContainerResizeObserver() {
+    var box = document.getElementById('ar-container');
+    if (!box || box.dataset.cpisRo === '1' || typeof ResizeObserver === 'undefined') return;
+    box.dataset.cpisRo = '1';
+    var ro = new ResizeObserver(function () {
+      forceLayoutFromViewport();
+    });
+    ro.observe(box);
   }
 
   /**
@@ -217,7 +246,7 @@
   function onWindowResize() {
     if (resizeTimer) clearTimeout(resizeTimer);
     resizeTimer = setTimeout(function () {
-      syncArDisplayToContainer();
+      forceLayoutFromViewport();
     }, 120);
   }
 
@@ -231,7 +260,7 @@
       function fire() {
         try {
           ensureEmbeddedArPatch(scene);
-          syncArDisplayToContainer();
+          forceLayoutFromViewport();
           onReady(null);
         } catch (e) {
           onReady(e);
@@ -249,6 +278,8 @@
         window.addEventListener('resize', onWindowResize);
         window.addEventListener('orientationchange', onWindowResize);
       }
+      bindArContainerResizeObserver();
+      forceLayoutFromViewport();
       return;
     }
 
@@ -276,10 +307,10 @@
     function fire() {
       try {
         ensureEmbeddedArPatch(scene);
-        syncArDisplayToContainer();
-        setTimeout(syncArDisplayToContainer, 80);
-        setTimeout(syncArDisplayToContainer, 350);
-        setTimeout(syncArDisplayToContainer, 800);
+        forceLayoutFromViewport();
+        setTimeout(forceLayoutFromViewport, 80);
+        setTimeout(forceLayoutFromViewport, 350);
+        setTimeout(forceLayoutFromViewport, 800);
         onReady(null);
       } catch (e) {
         onReady(e);
@@ -298,6 +329,9 @@
       window.addEventListener('resize', onWindowResize);
       window.addEventListener('orientationchange', onWindowResize);
     }
+
+    bindArContainerResizeObserver();
+    forceLayoutFromViewport();
   }
 
   window.ArScene = {
@@ -305,5 +339,6 @@
     getArHandles: getArHandles,
     mountSceneIfNeeded: mountSceneIfNeeded,
     syncArDisplayToContainer: syncArDisplayToContainer,
+    forceLayoutFromViewport: forceLayoutFromViewport,
   };
 })();

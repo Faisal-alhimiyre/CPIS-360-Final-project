@@ -1,0 +1,14 @@
+---
+description: After substantive edits, commit and push without waiting for user approval
+alwaysApply: true
+---
+
+# Git: auto commit and sync
+
+Whenever you change project files (code, HTML, CSS, assets the app serves), **do not wait for the user** to ask for a commit or push.
+
+1. **End of task** (after edits pass lint or build checks if applicable): run `git add -A`, then `git commit` with a short imperative message describing what changed.
+2. **Immediately after**: `git push` to `origin` on the current branch (usually `main`).
+3. If there is **nothing to commit** (clean tree), skip commit/push but still `git fetch` + `git status` when the user explicitly asked to sync or deploy.
+4. If **push fails** (auth, network): report the exact error once and leave the working tree committed locally so the user can push when ready.
+5. Do not ask “should I commit?” — assume yes for any completed change set.

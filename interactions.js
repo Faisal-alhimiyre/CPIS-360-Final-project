@@ -1,8 +1,10 @@
 /**
  * interactions.js
  * ---------------
- * Tap door, hit pad, or any .clickable façade (e.g. front wall) → all exterior façades (.ext-wall) become nearly transparent
- * so the colored apartment layout inside is visible.
+ * Tap door/front façade -> cutaway mode:
+ * - hide front shell layer + roof cap
+ * - make side/back walls glassy so interior blocks are visible
+ * Tap again to restore normal shell.
  */
 
 (function () {
@@ -11,8 +13,8 @@
   var OPAQUE = 1;
   var GLASSY = 0.14;
 
-  function isGlassMode(frontWall) {
-    return frontWall && frontWall.dataset && frontWall.dataset.wallMode === 'glass';
+  function isCutawayOpen(scene) {
+    return scene && scene.dataset && scene.dataset.cutawayOpen === '1';
   }
 
   function applyExtWallMaterial(wall, opacity, modeLabel) {
@@ -33,6 +35,31 @@
     var i;
     for (i = 0; i < walls.length; i++) {
       applyExtWallMaterial(walls[i], opacity, modeLabel);
+    }
+  }
+
+  function setCutawayVisibility(scene, visible) {
+    var parts = scene.querySelectorAll('.cutaway-hide');
+    var i;
+    for (i = 0; i < parts.length; i++) {
+      parts[i].setAttribute('visible', visible ? 'true' : 'false');
+    }
+  }
+
+  function setCutawayMode(scene, open) {
+    scene.dataset.cutawayOpen = open ? '1' : '0';
+    setCutawayVisibility(scene, !open);
+
+    if (open) {
+      var walls = scene.querySelectorAll('.ext-wall');
+      var i;
+      for (i = 0; i < walls.length; i++) {
+        var w = walls[i];
+        if (w.id === 'front-wall') continue;
+        applyExtWallMaterial(w, GLASSY, 'glass');
+      }
+    } else {
+      setAllExterior(scene, OPAQUE, 'opaque');
     }
   }
 
@@ -71,15 +98,10 @@
       if (!clickable) return;
       if (!isUnder(clickable, buildingRoot)) return;
 
-      var front = scene.querySelector('#front-wall');
-      var nextGlass = !isGlassMode(front);
-      if (nextGlass) {
-        setAllExterior(scene, GLASSY, 'glass');
-      } else {
-        setAllExterior(scene, OPAQUE, 'opaque');
-      }
+      setCutawayMode(scene, !isCutawayOpen(scene));
     }
 
+    setCutawayMode(scene, false);
     scene.addEventListener('click', tryToggle, true);
   }
 

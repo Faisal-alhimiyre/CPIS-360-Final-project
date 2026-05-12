@@ -266,16 +266,17 @@
       })
     );
 
-    parent.appendChild(
-      el('a-box', {
-        width: W + 0.04,
-        height: t * 1.2,
-        depth: D + 0.04,
-        position: '0 ' + (H - t * 0.6) + ' 0',
-        color: '#1e293b',
-        shader: 'flat',
-      })
-    );
+    var roofCap = el('a-box', {
+      id: 'roof-cap',
+      width: W + 0.04,
+      height: t * 1.2,
+      depth: D + 0.04,
+      position: '0 ' + (H - t * 0.6) + ' 0',
+      color: '#1e293b',
+      shader: 'flat',
+    });
+    roofCap.classList.add('cutaway-hide');
+    parent.appendChild(roofCap);
 
     var back = el('a-box', {
       width: W,
@@ -312,7 +313,7 @@
       position: '0 ' + H / 2 + ' ' + faceZ,
     });
     markExtWall(front, '#5b6c7d');
-    front.classList.add('clickable');
+    front.classList.add('clickable', 'cutaway-hide');
     parent.appendChild(front);
 
     var frontHitZ = faceZ + t * 1.15;
@@ -325,6 +326,7 @@
       rotation: '-90 0 0',
       material: 'opacity: 0.04; transparent: true; shader: flat; side: double',
     });
+    frontHit.classList.add('cutaway-hide');
     parent.appendChild(frontHit);
 
     var winY = H * 0.55;
@@ -341,6 +343,7 @@
         color: '#0f172a',
         shader: 'flat',
       });
+      wn.classList.add('cutaway-hide');
       parent.appendChild(wn);
     }
 

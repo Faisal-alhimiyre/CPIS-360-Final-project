@@ -57,7 +57,7 @@
         var baseHint = hint.textContent;
         markerEl.addEventListener('markerFound', function () {
           hint.textContent =
-            'Marker found — model locked in place. Tap the orange door or the front face to see through the walls; arrows turn the building.';
+            'Marker found — model locked in place. Tap the orange door to remove front layer + roof and inspect inside.';
           hint.style.color = '#15803d';
         });
         markerEl.addEventListener('markerLost', function () {

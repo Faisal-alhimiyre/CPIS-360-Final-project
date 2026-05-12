@@ -55,7 +55,7 @@
       var i;
       for (i = 0; i < walls.length; i++) {
         var w = walls[i];
-        if (w.id === 'front-wall') continue;
+        if (w.id === 'front-wall' || (w.dataset && w.dataset.apartmentFront === 'true')) continue;
         applyExtWallMaterial(w, GLASSY, 'glass');
       }
     } else {
@@ -89,29 +89,22 @@
     function tryToggle(evt) {
       var start = intersectedFromEvent(evt) || evt.target;
       var node = start;
-      var clickable = null;
+      var hit = null;
       while (node) {
+        if (node.dataset && node.dataset.doorToggle === '1') {
+          hit = node;
+          break;
+        }
         if (node.classList && node.classList.contains('clickable')) {
-          clickable = node;
+          hit = node;
           break;
         }
         node = node.parentElement || node.parentEl || null;
       }
-      if (!clickable) return;
-      if (!isUnder(clickable, buildingRoot)) return;
+      if (!hit) return;
+      if (!isUnder(hit, buildingRoot)) return;
 
       toggleCutaway();
-    }
-
-    function bindDirectTargets() {
-      var targets = scene.querySelectorAll('#door-visual, #door-hit, #front-wall, #front-facade-hit');
-      var i;
-      for (i = 0; i < targets.length; i++) {
-        targets[i].addEventListener('click', function (evt) {
-          evt.stopPropagation();
-          toggleCutaway();
-        });
-      }
     }
 
     if (scene.dataset.doorToggleBound !== '1') {
@@ -120,7 +113,6 @@
     }
 
     setCutawayMode(scene, false);
-    bindDirectTargets();
   }
 
   window.Interactions = {

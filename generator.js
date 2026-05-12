@@ -202,9 +202,8 @@
   }
 
   /**
-   * One fixed floor-plan template (professor MVP): five labeled rooms, no furniture.
-   * Approximates a small one-bedroom: kitchen + entrance + bath along the back row,
-   * living + bedroom toward the front — like the reference plan, scaled to the footprint.
+   * One fixed floor-plan template (professor MVP): five labeled rooms, thin floor tints,
+   * vertical partition walls + perimeter (no furniture). Full building shell is skipped for this path.
    * @param {Element} parent
    * @param {BuildingSpec} spec
    */
@@ -212,8 +211,12 @@
     var floorH = spec.height / clampMin(spec.floors, 1);
     var aptCount = clampMin(spec.apartments, 1);
     var aptWidthOuter = spec.width / aptCount;
-    var pad = 0.04;
-    var cellH = Math.max(0.08, floorH * 0.42);
+    var wt = WALL_T;
+    var wallH = Math.max(0.35, floorH * 0.9);
+    var slabT = 0.025;
+    var floorY = 0;
+    var wallCenterY = floorY + 0.02 + wallH / 2;
+    var facadeBase = /^#[0-9a-fA-F]{6}$/.test(spec.facadeColor || '') ? spec.facadeColor : '#64748b';
 
     /** @type {Array<{ key: string, label: string, x0: number, x1: number, z0: number, z1: number }>} */
     var rooms = [
@@ -224,46 +227,81 @@
       { key: 'bedroom', label: 'Bedroom', x0: 0.66, x1: 1, z0: 0.32, z1: 1 },
     ];
 
+    function addIntWall(w, h, d, cx, cy, cz) {
+      var wall = el('a-box', {
+        width: w,
+        height: h,
+        depth: d,
+        position: cx + ' ' + cy + ' ' + cz,
+        color: '#f1f5f9',
+        shader: 'flat',
+      });
+      wall.classList.add('int-wall');
+      parent.appendChild(wall);
+    }
+
     var f;
     var a;
     for (f = 0; f < spec.floors; f++) {
       var floorBaseY = f * floorH;
-      var midY = floorBaseY + floorH * 0.5;
+      floorY = floorBaseY + 0.01;
+      wallCenterY = floorY + 0.02 + wallH / 2;
+      var labelY = floorBaseY + wallH + 0.12;
 
       for (a = 0; a < aptCount; a++) {
-        var aptX0 = -spec.width / 2 + a * aptWidthOuter + WALL_T;
-        var aptX1 = -spec.width / 2 + (a + 1) * aptWidthOuter - WALL_T;
+        var aptX0 = -spec.width / 2 + a * aptWidthOuter + wt;
+        var aptX1 = -spec.width / 2 + (a + 1) * aptWidthOuter - wt;
         var usableW = aptX1 - aptX0;
-        var z0 = -spec.depth / 2 + WALL_T;
-        var z1 = spec.depth / 2 - WALL_T;
+        var z0 = -spec.depth / 2 + wt;
+        var z1 = spec.depth / 2 - wt;
         var usableD = z1 - z0;
+
+        var xLine1 = aptX0 + 0.36 * usableW;
+        var xLine2 = aptX0 + 0.5 * usableW;
+        var xLine3 = aptX0 + 0.66 * usableW;
+        var zLine1 = z0 + 0.32 * usableD;
+
+        var innerX0 = aptX0 + wt / 2;
+        var innerX1 = aptX1 - wt / 2;
+        var innerZ0 = z0 + wt / 2;
+        var innerZ1 = z1 - wt / 2;
+
+        var baseSlab = el('a-box', {
+          width: usableW,
+          height: slabT,
+          depth: usableD,
+          position: (aptX0 + aptX1) / 2 + ' ' + (floorY + slabT / 2) + ' ' + (z0 + z1) / 2,
+          color: '#e2e8f0',
+          shader: 'flat',
+        });
+        parent.appendChild(baseSlab);
 
         var ri;
         for (ri = 0; ri < rooms.length; ri++) {
           var rm = rooms[ri];
-          var xL = aptX0 + rm.x0 * usableW + pad;
-          var xR = aptX0 + rm.x1 * usableW - pad;
-          var zB = z0 + rm.z0 * usableD + pad;
-          var zF = z0 + rm.z1 * usableD - pad;
-          var bw = Math.max(0.06, xR - xL);
-          var bd = Math.max(0.06, zF - zB);
+          var xL = aptX0 + rm.x0 * usableW + wt * 0.35;
+          var xR = aptX0 + rm.x1 * usableW - wt * 0.35;
+          var zB = z0 + rm.z0 * usableD + wt * 0.35;
+          var zF = z0 + rm.z1 * usableD - wt * 0.35;
+          var bw = Math.max(0.08, xR - xL);
+          var bd = Math.max(0.08, zF - zB);
           var cx = (xL + xR) / 2;
-          var cz = (zB + zF) / 2 - 0.02;
+          var cz = (zB + zF) / 2;
           var col = COLORS[rm.key] || '#cbd5e1';
 
-          var box = el('a-box', {
+          var slab = el('a-box', {
             width: bw,
-            height: cellH,
+            height: slabT,
             depth: bd,
-            position: cx + ' ' + midY + ' ' + cz,
-            color: col,
-            shader: 'flat',
+            position: cx + ' ' + (floorY + slabT * 1.1) + ' ' + cz,
+            material:
+              'color: ' +
+              col +
+              '; opacity: 0.9; transparent: true; shader: flat; side: double',
             'data-room': rm.key,
-            'data-room-label': rm.label,
           });
-          parent.appendChild(box);
+          parent.appendChild(slab);
 
-          var labelY = midY + cellH * 0.52 + 0.06;
           var tw = Math.min(Math.max(bw, bd) * 0.85, 3.2);
           var label = el('a-text', {
             value: rm.label,
@@ -277,9 +315,145 @@
           });
           parent.appendChild(label);
         }
-      }
-    }
-  }
+
+        var topZ0 = innerZ0;
+        var topZ1 = zLine1 - wt / 2;
+        var dTop = Math.max(0.05, topZ1 - topZ0);
+        var czTop = (topZ0 + topZ1) / 2;
+        addIntWall(wt, wallH, dTop, xLine1, wallCenterY, czTop);
+        addIntWall(wt, wallH, dTop, xLine2, wallCenterY, czTop);
+
+        var botZ0 = zLine1 + wt / 2;
+        var botZ1 = innerZ1;
+        var dBot = Math.max(0.05, botZ1 - botZ0);
+        var czBot = (botZ0 + botZ1) / 2;
+        addIntWall(wt, wallH, dBot, xLine3, wallCenterY, czBot);
+
+        var partW = Math.max(0.05, innerX1 - innerX0);
+        var partX = (innerX0 + innerX1) / 2;
+        addIntWall(partW, wallH, wt, partX, wallCenterY, zLine1);
+
+        var backWall = el('a-box', {
+          width: usableW,
+          height: wallH,
+          depth: wt,
+          position: (aptX0 + aptX1) / 2 + ' ' + wallCenterY + ' ' + (z0 + wt / 2),
+          shader: 'flat',
+        });
+        markExtWall(backWall, facadeBase);
+        parent.appendChild(backWall);
+
+        var leftWall = el('a-box', {
+          width: wt,
+          height: wallH,
+          depth: usableD,
+          position: aptX0 + wt / 2 + ' ' + wallCenterY + ' ' + (z0 + z1) / 2,
+          shader: 'flat',
+        });
+        markExtWall(leftWall, tintHex(facadeBase, 0.08));
+        parent.appendChild(leftWall);
+
+        var rightWall = el('a-box', {
+          width: wt,
+          height: wallH,
+          depth: usableD,
+          position: aptX1 - wt / 2 + ' ' + wallCenterY + ' ' + (z0 + z1) / 2,
+          shader: 'flat',
+        });
+        markExtWall(rightWall, tintHex(facadeBase, 0.08));
+        parent.appendChild(rightWall);
+
+        var doorW = Math.min(1.05, Math.max(0.45, usableW * 0.16));
+        var midX = (aptX0 + aptX1) / 2;
+        var xDoorL = midX - doorW / 2;
+        var xDoorR = midX + doorW / 2;
+        var frontZ = z1 - wt / 2;
+        var segLeftW = Math.max(0.05, xDoorL - aptX0 - wt);
+        var segRightW = Math.max(0.05, aptX1 - wt - xDoorR);
+        var segLX = aptX0 + wt / 2 + segLeftW / 2;
+        var segRX = xDoorR + segRightW / 2;
+
+        var frontL = el('a-box', {
+          width: segLeftW,
+          height: wallH,
+          depth: wt,
+          position: segLX + ' ' + wallCenterY + ' ' + frontZ,
+          shader: 'flat',
+        });
+        markExtWall(frontL, tintHex(facadeBase, -0.08));
+        frontL.classList.add('cutaway-hide');
+        frontL.dataset.apartmentFront = 'true';
+        parent.appendChild(frontL);
+
+        var frontR = el('a-box', {
+          width: segRightW,
+          height: wallH,
+          depth: wt,
+          position: segRX + ' ' + wallCenterY + ' ' + frontZ,
+          shader: 'flat',
+        });
+        markExtWall(frontR, tintHex(facadeBase, -0.08));
+        frontR.classList.add('cutaway-hide');
+        frontR.dataset.apartmentFront = 'true';
+        parent.appendChild(frontR);
+
+        var roofAttrs = {
+          width: usableW + wt,
+          height: wt * 1.2,
+          depth: usableD + wt,
+          position: (aptX0 + aptX1) / 2 + ' ' + (floorBaseY + wallH + wt * 0.65) + ' ' + (z0 + z1) / 2,
+          color: tintHex(facadeBase, -0.45),
+          shader: 'flat',
+        };
+        if (a === 0 && f === 0) roofAttrs.id = 'roof-cap';
+        var roofCap = el('a-box', roofAttrs);
+        roofCap.classList.add('cutaway-hide');
+        parent.appendChild(roofCap);
+
+        var doorH = Math.min(wallH * 0.88, 1.05);
+        var doorY = floorY + 0.02 + doorH / 2;
+        var doorZOut = z1 + wt * 0.85;
+        var doorAttrs = {
+          class: 'clickable door-hot',
+          'data-door-toggle': '1',
+          width: doorW,
+          height: doorH,
+          depth: wt * 1.4,
+          position: midX + ' ' + doorY + ' ' + doorZOut,
+          color: '#ea580c',
+          shader: 'flat',
+        };
+        if (a === 0 && f === 0) doorAttrs.id = 'door-visual';
+        var door = el('a-box', doorAttrs);
+        parent.appendChild(door);
+
+        var hitAttrs = {
+          class: 'clickable door-hot',
+          'data-door-toggle': '1',
+          width: Math.max(doorW * 2.5, 0.7),
+          height: Math.max(doorH * 2.2, 0.85),
+          position: midX + ' ' + doorY + ' ' + (doorZOut + 0.12),
+          rotation: '-90 0 0',
+          material: 'opacity: 0.001; transparent: true; shader: flat; side: double',
+        };
+        if (a === 0 && f === 0) hitAttrs.id = 'door-hit';
+        var hitPad = el('a-plane', hitAttrs);
+        parent.appendChild(hitPad);
+
+        var frontHitZ = z1 + wt * 1.35;
+        var fhAttrs = {
+          class: 'clickable door-hot',
+          'data-door-toggle': '1',
+          width: usableW * 0.95,
+          height: wallH * 0.95,
+          position: (aptX0 + aptX1) / 2 + ' ' + wallCenterY + ' ' + frontHitZ,
+          rotation: '-90 0 0',
+          material: 'opacity: 0.04; transparent: true; shader: flat; side: double',
+        };
+        if (a === 0 && f === 0) fhAttrs.id = 'front-facade-hit';
+        var frontHit = el('a-plane', fhAttrs);
+        frontHit.classList.add('cutaway-hide');
+        parent.appendChild(frontHit);
 
   function addInteriorRooms(parent, spec) {
     var floorH = spec.height / clampMin(spec.floors, 1);
@@ -534,12 +708,17 @@
     clearChildren(buildingRoot);
     if (spec.useFixedApartmentTemplate) {
       addFixedSingleApartmentTemplate(buildingRoot, spec);
+      /*
+       * Full-building shell (façades, marker-scale box) paused while we perfect one apartment unit.
+       * Restore later: addShell(buildingRoot, spec);
+       */
     } else if (spec.apartmentLayout && layoutGridValid(spec.apartmentLayout)) {
       addInteriorRoomsFromLayout(buildingRoot, spec, spec.apartmentLayout);
+      addShell(buildingRoot, spec);
     } else {
       addInteriorRooms(buildingRoot, spec);
+      addShell(buildingRoot, spec);
     }
-    addShell(buildingRoot, spec);
 
     // AR marker is only a few cm wide in the real world. If the user types "120 m" the raw model would be
     // enormous — you would be "inside" a solid wall and see nothing. Uniformly scale so the longest edge

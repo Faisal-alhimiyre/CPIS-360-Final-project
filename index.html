@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400..700;1,9..40,400..700&family=Fraunces:opsz,wght@9..144,500;9..144,700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=realestate-3" />
+  <link rel="stylesheet" href="style.css?v=realestate-7" />
 </head>
 <body class="form-page">
   <main class="listing-shell">
@@ -25,9 +25,8 @@
       <details class="how-ar">
         <summary>Optional: how the next screens work</summary>
         <ol class="steps">
-          <li>You will <strong>paint a simple grid</strong> so each room sits where you want it inside the floor plate.</li>
           <li>On the camera page, the model appears on a <strong>printed square marker</strong> so the phone can keep it steady while you look around.</li>
-          <li>Tap the <strong>door</strong> or <strong>front</strong> of the block to see through the walls; use the <strong>turn arrows</strong> if you want another angle.</li>
+          <li>Tap the <strong>door</strong> for the cutaway inside view; swipe to rotate the model.</li>
         </ol>
         <p class="dev-foot">
           <a href="https://raw.githubusercontent.com/AR-js-org/ARToolkit5/master/bin/HIRO.jpg" target="_blank" rel="noopener">Printable marker image</a>
@@ -81,9 +80,10 @@
         </fieldset>
 
         <fieldset>
-          <legend>One typical unit (for the floor-plan step)</legend>
+          <legend>Demo apartment (fixed layout)</legend>
           <p class="fieldset-intro">
-            These are <strong>how many cells</strong> you will place next (not metres).
+            For the class MVP we always show <strong>one template apartment</strong> on each floor: Kitchen, Entrance, Bathroom, Living room, and Bedroom — with names in 3D (no furniture yet).
+            The counts below are kept for later when we add editable layouts; they do not change this template today.
           </p>
           <div class="field-grid">
             <div class="form-field">
@@ -110,14 +110,14 @@
         </fieldset>
 
         <div class="form-actions">
-          <button type="submit" id="btn-generate">Continue to floor layout</button>
+          <button type="submit" id="btn-generate">Open camera &amp; AR</button>
         </div>
         <p id="form-message" class="form-message" role="status"></p>
       </form>
     </article>
   </main>
 
-  <script src="ui.js?v=realestate-6"></script>
-  <script src="form-app.js?v=realestate-6"></script>
+  <script src="ui.js?v=realestate-7"></script>
+  <script src="form-app.js?v=realestate-7"></script>
 </body>
 </html>

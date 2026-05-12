@@ -151,7 +151,7 @@
     if (apt.bedrooms < 0 || apt.kitchens < 0 || apt.bathrooms < 0 || hw < 0) {
       return 'Room counts cannot be negative.';
     }
-    if (apt.bedrooms + apt.kitchens + apt.bathrooms + hw < 1) {
+    if (apt.bedrooms + apt.kitchens + apt.bathrooms + hw < 1 && !spec.useFixedApartmentTemplate) {
       return 'Add at least one room or hallway so the floor-plan step has something to place.';
     }
     return null;
@@ -180,7 +180,7 @@
         setMessage(err);
         return;
       }
-      setMessage('Saved — opening the floor layout page…');
+      setMessage('Saved — opening the camera…');
       onSubmitValid(spec);
     });
   }

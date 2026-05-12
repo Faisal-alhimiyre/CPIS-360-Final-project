@@ -23,6 +23,8 @@
     kitchen: '#F2C14E',
     bathroom: '#7BC96F',
     hallway: '#94a3b8',
+    living: '#e8dcc8',
+    entrance: '#cbd5e1',
   };
 
   /**
@@ -194,6 +196,86 @@
             });
             parent.appendChild(box);
           }
+        }
+      }
+    }
+  }
+
+  /**
+   * One fixed floor-plan template (professor MVP): five labeled rooms, no furniture.
+   * Approximates a small one-bedroom: kitchen + entrance + bath along the back row,
+   * living + bedroom toward the front — like the reference plan, scaled to the footprint.
+   * @param {Element} parent
+   * @param {BuildingSpec} spec
+   */
+  function addFixedSingleApartmentTemplate(parent, spec) {
+    var floorH = spec.height / clampMin(spec.floors, 1);
+    var aptCount = clampMin(spec.apartments, 1);
+    var aptWidthOuter = spec.width / aptCount;
+    var pad = 0.04;
+    var cellH = Math.max(0.08, floorH * 0.42);
+
+    /** @type {Array<{ key: string, label: string, x0: number, x1: number, z0: number, z1: number }>} */
+    var rooms = [
+      { key: 'kitchen', label: 'Kitchen', x0: 0, x1: 0.36, z0: 0, z1: 0.32 },
+      { key: 'entrance', label: 'Entrance', x0: 0.36, x1: 0.5, z0: 0, z1: 0.32 },
+      { key: 'bathroom', label: 'Bathroom', x0: 0.5, x1: 1, z0: 0, z1: 0.32 },
+      { key: 'living', label: 'Living room', x0: 0, x1: 0.66, z0: 0.32, z1: 1 },
+      { key: 'bedroom', label: 'Bedroom', x0: 0.66, x1: 1, z0: 0.32, z1: 1 },
+    ];
+
+    var f;
+    var a;
+    for (f = 0; f < spec.floors; f++) {
+      var floorBaseY = f * floorH;
+      var midY = floorBaseY + floorH * 0.5;
+
+      for (a = 0; a < aptCount; a++) {
+        var aptX0 = -spec.width / 2 + a * aptWidthOuter + WALL_T;
+        var aptX1 = -spec.width / 2 + (a + 1) * aptWidthOuter - WALL_T;
+        var usableW = aptX1 - aptX0;
+        var z0 = -spec.depth / 2 + WALL_T;
+        var z1 = spec.depth / 2 - WALL_T;
+        var usableD = z1 - z0;
+
+        var ri;
+        for (ri = 0; ri < rooms.length; ri++) {
+          var rm = rooms[ri];
+          var xL = aptX0 + rm.x0 * usableW + pad;
+          var xR = aptX0 + rm.x1 * usableW - pad;
+          var zB = z0 + rm.z0 * usableD + pad;
+          var zF = z0 + rm.z1 * usableD - pad;
+          var bw = Math.max(0.06, xR - xL);
+          var bd = Math.max(0.06, zF - zB);
+          var cx = (xL + xR) / 2;
+          var cz = (zB + zF) / 2 - 0.02;
+          var col = COLORS[rm.key] || '#cbd5e1';
+
+          var box = el('a-box', {
+            width: bw,
+            height: cellH,
+            depth: bd,
+            position: cx + ' ' + midY + ' ' + cz,
+            color: col,
+            shader: 'flat',
+            'data-room': rm.key,
+            'data-room-label': rm.label,
+          });
+          parent.appendChild(box);
+
+          var labelY = midY + cellH * 0.52 + 0.06;
+          var tw = Math.min(Math.max(bw, bd) * 0.85, 3.2);
+          var label = el('a-text', {
+            value: rm.label,
+            position: cx + ' ' + labelY + ' ' + cz,
+            align: 'center',
+            anchor: 'center',
+            baseline: 'center',
+            color: '#0f172a',
+            width: tw,
+            wrapCount: 18,
+          });
+          parent.appendChild(label);
         }
       }
     }
@@ -450,7 +532,9 @@
    */
   function generateBuilding(buildingRoot, spec) {
     clearChildren(buildingRoot);
-    if (spec.apartmentLayout && layoutGridValid(spec.apartmentLayout)) {
+    if (spec.useFixedApartmentTemplate) {
+      addFixedSingleApartmentTemplate(buildingRoot, spec);
+    } else if (spec.apartmentLayout && layoutGridValid(spec.apartmentLayout)) {
       addInteriorRoomsFromLayout(buildingRoot, spec, spec.apartmentLayout);
     } else {
       addInteriorRooms(buildingRoot, spec);

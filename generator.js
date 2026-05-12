@@ -75,6 +75,31 @@
   }
 
   /**
+   * Lighten/darken a hex color by pct in range [-1..1].
+   * @param {string} hex
+   * @param {number} pct
+   * @returns {string}
+   */
+  function tintHex(hex, pct) {
+    if (!/^#[0-9a-fA-F]{6}$/.test(hex || '')) return '#64748b';
+    var num = parseInt(hex.slice(1), 16);
+    var r = (num >> 16) & 255;
+    var g = (num >> 8) & 255;
+    var b = num & 255;
+    var target = pct >= 0 ? 255 : 0;
+    var t = Math.abs(pct);
+    var rr = Math.round(r + (target - r) * t);
+    var gg = Math.round(g + (target - g) * t);
+    var bb = Math.round(b + (target - b) * t);
+    return (
+      '#' +
+      rr.toString(16).padStart(2, '0') +
+      gg.toString(16).padStart(2, '0') +
+      bb.toString(16).padStart(2, '0')
+    );
+  }
+
+  /**
    * Build ordered list of room "slots" for one apartment on one floor.
    * @param {ApartmentTemplate} apt
    * @returns {Array<'bedroom'|'kitchen'|'bathroom'>}
@@ -254,6 +279,10 @@
     var H = spec.height;
     var t = WALL_T;
     var faceZ = D / 2 - t / 2;
+    var facadeBase = /^#[0-9a-fA-F]{6}$/.test(spec.facadeColor || '') ? spec.facadeColor : '#64748b';
+    var facadeSide = tintHex(facadeBase, 0.08);
+    var facadeFront = tintHex(facadeBase, -0.08);
+    var roofColor = tintHex(facadeBase, -0.45);
 
     parent.appendChild(
       el('a-box', {
@@ -272,7 +301,7 @@
       height: t * 1.2,
       depth: D + 0.04,
       position: '0 ' + (H - t * 0.6) + ' 0',
-      color: '#1e293b',
+      color: roofColor,
       shader: 'flat',
     });
     roofCap.classList.add('cutaway-hide');
@@ -284,7 +313,7 @@
       depth: t,
       position: '0 ' + H / 2 + ' ' + (-D / 2 + t / 2),
     });
-    markExtWall(back, '#64748b');
+    markExtWall(back, facadeBase);
     parent.appendChild(back);
 
     var left = el('a-box', {
@@ -293,7 +322,7 @@
       depth: D,
       position: -W / 2 + t / 2 + ' ' + H / 2 + ' 0',
     });
-    markExtWall(left, '#7c8fa3');
+    markExtWall(left, facadeSide);
     parent.appendChild(left);
 
     var right = el('a-box', {
@@ -302,7 +331,7 @@
       depth: D,
       position: W / 2 - t / 2 + ' ' + H / 2 + ' 0',
     });
-    markExtWall(right, '#7c8fa3');
+    markExtWall(right, facadeSide);
     parent.appendChild(right);
 
     var front = el('a-box', {
@@ -312,7 +341,7 @@
       depth: t,
       position: '0 ' + H / 2 + ' ' + faceZ,
     });
-    markExtWall(front, '#5b6c7d');
+    markExtWall(front, facadeFront);
     front.classList.add('clickable', 'cutaway-hide');
     parent.appendChild(front);
 

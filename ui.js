@@ -36,6 +36,17 @@
   }
 
   /**
+   * @param {HTMLInputElement|null} input
+   * @param {string} fallback
+   * @returns {string}
+   */
+  function readHexColor(input, fallback) {
+    if (!input || typeof input.value !== 'string') return fallback;
+    var v = input.value.trim();
+    return /^#[0-9a-fA-F]{6}$/.test(v) ? v : fallback;
+  }
+
+  /**
    * Updates live summaries and the readonly total height field (floors × ceiling).
    */
   function syncFootprintMath() {
@@ -97,6 +108,7 @@
     var kitchens = Math.round(readNumber(form.querySelector('#kitchens'), 1));
     var bathrooms = Math.round(readNumber(form.querySelector('#bathrooms'), 1));
     var hallways = Math.round(readNumber(form.querySelector('#hallways'), 1));
+    var facadeColor = readHexColor(form.querySelector('#facadeColor'), '#64748b');
 
     return {
       width: width,
@@ -105,6 +117,7 @@
       floors: floors,
       ceiling: ceiling,
       apartments: apartments,
+      facadeColor: facadeColor,
       apartment: {
         bedrooms: bedrooms,
         kitchens: kitchens,
@@ -125,6 +138,7 @@
     if (!(spec.height > 0.2)) return 'Total height must be greater than 0.2 m.';
     if (!(spec.floors >= 1)) return 'Floors must be at least 1.';
     if (!(spec.apartments >= 1)) return 'Apartments must be at least 1.';
+    if (!/^#[0-9a-fA-F]{6}$/.test(spec.facadeColor || '')) return 'Choose a valid building color.';
     var floorsN = Math.max(1, spec.floors);
     var ceil =
       typeof spec.ceiling === 'number' && isFinite(spec.ceiling)

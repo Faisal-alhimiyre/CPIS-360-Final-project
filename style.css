@@ -173,15 +173,36 @@ form#building-form legend {
   color: var(--ink-soft);
 }
 
+.math-summary {
+  margin: 0 0 10px;
+  padding: 10px 12px;
+  font-size: 0.86rem;
+  line-height: 1.5;
+  color: var(--ink);
+  background: #e0f2fe;
+  border: 1px solid #bae6fd;
+  border-radius: 10px;
+}
+
+.math-summary + .math-summary {
+  margin-top: -4px;
+  margin-bottom: 14px;
+}
+
 form#building-form .field-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 16px;
+  align-items: stretch;
 }
 
 @media (min-width: 520px) {
   form#building-form .field-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .form-field--full {
+    grid-column: 1 / -1;
   }
 }
 
@@ -190,6 +211,7 @@ form#building-form .field-grid {
   flex-direction: column;
   gap: 6px;
   min-width: 0;
+  height: 100%;
 }
 
 .form-field label {
@@ -201,8 +223,10 @@ form#building-form .field-grid {
 .field-help {
   margin: 0;
   font-size: 0.8rem;
-  line-height: 1.5;
+  line-height: 1.45;
   color: #64748b;
+  flex: 1 1 auto;
+  min-height: 2.9em;
 }
 
 form#building-form input[type="number"] {
@@ -216,6 +240,13 @@ form#building-form input[type="number"] {
   font-size: 1rem;
   font-family: inherit;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  margin-top: auto;
+}
+
+form#building-form input.input-readonly {
+  background: #f1f5f9;
+  color: var(--ink-soft);
+  cursor: default;
 }
 
 form#building-form input[type="number"]:focus {

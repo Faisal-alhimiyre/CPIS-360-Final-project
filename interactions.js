@@ -18,13 +18,13 @@
   function applyExtWallMaterial(wall, opacity, modeLabel) {
     if (!wall) return;
     var c = wall.dataset.extColor || '#64748b';
-    wall.setAttribute('material', {
-      color: c,
-      shader: 'flat',
-      opacity: opacity,
-      transparent: true,
-      side: 'double',
-    });
+    var mat =
+      'color: ' +
+      c +
+      '; shader: flat; opacity: ' +
+      opacity +
+      '; transparent: true; side: double';
+    wall.setAttribute('material', mat);
     wall.dataset.wallMode = modeLabel;
   }
 
@@ -45,13 +45,20 @@
     return false;
   }
 
+  function intersectedFromEvent(evt) {
+    var d = evt.detail || {};
+    if (d.intersectedEl) return d.intersectedEl;
+    if (d.els && d.els.length) return d.els[0];
+    return null;
+  }
+
   function setupDoorToggle(scene, buildingRoot) {
     if (!scene || !buildingRoot) return;
     if (scene.dataset.doorToggleBound === '1') return;
     scene.dataset.doorToggleBound = '1';
 
-    scene.addEventListener('click', function (evt) {
-      var start = evt.detail && evt.detail.intersectedEl ? evt.detail.intersectedEl : evt.target;
+    function tryToggle(evt) {
+      var start = intersectedFromEvent(evt) || evt.target;
       var node = start;
       var clickable = null;
       while (node) {
@@ -71,7 +78,9 @@
       } else {
         setAllExterior(scene, OPAQUE, 'opaque');
       }
-    });
+    }
+
+    scene.addEventListener('click', tryToggle, true);
   }
 
   window.Interactions = {

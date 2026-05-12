@@ -25,7 +25,7 @@
 
   /**
    * Parse numbers safely; fallback to default if blank/invalid.
-   * @param {HTMLInputElement} input
+   * @param {HTMLInputElement|null} input
    * @param {number} fallback
    * @returns {number}
    */
@@ -36,6 +36,50 @@
   }
 
   /**
+   * Updates live summaries and the readonly total height field (floors × ceiling).
+   */
+  function syncFootprintMath() {
+    var form = getForm();
+    if (!form) return;
+
+    var w = readNumber(form.querySelector('#width'), 20);
+    var d = readNumber(form.querySelector('#depth'), 20);
+    var floors = Math.round(readNumber(form.querySelector('#floors'), 5));
+    var ceiling = readNumber(form.querySelector('#ceiling'), 3);
+
+    var area = w * d;
+    var totalH = Math.max(0.5, floors * ceiling);
+
+    var areaEl = document.getElementById('floor-area-summary');
+    var hEl = document.getElementById('building-height-summary');
+    var heightInput = form.querySelector('#height');
+
+    if (areaEl) {
+      areaEl.textContent =
+        'One floor covers ' +
+        area.toLocaleString(undefined, { maximumFractionDigits: 2 }) +
+        ' m² (width × depth: ' +
+        w +
+        ' m × ' +
+        d +
+        ' m).';
+    }
+    if (hEl) {
+      hEl.textContent =
+        'Total building height: ' +
+        floors +
+        ' floors × ' +
+        ceiling +
+        ' m per floor = ' +
+        totalH.toLocaleString(undefined, { maximumFractionDigits: 2 }) +
+        ' m.';
+    }
+    if (heightInput) {
+      heightInput.value = String(totalH.toFixed(2));
+    }
+  }
+
+  /**
    * Reads current numeric inputs into a plain object consumed by BuildingGenerator.
    * @returns {object|null}
    */
@@ -43,11 +87,12 @@
     var form = getForm();
     if (!form) return null;
 
-    var width = readNumber(form.querySelector('#width'), 2);
-    var depth = readNumber(form.querySelector('#depth'), 1.5);
-    var height = readNumber(form.querySelector('#height'), 2);
-    var floors = Math.round(readNumber(form.querySelector('#floors'), 2));
-    var apartments = Math.round(readNumber(form.querySelector('#apartments'), 2));
+    var width = readNumber(form.querySelector('#width'), 20);
+    var depth = readNumber(form.querySelector('#depth'), 20);
+    var floors = Math.round(readNumber(form.querySelector('#floors'), 5));
+    var ceiling = readNumber(form.querySelector('#ceiling'), 3);
+    var height = Math.max(0.5, floors * ceiling);
+    var apartments = Math.round(readNumber(form.querySelector('#apartments'), 1));
     var bedrooms = Math.round(readNumber(form.querySelector('#bedrooms'), 2));
     var kitchens = Math.round(readNumber(form.querySelector('#kitchens'), 1));
     var bathrooms = Math.round(readNumber(form.querySelector('#bathrooms'), 1));
@@ -58,6 +103,7 @@
       depth: depth,
       height: height,
       floors: floors,
+      ceiling: ceiling,
       apartments: apartments,
       apartment: {
         bedrooms: bedrooms,
@@ -74,11 +120,18 @@
    */
   function validateSpec(spec) {
     if (!spec) return 'Missing form.';
-    if (!(spec.width > 0.15)) return 'Width must be greater than 0.15 m.';
-    if (!(spec.depth > 0.15)) return 'Depth must be greater than 0.15 m.';
-    if (!(spec.height > 0.2)) return 'Height must be greater than 0.2 m.';
+    if (!(spec.width > 0.15)) return 'Floor width must be greater than 0.15 m.';
+    if (!(spec.depth > 0.15)) return 'Floor depth must be greater than 0.15 m.';
+    if (!(spec.height > 0.2)) return 'Total height must be greater than 0.2 m.';
     if (!(spec.floors >= 1)) return 'Floors must be at least 1.';
     if (!(spec.apartments >= 1)) return 'Apartments must be at least 1.';
+    var floorsN = Math.max(1, spec.floors);
+    var ceil =
+      typeof spec.ceiling === 'number' && isFinite(spec.ceiling)
+        ? spec.ceiling
+        : spec.height / floorsN;
+    if (!(ceil >= 2)) return 'Ceiling height per floor should be at least 2 m (or lower the floor count).';
+    if (!(ceil <= 30)) return 'Ceiling height per floor looks unrealistically high; use a value under 30 m.';
     var apt = spec.apartment;
     var hw = typeof apt.hallways === 'number' ? apt.hallways : 0;
     if (apt.bedrooms < 0 || apt.kitchens < 0 || apt.bathrooms < 0 || hw < 0) {
@@ -97,8 +150,16 @@
     var form = getForm();
     if (!form) return;
 
+    function onInput() {
+      syncFootprintMath();
+    }
+    form.addEventListener('input', onInput);
+    form.addEventListener('change', onInput);
+    syncFootprintMath();
+
     form.addEventListener('submit', function (e) {
       e.preventDefault();
+      syncFootprintMath();
       var spec = readBuildingSpecFromForm();
       var err = validateSpec(spec);
       if (err) {
@@ -115,5 +176,6 @@
     setMessage: setMessage,
     readBuildingSpecFromForm: readBuildingSpecFromForm,
     validateSpec: validateSpec,
+    syncFootprintMath: syncFootprintMath,
   };
 })();

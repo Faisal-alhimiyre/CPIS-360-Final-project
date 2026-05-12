@@ -17,7 +17,7 @@
         window.Ui.setMessage('Could not save your inputs. Allow site storage or try another browser.');
         return;
       }
-      window.location.href = 'layout.html?v=realestate-2';
+      window.location.href = 'layout.html?v=realestate-3';
     });
   }
 

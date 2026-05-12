@@ -1,7 +1,7 @@
 /**
  * ar-rotate.js
  * ------------
- * Extra yaw on #building-root. Marker tracking still fixes position; this only spins the model in place.
+ * Extra yaw on #building-mount (geometry parent). #building-root only adds a fixed tilt so the entrance reads from phone height.
  */
 
 (function () {
@@ -10,7 +10,7 @@
   var STEP = 18;
 
   function getRoot() {
-    return document.getElementById('building-root');
+    return document.getElementById('building-mount');
   }
 
   function readYaw(root) {

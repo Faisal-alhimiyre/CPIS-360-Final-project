@@ -114,12 +114,12 @@
     })();
   </script>
   <div class="ar-bar">
-    <a href="index.html?v=realestate-2">← Edit building</a>
+    <a href="index.html?v=realestate-3">← Edit building</a>
     <div class="ar-spin" role="group" aria-label="Rotate model in place">
       <button type="button" id="btn-spin-ccw" title="Turn left">⟲</button>
       <button type="button" id="btn-spin-cw" title="Turn right">⟳</button>
     </div>
-    <span id="ar-tracking-hint">Point at the HIRO marker. Tap the door or front wall for glass façades. Use spin to turn the model.</span>
+    <span id="ar-tracking-hint">Aim at the printed marker until the model appears. Tap the bright door or the front of the block to see through the walls. Use the arrows to turn the model.</span>
     <p id="ar-page-error" role="alert"></p>
   </div>
 
@@ -130,12 +130,16 @@
     arjs="sourceType: webcam; videoTexture: false; trackingMethod: best; debugUIEnabled: false;"
   >
     <a-marker preset="hiro" id="hiro-marker" emitevents="true">
-      <a-entity id="building-root" position="0 0 0"></a-entity>
+      <!-- Pitch whole model so you see the entrance (not only the roof). Yaw is applied on #building-mount. -->
+      <a-entity id="building-root" position="0 0 0" rotation="-22 0 0">
+        <a-entity id="building-mount" position="0 0 0" rotation="0 0 0"></a-entity>
+      </a-entity>
     </a-marker>
     <a-entity id="ar-camera" camera>
       <a-cursor
         id="ar-cursor"
-        raycaster="objects: .clickable; far: 25"
+        raycaster="objects: .clickable; far: 40"
+        ray-origin="mouse"
         fuse="false"
         scale="0.01 0.01 0.01"
         color="#4CC3D9"
@@ -144,13 +148,13 @@
     </a-entity>
   </a-scene>
 
-  <script src="generator.js?v=realestate-2"></script>
-  <script src="interactions.js?v=realestate-2"></script>
-  <script src="ui.js?v=realestate-2"></script>
-  <script src="app-core.js?v=realestate-2"></script>
-  <script src="ar-scene.js?v=markerfix-24"></script>
+  <script src="generator.js?v=realestate-3"></script>
+  <script src="interactions.js?v=realestate-3"></script>
+  <script src="ui.js?v=realestate-3"></script>
+  <script src="app-core.js?v=realestate-3"></script>
+  <script src="ar-scene.js?v=realestate-3"></script>
   <script src="ar-stack.js?v=markerfix-24"></script>
-  <script src="ar-rotate.js?v=realestate-2"></script>
-  <script src="ar-page.js?v=markerfix-24"></script>
+  <script src="ar-rotate.js?v=realestate-3"></script>
+  <script src="ar-page.js?v=realestate-3"></script>
 </body>
 </html>

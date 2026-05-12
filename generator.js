@@ -237,13 +237,10 @@
   function markExtWall(node, hex) {
     node.classList.add('ext-wall');
     node.dataset.extColor = hex;
-    node.setAttribute('material', {
-      color: hex,
-      shader: 'flat',
-      opacity: 1,
-      transparent: true,
-      side: 'double',
-    });
+    node.setAttribute(
+      'material',
+      'color: ' + hex + '; shader: flat; opacity: 1; transparent: true; side: double'
+    );
   }
 
   /**
@@ -318,6 +315,18 @@
     front.classList.add('clickable');
     parent.appendChild(front);
 
+    var frontHitZ = faceZ + t * 1.15;
+    var frontHit = el('a-plane', {
+      id: 'front-facade-hit',
+      class: 'clickable',
+      width: W * 0.98,
+      height: H * 0.96,
+      position: '0 ' + H / 2 + ' ' + frontHitZ,
+      rotation: '-90 0 0',
+      material: 'opacity: 0.04; transparent: true; shader: flat; side: double',
+    });
+    parent.appendChild(frontHit);
+
     var winY = H * 0.55;
     var winW = Math.min(0.22, W * 0.08);
     var winH = H * 0.22;
@@ -336,8 +345,8 @@
     }
 
     var floorH = H / clampMin(spec.floors, 1);
-    var doorH = Math.min(0.85, Math.max(0.38, floorH * 0.5));
-    var doorW = Math.min(0.58, Math.max(0.3, W * 0.24));
+    var doorH = Math.min(1.15, Math.max(0.55, floorH * 0.72));
+    var doorW = Math.min(1.05, Math.max(0.48, W * 0.38));
     var doorY = doorH / 2 + 0.04;
     var doorZ = D / 2 + t * 0.75;
     var frameT = Math.max(0.03, t * 1.1);
@@ -382,13 +391,13 @@
       height: doorH,
       depth: t * 1.35,
       position: '0 ' + doorY + ' ' + doorZ,
-      color: '#f59e0b',
+      color: '#ea580c',
       shader: 'flat',
     });
     parent.appendChild(door);
 
-    var hitW = Math.max(doorW * 2.4, 0.62);
-    var hitH = Math.max(doorH * 2.1, 0.85);
+    var hitW = Math.max(doorW * 2.8, Math.min(W * 0.85, 1.4));
+    var hitH = Math.max(doorH * 2.4, Math.min(H * 0.55, 1.35));
     var hitZ = doorZ + 0.14;
     var hitPad = el('a-plane', {
       id: 'door-hit',

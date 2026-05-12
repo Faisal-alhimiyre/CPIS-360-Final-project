@@ -14,13 +14,7 @@
       var w = walls[i];
       var c = w.dataset.extColor || '#64748b';
       w.dataset.wallMode = 'opaque';
-      w.setAttribute('material', {
-        color: c,
-        shader: 'flat',
-        opacity: 1,
-        transparent: true,
-        side: 'double',
-      });
+      w.setAttribute('material', 'color: ' + c + '; shader: flat; opacity: 1; transparent: true; side: double');
     }
   }
 

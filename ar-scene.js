@@ -26,9 +26,9 @@
   function getArHandles() {
     var scene = document.getElementById('ar-scene');
     var marker = document.getElementById('hiro-marker');
-    var buildingRoot = document.getElementById('building-root');
-    if (!scene || !marker || !buildingRoot) return null;
-    return { scene: scene, marker: marker, buildingRoot: buildingRoot };
+    var buildingMount = document.getElementById('building-mount');
+    if (!scene || !marker || !buildingMount) return null;
+    return { scene: scene, marker: marker, buildingRoot: buildingMount };
   }
 
   /**

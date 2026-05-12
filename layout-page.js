@@ -66,7 +66,7 @@
   function start() {
     var raw = sessionStorage.getItem(STORAGE_KEY);
     if (!raw) {
-      window.location.replace('index.html?v=realestate-2');
+      window.location.replace('index.html?v=realestate-3');
       return;
     }
     var spec;
@@ -74,7 +74,7 @@
       spec = JSON.parse(raw);
     } catch (e) {
       sessionStorage.removeItem(STORAGE_KEY);
-      window.location.replace('index.html?v=realestate-2');
+      window.location.replace('index.html?v=realestate-3');
       return;
     }
     var err = window.Ui.validateSpec(spec);

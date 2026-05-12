@@ -130,8 +130,8 @@
     arjs="sourceType: webcam; videoTexture: false; trackingMethod: best; debugUIEnabled: false;"
   >
     <a-marker preset="hiro" id="hiro-marker" emitevents="true">
-      <!-- Pitch whole model so you see the entrance (not only the roof). Yaw is applied on #building-mount. -->
-      <a-entity id="building-root" position="0 0 0" rotation="-22 0 0">
+      <!-- Strong presentation tilt so initial view shows the front/door (not the roof). -->
+      <a-entity id="building-root" position="0 0.06 0" rotation="-68 0 0">
         <a-entity id="building-mount" position="0 0 0" rotation="0 0 0"></a-entity>
       </a-entity>
     </a-marker>

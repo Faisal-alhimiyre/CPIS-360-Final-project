@@ -24,11 +24,10 @@
       return 'AR handles missing (scene HTML changed?).';
     }
 
-    window.Interactions.setupDoorToggle(handles.scene, handles.buildingRoot);
-
     window.BuildingGenerator.generateBuilding(handles.buildingRoot, spec);
 
     resetExteriorWalls();
+    window.Interactions.setupDoorToggle(handles.scene, handles.buildingRoot);
     return null;
   }
 

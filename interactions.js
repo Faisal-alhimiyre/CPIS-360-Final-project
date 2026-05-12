@@ -81,8 +81,10 @@
 
   function setupDoorToggle(scene, buildingRoot) {
     if (!scene || !buildingRoot) return;
-    if (scene.dataset.doorToggleBound === '1') return;
-    scene.dataset.doorToggleBound = '1';
+
+    function toggleCutaway() {
+      setCutawayMode(scene, !isCutawayOpen(scene));
+    }
 
     function tryToggle(evt) {
       var start = intersectedFromEvent(evt) || evt.target;
@@ -98,11 +100,27 @@
       if (!clickable) return;
       if (!isUnder(clickable, buildingRoot)) return;
 
-      setCutawayMode(scene, !isCutawayOpen(scene));
+      toggleCutaway();
+    }
+
+    function bindDirectTargets() {
+      var targets = scene.querySelectorAll('#door-visual, #door-hit, #front-wall, #front-facade-hit');
+      var i;
+      for (i = 0; i < targets.length; i++) {
+        targets[i].addEventListener('click', function (evt) {
+          evt.stopPropagation();
+          toggleCutaway();
+        });
+      }
+    }
+
+    if (scene.dataset.doorToggleBound !== '1') {
+      scene.dataset.doorToggleBound = '1';
+      scene.addEventListener('click', tryToggle, true);
     }
 
     setCutawayMode(scene, false);
-    scene.addEventListener('click', tryToggle, true);
+    bindDirectTargets();
   }
 
   window.Interactions = {

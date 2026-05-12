@@ -51,6 +51,7 @@
     var bedrooms = Math.round(readNumber(form.querySelector('#bedrooms'), 2));
     var kitchens = Math.round(readNumber(form.querySelector('#kitchens'), 1));
     var bathrooms = Math.round(readNumber(form.querySelector('#bathrooms'), 1));
+    var hallways = Math.round(readNumber(form.querySelector('#hallways'), 1));
 
     return {
       width: width,
@@ -62,6 +63,7 @@
         bedrooms: bedrooms,
         kitchens: kitchens,
         bathrooms: bathrooms,
+        hallways: hallways,
       },
     };
   }
@@ -77,8 +79,13 @@
     if (!(spec.height > 0.2)) return 'Height must be greater than 0.2 m.';
     if (!(spec.floors >= 1)) return 'Floors must be at least 1.';
     if (!(spec.apartments >= 1)) return 'Apartments must be at least 1.';
-    if (spec.apartment.bedrooms < 0 || spec.apartment.kitchens < 0 || spec.apartment.bathrooms < 0) {
+    var apt = spec.apartment;
+    var hw = typeof apt.hallways === 'number' ? apt.hallways : 0;
+    if (apt.bedrooms < 0 || apt.kitchens < 0 || apt.bathrooms < 0 || hw < 0) {
       return 'Room counts cannot be negative.';
+    }
+    if (apt.bedrooms + apt.kitchens + apt.bathrooms + hw < 1) {
+      return 'Add at least one room or hallway so the floor-plan step has something to place.';
     }
     return null;
   }
@@ -98,7 +105,7 @@
         setMessage(err);
         return;
       }
-      setMessage('Inputs look good — opening the camera page…');
+      setMessage('Saved — opening the floor layout page…');
       onSubmitValid(spec);
     });
   }

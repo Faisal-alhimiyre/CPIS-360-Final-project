@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400..700;1,9..40,400..700&family=Fraunces:opsz,wght@9..144,500;9..144,700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=realestate-1" />
+  <link rel="stylesheet" href="style.css?v=realestate-2" />
 </head>
 <body class="form-page">
   <main class="listing-shell">
@@ -16,30 +16,28 @@
         <p class="eyebrow">Augmented reality preview</p>
         <h1>Configure your building</h1>
         <p class="lead">
-          Set the footprint and unit mix below, then open the camera to place the model on the official
-          <strong>HIRO</strong> marker. The entrance is highlighted in <strong>amber</strong> — tap it (or the large invisible touch zone in front) to turn the
-          <strong>outside walls glassy</strong> so the colored apartment layout inside is easy to see.
+          Numbers are <strong>meters for the 3D model</strong> (like a CAD sketch), not a claim about a real tower.
+          The AR page automatically shrinks huge values so the model still fits on a desk‑sized <strong>HIRO</strong> marker.
         </p>
       </header>
 
-      <section class="how-ar" aria-label="How to use AR">
-        <h2 class="section-title">Quick start</h2>
+      <details class="how-ar">
+        <summary>How AR works on the next pages</summary>
         <ol class="steps">
-          <li>Fill every field you care about (hints under each box explain the numbers).</li>
-          <li>Tap <strong>Open camera &amp; build in AR</strong> — the next page starts your webcam.</li>
-          <li>Print or display the marker:
+          <li>After this form you will <strong>paint a simple floor plan</strong> in a square grid so each room sits where you want it.</li>
+          <li>Open the camera, allow video, and point at the marker:
             <a href="https://raw.githubusercontent.com/AR-js-org/ARToolkit5/master/bin/HIRO.jpg" target="_blank" rel="noopener">HIRO marker (official)</a>.
           </li>
-          <li>Point your phone at the marker until the building locks on.</li>
-          <li>Tap the <strong>door area</strong> to toggle transparent façades and reveal the interior layout.</li>
-          <li>Use <strong>← Edit building</strong> on the camera page to adjust these values.</li>
+          <li>Tap the <strong>door</strong> or the <strong>dark front wall</strong> to make façades glassy and see inside.</li>
+          <li>Use <strong>spin</strong> buttons on the camera page to turn the model; the marker still fixes position in space.</li>
+          <li><strong>← Edit building</strong> returns here.</li>
         </ol>
         <p class="dev-foot">
           <a href="ar-test.html?v=markerfix-24" target="_blank" rel="noopener">Minimal AR test</a>
           <span aria-hidden="true">·</span>
-          Stable marker stack (AR.js 3.4.2) unchanged for camera reliability.
+          Stable marker stack (AR.js 3.4.2) for camera reliability.
         </p>
-      </section>
+      </details>
 
       <form id="building-form" novalidate>
         <fieldset>
@@ -47,63 +45,71 @@
           <div class="field-grid">
             <div class="form-field">
               <label for="width">Building width (m)</label>
-              <p class="field-help">Left‑to‑right size of the whole floor plate. Wider buildings split that width across the number of apartments per floor you set below.</p>
-              <input type="number" id="width" name="width" min="0.2" max="999" step="0.1" value="2" required />
+              <p class="field-help">Whole floor plate, left to right. Width is split across “apartments per floor.”</p>
+              <input type="number" id="width" name="width" min="0.2" max="999" step="0.1" value="8" required />
             </div>
             <div class="form-field">
               <label for="depth">Building depth (m)</label>
-              <p class="field-help">Front‑to‑back length. The <strong>main entrance</strong> is on the front face (+Z); aim that side toward you when the marker lies flat.</p>
-              <input type="number" id="depth" name="depth" min="0.2" max="999" step="0.1" value="1.5" required />
+              <p class="field-help">Front to back. The main entrance is on the front face (+Z).</p>
+              <input type="number" id="depth" name="depth" min="0.2" max="999" step="0.1" value="6" required />
             </div>
             <div class="form-field">
               <label for="height">Total height (m)</label>
-              <p class="field-help">Roof‑to‑slab height before scaling for AR. Very large values are auto‑shrunk so the model still fits comfortably on a desk‑size marker.</p>
-              <input type="number" id="height" name="height" min="0.5" max="999" step="0.1" value="2" required />
+              <p class="field-help">All floors stacked. Large values are only scaled down for AR so you can still see the whole block.</p>
+              <input type="number" id="height" name="height" min="0.5" max="999" step="0.1" value="9" required />
             </div>
             <div class="form-field">
               <label for="floors">Floors</label>
-              <p class="field-help">How many stacked levels. Each floor repeats the same apartment template you define in the next section.</p>
-              <input type="number" id="floors" name="floors" min="1" max="40" step="1" value="2" required />
+              <p class="field-help">Stacked levels; each repeats the same unit mix and floor plan you define.</p>
+              <input type="number" id="floors" name="floors" min="1" max="40" step="1" value="3" required />
             </div>
             <div class="form-field">
               <label for="apartments">Apartments per floor</label>
-              <p class="field-help">Units side‑by‑side along the <strong>width</strong>. Each gets an equal slice of the floor plate for the colored room blocks inside.</p>
-              <input type="number" id="apartments" name="apartments" min="1" max="16" step="1" value="2" required />
+              <p class="field-help">Units side by side along the width. Each gets an equal slice for the interior grid.</p>
+              <input type="number" id="apartments" name="apartments" min="1" max="16" step="1" value="1" required />
             </div>
           </div>
         </fieldset>
 
         <fieldset>
-          <legend>Typical unit (repeated on every floor)</legend>
-          <p class="fieldset-intro">These counts control how many colored “room” blocks appear inside <em>each</em> apartment footprint. Use zeros only if you want a single studio cell.</p>
+          <legend>One typical unit (counts for the floor-plan step)</legend>
+          <p class="fieldset-intro">
+            These numbers set how many cells you must place on the next page (bedroom / kitchen / bath / hallway).
+            They are <strong>counts</strong>, not meters.
+          </p>
           <div class="field-grid">
             <div class="form-field">
               <label for="bedrooms">Bedrooms</label>
-              <p class="field-help">Number of blue‑tinted bedroom cells per unit (shown in the AR interior).</p>
+              <p class="field-help">Blue‑tinted cells in AR.</p>
               <input type="number" id="bedrooms" name="bedrooms" min="0" max="12" step="1" value="2" />
             </div>
             <div class="form-field">
               <label for="kitchens">Kitchens</label>
-              <p class="field-help">Number of warm yellow kitchen / living cells per unit.</p>
+              <p class="field-help">Yellow kitchen / living cells.</p>
               <input type="number" id="kitchens" name="kitchens" min="0" max="6" step="1" value="1" />
             </div>
             <div class="form-field">
               <label for="bathrooms">Bathrooms</label>
-              <p class="field-help">Number of green bathroom cells per unit.</p>
+              <p class="field-help">Green bath cells.</p>
               <input type="number" id="bathrooms" name="bathrooms" min="0" max="12" step="1" value="1" />
+            </div>
+            <div class="form-field">
+              <label for="hallways">Hallways</label>
+              <p class="field-help">Grey corridor cells. Use 0 if you do not want a separate hallway type.</p>
+              <input type="number" id="hallways" name="hallways" min="0" max="12" step="1" value="1" />
             </div>
           </div>
         </fieldset>
 
         <div class="form-actions">
-          <button type="submit" id="btn-generate">Open camera &amp; build in AR</button>
+          <button type="submit" id="btn-generate">Continue to floor layout</button>
         </div>
         <p id="form-message" class="form-message" role="status"></p>
       </form>
     </article>
   </main>
 
-  <script src="ui.js?v=realestate-1"></script>
-  <script src="form-app.js?v=markerfix-24"></script>
+  <script src="ui.js?v=realestate-2"></script>
+  <script src="form-app.js?v=realestate-2"></script>
 </body>
 </html>

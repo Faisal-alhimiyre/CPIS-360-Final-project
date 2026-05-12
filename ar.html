@@ -74,6 +74,27 @@
       font-weight: 600;
       color: #9d174d;
     }
+    .ar-spin {
+      display: flex;
+      gap: 6px;
+      flex-shrink: 0;
+      align-items: center;
+    }
+    .ar-spin button {
+      min-width: 40px;
+      padding: 6px 10px;
+      font-size: 18px;
+      line-height: 1;
+      border: 1px solid #0369a1;
+      border-radius: 8px;
+      background: #fff;
+      color: #0c4a6e;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+    .ar-spin button:active {
+      background: #e0f2fe;
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/aframe@1.2.0/dist/aframe.min.js?v=markerfix-24"></script>
   <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js@3.4.2/aframe/build/aframe-ar.js?v=markerfix-24"></script>
@@ -93,8 +114,12 @@
     })();
   </script>
   <div class="ar-bar">
-    <a href="index.html?v=markerfix-24">← Edit building</a>
-    <span id="ar-tracking-hint">Point at the HIRO marker. Tap the door for a transparent front wall.</span>
+    <a href="index.html?v=realestate-2">← Edit building</a>
+    <div class="ar-spin" role="group" aria-label="Rotate model in place">
+      <button type="button" id="btn-spin-ccw" title="Turn left">⟲</button>
+      <button type="button" id="btn-spin-cw" title="Turn right">⟳</button>
+    </div>
+    <span id="ar-tracking-hint">Point at the HIRO marker. Tap the door or front wall for glass façades. Use spin to turn the model.</span>
     <p id="ar-page-error" role="alert"></p>
   </div>
 
@@ -119,12 +144,13 @@
     </a-entity>
   </a-scene>
 
-  <script src="generator.js?v=realestate-1"></script>
-  <script src="interactions.js?v=realestate-1"></script>
-  <script src="ui.js?v=realestate-1"></script>
-  <script src="app-core.js?v=realestate-1"></script>
+  <script src="generator.js?v=realestate-2"></script>
+  <script src="interactions.js?v=realestate-2"></script>
+  <script src="ui.js?v=realestate-2"></script>
+  <script src="app-core.js?v=realestate-2"></script>
   <script src="ar-scene.js?v=markerfix-24"></script>
   <script src="ar-stack.js?v=markerfix-24"></script>
+  <script src="ar-rotate.js?v=realestate-2"></script>
   <script src="ar-page.js?v=markerfix-24"></script>
 </body>
 </html>

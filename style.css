@@ -93,6 +93,19 @@ body.form-page {
   background: linear-gradient(180deg, #fffbeb 0%, #fff 100%);
 }
 
+.how-ar > summary {
+  cursor: pointer;
+  font-family: "Fraunces", Georgia, serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--ink);
+  list-style: none;
+}
+
+.how-ar > summary::-webkit-details-marker {
+  display: none;
+}
+
 .section-title {
   margin: 0 0 12px;
   font-family: "Fraunces", Georgia, serif;

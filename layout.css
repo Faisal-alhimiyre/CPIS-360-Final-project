@@ -1,0 +1,205 @@
+/* layout.html — floor planner between form and AR */
+:root {
+  --ink: #0f172a;
+  --muted: #64748b;
+  --card: #fff;
+  --line: #e2e8f0;
+  --accent: #0d9488;
+  --accent2: #b45309;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100%;
+  font-family: "DM Sans", system-ui, sans-serif;
+  color: var(--ink);
+  background: linear-gradient(180deg, #f0fdfa 0%, #f8fafc 40%, #e2e8f0 100%);
+  padding: 20px 16px 32px;
+}
+
+.layout-shell {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.layout-card {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 22px 20px 26px;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+  border: 1px solid var(--line);
+}
+
+.layout-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.layout-top h1 {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.layout-top a {
+  color: #1d4ed8;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.layout-top a:hover {
+  text-decoration: underline;
+}
+
+.layout-lead {
+  margin: 0 0 16px;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+.quotas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin-bottom: 14px;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.quotas span {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #f1f5f9;
+  border: 1px solid var(--line);
+}
+
+.brushes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.brushes button {
+  border: 2px solid transparent;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  color: #fff;
+}
+
+.brushes button[data-brush="bedroom"] {
+  background: #6c8ebf;
+}
+.brushes button[data-brush="kitchen"] {
+  background: #eab308;
+  color: #422006;
+}
+.brushes button[data-brush="bathroom"] {
+  background: #4ade80;
+  color: #052e16;
+}
+.brushes button[data-brush="hallway"] {
+  background: #94a3b8;
+  color: #0f172a;
+}
+.brushes button[data-brush="erase"] {
+  background: #475569;
+}
+
+.brushes button.is-active {
+  border-color: var(--ink);
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--ink);
+}
+
+#layout-grid {
+  display: grid;
+  gap: 5px;
+  margin-bottom: 18px;
+  padding: 12px;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 1px dashed #cbd5e1;
+}
+
+.layout-cell {
+  aspect-ratio: 1;
+  min-height: 36px;
+  border-radius: 8px;
+  border: 2px solid #cbd5e1;
+  background: #fff;
+  cursor: pointer;
+  transition: transform 0.08s ease, border-color 0.12s ease;
+}
+
+.layout-cell:active {
+  transform: scale(0.96);
+}
+
+.layout-cell.kind-bedroom {
+  background: #bfdbfe;
+  border-color: #2563eb;
+}
+.layout-cell.kind-kitchen {
+  background: #fef08a;
+  border-color: #ca8a04;
+}
+.layout-cell.kind-bathroom {
+  background: #bbf7d0;
+  border-color: #16a34a;
+}
+.layout-cell.kind-hallway {
+  background: #e2e8f0;
+  border-color: #64748b;
+}
+
+.layout-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+#btn-open-ar {
+  flex: 1 1 200px;
+  padding: 14px 18px;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: inherit;
+  color: #fff;
+  background: linear-gradient(135deg, #0d9488, #0f766e);
+  cursor: pointer;
+}
+
+#btn-open-ar:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+#layout-message {
+  flex: 1 1 100%;
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #9d174d;
+}
+
+.layout-hint {
+  margin: 10px 0 0;
+  font-size: 0.78rem;
+  color: var(--muted);
+}

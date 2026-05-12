@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Unit floor plan — AR Building Preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="layout.css?v=realestate-2" />
+</head>
+<body>
+  <div class="layout-shell">
+    <article class="layout-card">
+      <div class="layout-top">
+        <h1>Draw one apartment</h1>
+        <a href="index.html?v=realestate-2">← Change sizes</a>
+      </div>
+      <p class="layout-lead">
+        The square is one apartment’s footprint (top‑down). Paint each cell with the brush that matches your counts from the previous page.
+        When every room is placed exactly once, you can open the camera.
+      </p>
+      <div id="layout-quotas" class="quotas" aria-live="polite"></div>
+      <div class="brushes" id="layout-brushes" role="toolbar" aria-label="Room brush"></div>
+      <div id="layout-grid" role="grid" aria-label="Apartment cells"></div>
+      <div class="layout-actions">
+        <button type="button" id="btn-open-ar" disabled>Open camera &amp; AR</button>
+        <p id="layout-message" role="alert"></p>
+      </div>
+      <p class="layout-hint">
+        The model is still pinned to the HIRO marker for tracking. Use the <strong>spin buttons</strong> on the camera page to turn the building without moving the paper.
+      </p>
+    </article>
+  </div>
+  <script src="ui.js?v=realestate-2"></script>
+  <script src="layout-page.js?v=realestate-2"></script>
+</body>
+</html>

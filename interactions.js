@@ -1,7 +1,7 @@
 /**
  * interactions.js
  * ---------------
- * Tap door (or large hit pad) → all exterior façades (.ext-wall) become nearly transparent
+ * Tap door, hit pad, or any .clickable façade (e.g. front wall) → all exterior façades (.ext-wall) become nearly transparent
  * so the colored apartment layout inside is visible.
  */
 

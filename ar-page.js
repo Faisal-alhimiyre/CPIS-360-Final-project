@@ -18,7 +18,7 @@
   function start() {
     var raw = sessionStorage.getItem(STORAGE_KEY);
     if (!raw) {
-      window.location.replace('index.html?v=markerfix-24');
+      window.location.replace('index.html?v=realestate-2');
       return;
     }
 
@@ -27,7 +27,7 @@
       spec = JSON.parse(raw);
     } catch (e) {
       sessionStorage.removeItem(STORAGE_KEY);
-      window.location.replace('index.html?v=markerfix-24');
+      window.location.replace('index.html?v=realestate-2');
       return;
     }
 
@@ -57,7 +57,7 @@
         var baseHint = hint.textContent;
         markerEl.addEventListener('markerFound', function () {
           hint.textContent =
-            'HIRO seen — building should sit on the marker. Tap the door for a transparent front wall.';
+            'HIRO seen — model on marker. Tap door or front wall for glass façades; ⟲ ⟳ spins the building.';
           hint.style.color = '#15803d';
         });
         markerEl.addEventListener('markerLost', function () {

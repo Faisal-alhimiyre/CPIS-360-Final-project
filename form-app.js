@@ -1,7 +1,7 @@
 /**
  * form-app.js
  * -----------
- * index.html only: valid submit → save spec → open dedicated camera page.
+ * index.html only: valid submit → save spec → layout.html → user opens AR from there.
  */
 
 (function () {
@@ -17,7 +17,7 @@
         window.Ui.setMessage('Could not save your inputs. Allow site storage or try another browser.');
         return;
       }
-      window.location.href = 'ar.html?v=markerfix-24&c=' + String(Date.now());
+      window.location.href = 'layout.html?v=realestate-2';
     });
   }
 

@@ -22,6 +22,7 @@
     bedroom: '#6C8EBF',
     kitchen: '#F2C14E',
     bathroom: '#7BC96F',
+    hallway: '#94a3b8',
   };
 
   /**
@@ -81,10 +82,11 @@
   function expandRoomTypes(apt) {
     var list = [];
     var i;
+    var hw = typeof apt.hallways === 'number' ? apt.hallways : 0;
     for (i = 0; i < apt.bedrooms; i++) list.push('bedroom');
     for (i = 0; i < apt.kitchens; i++) list.push('kitchen');
     for (i = 0; i < apt.bathrooms; i++) list.push('bathroom');
-    // If the user sets everything to 0, place one neutral "studio" kitchen cell so the interior is not empty.
+    for (i = 0; i < hw; i++) list.push('hallway');
     if (list.length === 0) list.push('kitchen');
     return list;
   }
@@ -105,6 +107,73 @@
    * @param {Element} parent
    * @param {BuildingSpec} spec
    */
+  function layoutGridValid(L) {
+    if (!L || !L.cells || !L.gridCols || !L.gridRows) return false;
+    if (L.cells.length !== L.gridRows) return false;
+    var r;
+    for (r = 0; r < L.cells.length; r++) {
+      if (!L.cells[r] || L.cells[r].length !== L.gridCols) return false;
+    }
+    return true;
+  }
+
+  /**
+   * @param {Element} parent
+   * @param {BuildingSpec} spec
+   * @param {{ gridCols: number, gridRows: number, cells: string[][] }} L
+   */
+  function addInteriorRoomsFromLayout(parent, spec, L) {
+    var floorH = spec.height / clampMin(spec.floors, 1);
+    var aptCount = clampMin(spec.apartments, 1);
+    var aptWidthOuter = spec.width / aptCount;
+    var cols = L.gridCols;
+    var rows = L.gridRows;
+    var pad = 0.04;
+
+    var f;
+    var a;
+    for (f = 0; f < spec.floors; f++) {
+      var floorBaseY = f * floorH;
+      var midY = floorBaseY + floorH * 0.5;
+
+      for (a = 0; a < aptCount; a++) {
+        var aptX0 = -spec.width / 2 + a * aptWidthOuter + WALL_T;
+        var aptX1 = -spec.width / 2 + (a + 1) * aptWidthOuter - WALL_T;
+        var usableW = aptX1 - aptX0;
+        var z0 = -spec.depth / 2 + WALL_T;
+        var z1 = spec.depth / 2 - WALL_T;
+        var usableD = z1 - z0;
+
+        var cellW = (usableW - pad * (cols + 1)) / cols;
+        var cellD = (usableD - pad * (rows + 1)) / rows;
+        var cellH = Math.max(0.06, floorH * 0.55);
+
+        var rr;
+        var cc;
+        for (rr = 0; rr < rows; rr++) {
+          for (cc = 0; cc < cols; cc++) {
+            var kind = L.cells[rr][cc];
+            if (!kind) continue;
+            var col = COLORS[kind] || '#cbd5e1';
+            var cx = aptX0 + pad + (cc + 0.5) * cellW + cc * pad;
+            var cz = z0 + pad + (rr + 0.5) * cellD + rr * pad;
+            var czRoom = cz - 0.02;
+            var box = el('a-box', {
+              width: Math.max(0.05, cellW),
+              height: cellH,
+              depth: Math.max(0.05, cellD),
+              position: cx + ' ' + midY + ' ' + czRoom,
+              color: col,
+              shader: 'flat',
+              'data-room': kind,
+            });
+            parent.appendChild(box);
+          }
+        }
+      }
+    }
+  }
+
   function addInteriorRooms(parent, spec) {
     var floorH = spec.height / clampMin(spec.floors, 1);
     var aptCount = clampMin(spec.apartments, 1);
@@ -240,19 +309,19 @@
 
     var front = el('a-box', {
       id: 'front-wall',
-      class: 'ext-wall',
       width: W,
       height: H,
       depth: t,
       position: '0 ' + H / 2 + ' ' + faceZ,
     });
     markExtWall(front, '#5b6c7d');
+    front.classList.add('clickable');
     parent.appendChild(front);
 
     var winY = H * 0.55;
     var winW = Math.min(0.22, W * 0.08);
     var winH = H * 0.22;
-    var winZ = D / 2 + t * 0.35;
+    var winZ = faceZ - t * 0.25;
     var wx;
     for (wx = -W * 0.28; wx <= W * 0.28 + 0.01; wx += W * 0.28) {
       var wn = el('a-box', {
@@ -340,8 +409,11 @@
    */
   function generateBuilding(buildingRoot, spec) {
     clearChildren(buildingRoot);
-    // Interior first, shell second — keeps colored units readable when façades go glassy.
-    addInteriorRooms(buildingRoot, spec);
+    if (spec.apartmentLayout && layoutGridValid(spec.apartmentLayout)) {
+      addInteriorRoomsFromLayout(buildingRoot, spec, spec.apartmentLayout);
+    } else {
+      addInteriorRooms(buildingRoot, spec);
+    }
     addShell(buildingRoot, spec);
 
     // AR marker is only a few cm wide in the real world. If the user types "120 m" the raw model would be

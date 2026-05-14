@@ -30,6 +30,13 @@
       resetExteriorWalls();
     }
     window.Interactions.setupDoorToggle(handles.scene, handles.buildingRoot);
+    if (window.RoomRelocate) {
+      if (spec.useFixedApartmentTemplate) {
+        window.RoomRelocate.attach(handles.buildingRoot);
+      } else {
+        window.RoomRelocate.detach();
+      }
+    }
     return null;
   }
 

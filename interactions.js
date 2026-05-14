@@ -2,9 +2,9 @@
  * interactions.js
  * ---------------
  * Tap door/front façade -> cutaway mode:
- * - hide front shell layer + roof cap
- * - make side/back walls extra clear so interior is visible
- * Tap again to restore translucent shell (default fixed template uses glass walls).
+ * - hide front shell segments (no roof mesh in fixed template)
+ * - make side/back walls extra clear when open
+ * Tap again to restore translucent shell.
  */
 
 (function () {

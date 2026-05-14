@@ -70,7 +70,7 @@
           ' Use good light, hold the marker flat, fill most of the screen. Add ?ardebug=1 to the URL for AR.js debug.';
         markerEl.addEventListener('markerFound', function () {
           hint.textContent =
-            'Marker found — open dollhouse view (one floor, clear walls). Tap the orange door to add translucent roof + front, or open again.';
+            'Marker found — tap a room to select, tap the floor to move it. Orange door toggles the front wall.';
           hint.style.color = '#15803d';
         });
         markerEl.addEventListener('markerLost', function () {

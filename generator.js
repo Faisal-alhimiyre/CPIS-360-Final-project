@@ -276,6 +276,20 @@
         });
         parent.appendChild(baseSlab);
 
+        var floorRelocate = el('a-plane', {
+          class: 'clickable relocate-floor-hit',
+          width: usableW * 0.99,
+          height: usableD * 0.99,
+          position: (aptX0 + aptX1) / 2 + ' ' + (floorY + 0.04) + ' ' + (z0 + z1) / 2,
+          rotation: '-90 0 0',
+          material: 'opacity: 0.003; transparent: true; shader: flat; side: double',
+        });
+        floorRelocate.dataset.innerX0 = String(innerX0);
+        floorRelocate.dataset.innerX1 = String(innerX1);
+        floorRelocate.dataset.innerZ0 = String(innerZ0);
+        floorRelocate.dataset.innerZ1 = String(innerZ1);
+        parent.appendChild(floorRelocate);
+
         var ri;
         for (ri = 0; ri < rooms.length; ri++) {
           var rm = rooms[ri];
@@ -289,23 +303,33 @@
           var cz = (zB + zF) / 2;
           var col = COLORS[rm.key] || '#cbd5e1';
 
+          var grp = el('a-entity', {
+            class: 'room-cluster',
+            'data-room-key': rm.key,
+            position: cx + ' ' + floorY + ' ' + cz,
+          });
+          grp.dataset.halfW = String(bw / 2);
+          grp.dataset.halfD = String(bd / 2);
+
+          var slabMat =
+            'color: ' +
+            col +
+            '; opacity: 0.82; transparent: true; shader: flat; side: double';
           var slab = el('a-box', {
             width: bw,
             height: slabT,
             depth: bd,
-            position: cx + ' ' + (floorY + slabT * 1.1) + ' ' + cz,
-            material:
-              'color: ' +
-              col +
-              '; opacity: 0.82; transparent: true; shader: flat; side: double',
+            position: '0 ' + (slabT * 1.1) + ' 0',
+            material: slabMat,
             'data-room': rm.key,
+            'data-slab': '1',
           });
-          parent.appendChild(slab);
+          slab.dataset.origMaterial = slabMat;
 
           var tw = Math.min(Math.max(bw, bd) * 0.85, 3.2);
           var label = el('a-text', {
             value: rm.label,
-            position: cx + ' ' + labelY + ' ' + cz,
+            position: '0 ' + (labelY - floorY) + ' 0',
             align: 'center',
             anchor: 'center',
             baseline: 'center',
@@ -313,7 +337,21 @@
             width: tw,
             wrapCount: 18,
           });
-          parent.appendChild(label);
+
+          var hitPad = el('a-plane', {
+            class: 'clickable room-select-hit',
+            width: bw,
+            height: bd,
+            position: '0 0.06 0',
+            rotation: '-90 0 0',
+            material: 'opacity: 0.02; transparent: true; shader: flat; side: double',
+            'data-room-key': rm.key,
+          });
+
+          grp.appendChild(slab);
+          grp.appendChild(label);
+          grp.appendChild(hitPad);
+          parent.appendChild(grp);
         }
 
         var topZ0 = innerZ0;
@@ -396,21 +434,6 @@
         frontR.classList.add('cutaway-hide');
         frontR.dataset.apartmentFront = 'true';
         parent.appendChild(frontR);
-
-        var roofAttrs = {
-          width: usableW + wt,
-          height: wt * 1.2,
-          depth: usableD + wt,
-          position: (aptX0 + aptX1) / 2 + ' ' + (floorBaseY + wallH + wt * 0.65) + ' ' + (z0 + z1) / 2,
-          material:
-            'color: ' +
-            tintHex(facadeBase, -0.35) +
-            '; shader: flat; opacity: 0.14; transparent: true; side: double',
-        };
-        if (a === 0 && f === 0) roofAttrs.id = 'roof-cap';
-        var roofCap = el('a-box', roofAttrs);
-        roofCap.classList.add('cutaway-hide');
-        parent.appendChild(roofCap);
 
         var doorH = Math.min(wallH * 0.88, 1.05);
         var doorY = floorY + 0.02 + doorH / 2;

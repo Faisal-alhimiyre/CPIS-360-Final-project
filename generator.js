@@ -454,6 +454,9 @@
         var frontHit = el('a-plane', fhAttrs);
         frontHit.classList.add('cutaway-hide');
         parent.appendChild(frontHit);
+      }
+    }
+  }
 
   function addInteriorRooms(parent, spec) {
     var floorH = spec.height / clampMin(spec.floors, 1);

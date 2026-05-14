@@ -26,7 +26,9 @@
 
     window.BuildingGenerator.generateBuilding(handles.buildingRoot, spec);
 
-    resetExteriorWalls();
+    if (!spec.useFixedApartmentTemplate) {
+      resetExteriorWalls();
+    }
     window.Interactions.setupDoorToggle(handles.scene, handles.buildingRoot);
     return null;
   }

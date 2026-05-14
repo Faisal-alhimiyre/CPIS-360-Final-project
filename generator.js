@@ -233,8 +233,8 @@
         height: h,
         depth: d,
         position: cx + ' ' + cy + ' ' + cz,
-        color: '#f1f5f9',
-        shader: 'flat',
+        material:
+          'color: #bae6fd; shader: flat; opacity: 0.32; transparent: true; side: double',
       });
       wall.classList.add('int-wall');
       parent.appendChild(wall);
@@ -271,8 +271,8 @@
           height: slabT,
           depth: usableD,
           position: (aptX0 + aptX1) / 2 + ' ' + (floorY + slabT / 2) + ' ' + (z0 + z1) / 2,
-          color: '#e2e8f0',
-          shader: 'flat',
+          material:
+            'color: #f8fafc; shader: flat; opacity: 0.28; transparent: true; side: double',
         });
         parent.appendChild(baseSlab);
 
@@ -297,7 +297,7 @@
             material:
               'color: ' +
               col +
-              '; opacity: 0.9; transparent: true; shader: flat; side: double',
+              '; opacity: 0.82; transparent: true; shader: flat; side: double',
             'data-room': rm.key,
           });
           parent.appendChild(slab);
@@ -340,7 +340,7 @@
           position: (aptX0 + aptX1) / 2 + ' ' + wallCenterY + ' ' + (z0 + wt / 2),
           shader: 'flat',
         });
-        markExtWall(backWall, facadeBase);
+        markExtWallGlass(backWall, facadeBase);
         parent.appendChild(backWall);
 
         var leftWall = el('a-box', {
@@ -350,7 +350,7 @@
           position: aptX0 + wt / 2 + ' ' + wallCenterY + ' ' + (z0 + z1) / 2,
           shader: 'flat',
         });
-        markExtWall(leftWall, tintHex(facadeBase, 0.08));
+        markExtWallGlass(leftWall, tintHex(facadeBase, 0.08));
         parent.appendChild(leftWall);
 
         var rightWall = el('a-box', {
@@ -360,7 +360,7 @@
           position: aptX1 - wt / 2 + ' ' + wallCenterY + ' ' + (z0 + z1) / 2,
           shader: 'flat',
         });
-        markExtWall(rightWall, tintHex(facadeBase, 0.08));
+        markExtWallGlass(rightWall, tintHex(facadeBase, 0.08));
         parent.appendChild(rightWall);
 
         var doorW = Math.min(1.05, Math.max(0.45, usableW * 0.16));
@@ -380,7 +380,7 @@
           position: segLX + ' ' + wallCenterY + ' ' + frontZ,
           shader: 'flat',
         });
-        markExtWall(frontL, tintHex(facadeBase, -0.08));
+        markExtWallGlass(frontL, tintHex(facadeBase, -0.08));
         frontL.classList.add('cutaway-hide');
         frontL.dataset.apartmentFront = 'true';
         parent.appendChild(frontL);
@@ -392,7 +392,7 @@
           position: segRX + ' ' + wallCenterY + ' ' + frontZ,
           shader: 'flat',
         });
-        markExtWall(frontR, tintHex(facadeBase, -0.08));
+        markExtWallGlass(frontR, tintHex(facadeBase, -0.08));
         frontR.classList.add('cutaway-hide');
         frontR.dataset.apartmentFront = 'true';
         parent.appendChild(frontR);
@@ -402,8 +402,10 @@
           height: wt * 1.2,
           depth: usableD + wt,
           position: (aptX0 + aptX1) / 2 + ' ' + (floorBaseY + wallH + wt * 0.65) + ' ' + (z0 + z1) / 2,
-          color: tintHex(facadeBase, -0.45),
-          shader: 'flat',
+          material:
+            'color: ' +
+            tintHex(facadeBase, -0.35) +
+            '; shader: flat; opacity: 0.14; transparent: true; side: double',
         };
         if (a === 0 && f === 0) roofAttrs.id = 'roof-cap';
         var roofCap = el('a-box', roofAttrs);
@@ -525,6 +527,21 @@
       'material',
       'color: ' + hex + '; shader: flat; opacity: 1; transparent: true; side: double'
     );
+  }
+
+  /**
+   * Translucent shell for fixed-template AR (dollhouse / glass box).
+   * @param {Element} node
+   * @param {string} hex
+   */
+  function markExtWallGlass(node, hex) {
+    node.classList.add('ext-wall');
+    node.dataset.extColor = hex;
+    node.setAttribute(
+      'material',
+      'color: ' + hex + '; shader: flat; opacity: 0.24; transparent: true; side: double'
+    );
+    node.dataset.wallMode = 'glass';
   }
 
   /**
@@ -710,19 +727,14 @@
   function generateBuilding(buildingRoot, spec) {
     clearChildren(buildingRoot);
     var buildSpec = spec;
-    var cappedFloorsNote = null;
-    /** AR: avoid “needle” buildings when height ≫ footprint (uniform scale made one edge microscopic). */
-    var MAX_AR_FLOORS_PREVIEW = 4;
 
     if (spec.useFixedApartmentTemplate) {
-      if (spec.floors > MAX_AR_FLOORS_PREVIEW) {
-        var fh = spec.height / clampMin(spec.floors, 1);
-        buildSpec = Object.assign({}, spec, {
-          floors: MAX_AR_FLOORS_PREVIEW,
-          height: fh * MAX_AR_FLOORS_PREVIEW,
-        });
-        cappedFloorsNote = { shown: MAX_AR_FLOORS_PREVIEW, total: spec.floors };
-      }
+      // One floor in AR for now: same template footprint, height = one storey (total height / floors).
+      var perFloorH = spec.height / clampMin(spec.floors, 1);
+      buildSpec = Object.assign({}, spec, {
+        floors: 1,
+        height: perFloorH,
+      });
       addFixedSingleApartmentTemplate(buildingRoot, buildSpec);
       /*
        * Full-building shell (façades, marker-scale box) paused while we perfect one apartment unit.
@@ -734,21 +746,6 @@
     } else {
       addInteriorRooms(buildingRoot, spec);
       addShell(buildingRoot, spec);
-    }
-
-    if (cappedFloorsNote) {
-      var yBanner = buildSpec.height + 0.35;
-      var banner = el('a-text', {
-        value: 'AR preview: ' + cappedFloorsNote.shown + ' of ' + cappedFloorsNote.total + ' floors',
-        position: '0 ' + yBanner + ' 0',
-        align: 'center',
-        anchor: 'center',
-        baseline: 'center',
-        color: '#0f172a',
-        width: Math.min(Math.max(buildSpec.width, buildSpec.depth), 6),
-        wrapCount: 22,
-      });
-      buildingRoot.appendChild(banner);
     }
 
     // Fit inside ~2.3×2.3×2.3 virtual units on the marker. Per-axis scale keeps width/depth readable when

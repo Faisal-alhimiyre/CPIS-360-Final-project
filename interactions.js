@@ -3,15 +3,17 @@
  * ---------------
  * Tap door/front façade -> cutaway mode:
  * - hide front shell layer + roof cap
- * - make side/back walls glassy so interior blocks are visible
- * Tap again to restore normal shell.
+ * - make side/back walls extra clear so interior is visible
+ * Tap again to restore translucent shell (default fixed template uses glass walls).
  */
 
 (function () {
   'use strict';
 
-  var OPAQUE = 1;
-  var GLASSY = 0.14;
+  /** Translucent shell when “closed” (roof + front on). */
+  var SHELL_GLASS = 0.28;
+  /** Extra-clear walls when cutaway is open (dollhouse). */
+  var GLASSY = 0.11;
 
   function isCutawayOpen(scene) {
     return scene && scene.dataset && scene.dataset.cutawayOpen === '1';
@@ -59,7 +61,7 @@
         applyExtWallMaterial(w, GLASSY, 'glass');
       }
     } else {
-      setAllExterior(scene, OPAQUE, 'opaque');
+      setAllExterior(scene, SHELL_GLASS, 'glass');
     }
   }
 
@@ -112,7 +114,7 @@
       scene.addEventListener('click', tryToggle, true);
     }
 
-    setCutawayMode(scene, false);
+    setCutawayMode(scene, true);
   }
 
   window.Interactions = {

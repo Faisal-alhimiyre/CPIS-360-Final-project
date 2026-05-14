@@ -38,6 +38,17 @@
       return;
     }
 
+    var scenePre = document.getElementById('ar-scene');
+    if (scenePre) {
+      try {
+        var q = new URLSearchParams(window.location.search);
+        if (q.get('ardebug') === '1') {
+          var arjs = scenePre.getAttribute('arjs') || '';
+          scenePre.setAttribute('arjs', arjs.replace('debugUIEnabled: false', 'debugUIEnabled: true'));
+        }
+      } catch (e2) {}
+    }
+
     window.ArScene.mountSceneIfNeeded(function (mountErr) {
       if (mountErr) {
         console.error(mountErr);
@@ -55,16 +66,31 @@
       var markerEl = document.getElementById('hiro-marker');
       if (markerEl && hint) {
         var baseHint = hint.textContent;
+        var trackHelp =
+          ' Use good light, hold the marker flat, fill most of the screen. Add ?ardebug=1 to the URL for AR.js debug.';
         markerEl.addEventListener('markerFound', function () {
           hint.textContent =
             'Marker found — model locked in place. Tap the orange door to remove front layer + roof and inspect inside.';
           hint.style.color = '#15803d';
         });
         markerEl.addEventListener('markerLost', function () {
-          hint.textContent = baseHint;
+          hint.textContent = baseHint + trackHelp;
           hint.style.color = '';
         });
+        hint.textContent = baseHint + trackHelp;
       }
+
+      function wireVideoErrors() {
+        var v = document.querySelector('#arjs-video');
+        if (!v || v.dataset.cpisVideoErr === '1') return;
+        v.dataset.cpisVideoErr = '1';
+        v.addEventListener('error', function () {
+          setArError('Camera video failed. Check permissions, HTTPS, and that no other app is using the camera.');
+        });
+      }
+      wireVideoErrors();
+      setTimeout(wireVideoErrors, 800);
+      setTimeout(wireVideoErrors, 3000);
 
       var built = false;
       function tryBuild() {

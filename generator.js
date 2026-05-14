@@ -709,8 +709,21 @@
    */
   function generateBuilding(buildingRoot, spec) {
     clearChildren(buildingRoot);
+    var buildSpec = spec;
+    var cappedFloorsNote = null;
+    /** AR: avoid “needle” buildings when height ≫ footprint (uniform scale made one edge microscopic). */
+    var MAX_AR_FLOORS_PREVIEW = 4;
+
     if (spec.useFixedApartmentTemplate) {
-      addFixedSingleApartmentTemplate(buildingRoot, spec);
+      if (spec.floors > MAX_AR_FLOORS_PREVIEW) {
+        var fh = spec.height / clampMin(spec.floors, 1);
+        buildSpec = Object.assign({}, spec, {
+          floors: MAX_AR_FLOORS_PREVIEW,
+          height: fh * MAX_AR_FLOORS_PREVIEW,
+        });
+        cappedFloorsNote = { shown: MAX_AR_FLOORS_PREVIEW, total: spec.floors };
+      }
+      addFixedSingleApartmentTemplate(buildingRoot, buildSpec);
       /*
        * Full-building shell (façades, marker-scale box) paused while we perfect one apartment unit.
        * Restore later: addShell(buildingRoot, spec);
@@ -723,13 +736,28 @@
       addShell(buildingRoot, spec);
     }
 
-    // AR marker is only a few cm wide in the real world. If the user types "120 m" the raw model would be
-    // enormous — you would be "inside" a solid wall and see nothing. Uniformly scale so the longest edge
-    // fits roughly on the marker (~2.3 m in virtual space is a comfortable phone AR size).
-    var maxDim = Math.max(spec.width, spec.depth, spec.height);
-    var AR_MAX_EXTENT = 2.3;
-    var s = maxDim > AR_MAX_EXTENT ? AR_MAX_EXTENT / maxDim : 1;
-    buildingRoot.setAttribute('scale', s + ' ' + s + ' ' + s);
+    if (cappedFloorsNote) {
+      var yBanner = buildSpec.height + 0.35;
+      var banner = el('a-text', {
+        value: 'AR preview: ' + cappedFloorsNote.shown + ' of ' + cappedFloorsNote.total + ' floors',
+        position: '0 ' + yBanner + ' 0',
+        align: 'center',
+        anchor: 'center',
+        baseline: 'center',
+        color: '#0f172a',
+        width: Math.min(Math.max(buildSpec.width, buildSpec.depth), 6),
+        wrapCount: 22,
+      });
+      buildingRoot.appendChild(banner);
+    }
+
+    // Fit inside ~2.3×2.3×2.3 virtual units on the marker. Per-axis scale keeps width/depth readable when
+    // total height is large (uniform scale used to crush the footprint into a grey pillar).
+    var AR_MAX = 2.3;
+    var gw = Math.max(buildSpec.width, 0.2);
+    var gh = Math.max(buildSpec.height, 0.2);
+    var gd = Math.max(buildSpec.depth, 0.2);
+    buildingRoot.setAttribute('scale', AR_MAX / gw + ' ' + AR_MAX / gh + ' ' + AR_MAX / gd);
   }
 
   window.BuildingGenerator = {

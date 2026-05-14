@@ -70,7 +70,7 @@
           ' Use good light, hold the marker flat, fill most of the screen. Add ?ardebug=1 to the URL for AR.js debug.';
         markerEl.addEventListener('markerFound', function () {
           hint.textContent =
-            'Marker found — model locked in place. Tap the orange door to remove front layer + roof and inspect inside.';
+            'Marker found — model locked. Tilt to see the colored room plan on the marker; tap the orange door for the cutaway view.';
           hint.style.color = '#15803d';
         });
         markerEl.addEventListener('markerLost', function () {

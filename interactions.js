@@ -10,10 +10,10 @@
 (function () {
   'use strict';
 
-  /** Translucent shell when “closed” (roof + front on). */
-  var SHELL_GLASS = 0.28;
-  /** Extra-clear walls when cutaway is open (dollhouse). */
-  var GLASSY = 0.11;
+  /** Shell when cutaway is closed (front segments visible). */
+  var SHELL_GLASS = 0.78;
+  /** Side/back walls when cutaway is open (still readable, less video bleed-through). */
+  var GLASSY = 0.55;
 
   function isCutawayOpen(scene) {
     return scene && scene.dataset && scene.dataset.cutawayOpen === '1';
@@ -88,6 +88,14 @@
       setCutawayMode(scene, !isCutawayOpen(scene));
     }
 
+    var lastDoorToggleMs = 0;
+    function doDoorToggle() {
+      var t = Date.now();
+      if (t - lastDoorToggleMs < 380) return;
+      lastDoorToggleMs = t;
+      toggleCutaway();
+    }
+
     function tryToggle(evt) {
       var start = intersectedFromEvent(evt) || evt.target;
       var node = start;
@@ -97,7 +105,7 @@
           hit = node;
           break;
         }
-        if (node.classList && node.classList.contains('clickable')) {
+        if (node.classList && node.classList.contains('door-hot')) {
           hit = node;
           break;
         }
@@ -106,12 +114,25 @@
       if (!hit) return;
       if (!isUnder(hit, buildingRoot)) return;
 
-      toggleCutaway();
+      doDoorToggle();
     }
 
     if (scene.dataset.doorToggleBound !== '1') {
       scene.dataset.doorToggleBound = '1';
       scene.addEventListener('click', tryToggle, true);
+    }
+
+    function tryToggleTouch(e) {
+      var t = e.changedTouches && e.changedTouches[0];
+      if (!t || !window.CpisArPick) return;
+      var r = window.CpisArPick.pick(buildingRoot, scene, t.clientX, t.clientY);
+      if (!r || r.type !== 'door') return;
+      doDoorToggle();
+    }
+
+    if (scene.dataset.doorTouchBound !== '1') {
+      scene.dataset.doorTouchBound = '1';
+      scene.addEventListener('touchend', tryToggleTouch, { capture: true, passive: false });
     }
 
     setCutawayMode(scene, true);

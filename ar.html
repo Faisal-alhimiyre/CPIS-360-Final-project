@@ -126,11 +126,11 @@
   <a-scene
     id="ar-scene"
     vr-mode-ui="enabled: false"
-    renderer="alpha: true; antialias: true"
+    renderer="alpha: true; antialias: true; logarithmicDepthBuffer: true"
     arjs="sourceType: webcam; videoTexture: false; trackingMethod: best; detectionMode: mono; facingMode: environment; sourceWidth: 1280; sourceHeight: 720; debugUIEnabled: false;"
   >
     <!-- Local patt.hiro (same as AR.js 3.4.2) so tracking does not depend on preset CDN fetches. -->
-    <a-marker type="pattern" url="data/patt.hiro" id="hiro-marker" emitevents="true">
+    <a-marker type="pattern" url="data/patt.hiro" id="hiro-marker" emitevents="true" smooth="true">
       <!-- Strong presentation tilt so initial view shows the front/door (not the roof). -->
       <a-entity id="building-root" position="0 0.06 0" rotation="-68 0 0">
         <a-entity id="building-mount" position="0 0 0" rotation="0 0 0"></a-entity>
@@ -149,14 +149,14 @@
     </a-entity>
   </a-scene>
 
-  <script src="generator.js?v=realestate-12"></script>
-  <script src="room-relocate.js?v=realestate-1"></script>
-  <script src="interactions.js?v=realestate-9"></script>
+  <script src="generator.js?v=realestate-13"></script>
+  <script src="room-relocate.js?v=realestate-2"></script>
+  <script src="interactions.js?v=realestate-10"></script>
   <script src="ui.js?v=realestate-7"></script>
-  <script src="app-core.js?v=realestate-7"></script>
+  <script src="app-core.js?v=realestate-8"></script>
   <script src="ar-scene.js?v=realestate-3"></script>
   <script src="ar-stack.js?v=markerfix-25"></script>
   <script src="ar-rotate.js?v=realestate-4"></script>
-  <script src="ar-page.js?v=markerfix-28"></script>
+  <script src="ar-page.js?v=markerfix-29"></script>
 </body>
 </html>

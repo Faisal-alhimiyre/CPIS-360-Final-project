@@ -1,7 +1,8 @@
 /**
  * room-relocate.js
  * ----------------
- * Fixed-template AR: tap a room pad to select, then tap the floor pad to move (XZ clamped).
+ * Fixed-template AR: pick a room, then pick the floor to move (works with touch via raycast).
+ * Exposes CpisArPick for door hits on touchend (see interactions.js).
  */
 
 (function () {
@@ -9,12 +10,63 @@
 
   var selected = null;
   var mount = null;
+  var sceneEl = null;
+  var onPickBound = null;
+  var lastPickAt = 0;
 
   function three() {
     if (typeof AFRAME !== 'undefined' && AFRAME.THREE) return AFRAME.THREE;
     if (typeof THREE !== 'undefined') return THREE;
     return null;
   }
+
+  /**
+   * @param {Element} mount
+   * @param {Element} scene
+   * @param {number} clientX
+   * @param {number} clientY
+   * @returns {{ type: 'door'|'room'|'floor', el: Element, point: import('three').Vector3 }|null}
+   */
+  function pickMount(mount, scene, clientX, clientY) {
+    var T = three();
+    if (!T || !mount || !scene || !scene.camera) return null;
+    var canvas = scene.canvas;
+    if (!canvas) return null;
+    var rect = canvas.getBoundingClientRect();
+    var nx = ((clientX - rect.left) / rect.width) * 2 - 1;
+    var ny = -((clientY - rect.top) / rect.height) * 2 + 1;
+    var ray = new T.Raycaster();
+    ray.setFromCamera({ x: nx, y: ny }, scene.camera);
+    mount.object3D.updateMatrixWorld(true);
+    var hits = ray.intersectObjects([mount.object3D], true);
+    var hi;
+    for (hi = 0; hi < hits.length; hi++) {
+      var walk = hits[hi].object;
+      while (walk) {
+        if (walk.el) {
+          var el = walk.el;
+          if (el.dataset && el.dataset.doorToggle === '1') {
+            return { type: 'door', el: el, point: hits[hi].point };
+          }
+          if (el.classList && el.classList.contains('door-hot')) {
+            return { type: 'door', el: el, point: hits[hi].point };
+          }
+          if (el.classList && el.classList.contains('room-select-hit')) {
+            return { type: 'room', el: el, point: hits[hi].point };
+          }
+          if (el.classList && el.classList.contains('relocate-floor-hit')) {
+            return { type: 'floor', el: el, point: hits[hi].point };
+          }
+        }
+        walk = walk.parent;
+      }
+    }
+    return null;
+  }
+
+  window.CpisArPick = {
+    pick: pickMount,
+  };
 
   function findRoomCluster(node) {
     var cur = node;
@@ -28,8 +80,8 @@
   function clearSelect() {
     if (!selected) return;
     var slab = selected.querySelector('[data-slab="1"]');
-    if (slab && slab.dataset.origMaterial) {
-      slab.setAttribute('material', slab.dataset.origMaterial);
+    if (slab) {
+      slab.setAttribute('scale', '1 1 1');
     }
     selected.setAttribute('scale', '1 1 1');
     selected = null;
@@ -38,80 +90,74 @@
   function selectGroup(grp) {
     clearSelect();
     selected = grp;
-    var slab = grp.querySelector('[data-slab="1"]');
-    if (slab && slab.dataset.origMaterial) {
-      slab.setAttribute(
-        'material',
-        slab.dataset.origMaterial.replace('opacity: 0.82', 'opacity: 0.98')
-      );
+    var slab = selected.querySelector('[data-slab="1"]');
+    if (slab) {
+      slab.setAttribute('scale', '1.08 1.15 1.08');
     }
-    grp.setAttribute('scale', '1.04 1.04 1.04');
+    selected.setAttribute('scale', '1.02 1.02 1.02');
   }
 
-  function intersectPoint(evt) {
-    var d = evt.detail || {};
-    if (d.intersection && d.intersection.point) return d.intersection.point;
-    if (d.intersections && d.intersections[0] && d.intersections[0].point) return d.intersections[0].point;
-    return null;
-  }
+  function onPick(evt) {
+    if (!mount || !sceneEl) return;
+    if (!sceneEl.hasLoaded) return;
 
-  function onRoomHitClick(evt) {
-    if (!mount) return;
-    var grp = findRoomCluster(evt.currentTarget);
-    if (grp) selectGroup(grp);
-  }
+    var tch = evt.changedTouches && evt.changedTouches[0];
+    var clientX = tch ? tch.clientX : evt.clientX;
+    var clientY = tch ? tch.clientY : evt.clientY;
 
-  function onFloorHitClick(evt) {
-    if (!mount || !selected) return;
-    var floorEl = evt.currentTarget;
-    var T = three();
-    if (!T) return;
-    var pt = intersectPoint(evt);
-    if (!pt || floorEl.dataset.innerX0 == null) return;
+    var res = pickMount(mount, sceneEl, clientX, clientY);
+    if (!res || res.type === 'door') return;
 
-    var ix0 = parseFloat(floorEl.dataset.innerX0, 10);
-    var ix1 = parseFloat(floorEl.dataset.innerX1, 10);
-    var iz0 = parseFloat(floorEl.dataset.innerZ0, 10);
-    var iz1 = parseFloat(floorEl.dataset.innerZ1, 10);
-    var hw = parseFloat(selected.dataset.halfW, 10) || 0.05;
-    var hd = parseFloat(selected.dataset.halfD, 10) || 0.05;
+    var now = Date.now();
+    if (now - lastPickAt < 140) return;
+    lastPickAt = now;
 
-    var local = new T.Vector3();
-    mount.object3D.worldToLocal(local.copy(pt));
+    if (res.type === 'room') {
+      var grp = findRoomCluster(res.el);
+      if (grp) selectGroup(grp);
+      return;
+    }
 
-    var ny = selected.object3D.position.y;
-    var nx = Math.min(Math.max(local.x, ix0 + hw), ix1 - hw);
-    var nz = Math.min(Math.max(local.z, iz0 + hd), iz1 - hd);
-    selected.setAttribute('position', { x: nx, y: ny, z: nz });
+    if (res.type === 'floor' && selected) {
+      var floorEl = res.el;
+      var T = three();
+      if (!T || floorEl.dataset.innerX0 == null) return;
+
+      var ix0 = parseFloat(floorEl.dataset.innerX0, 10);
+      var ix1 = parseFloat(floorEl.dataset.innerX1, 10);
+      var iz0 = parseFloat(floorEl.dataset.innerZ0, 10);
+      var iz1 = parseFloat(floorEl.dataset.innerZ1, 10);
+      var hw = parseFloat(selected.dataset.halfW, 10) || 0.05;
+      var hd = parseFloat(selected.dataset.halfD, 10) || 0.05;
+
+      var local = new T.Vector3();
+      mount.object3D.worldToLocal(local.copy(res.point));
+
+      var ny = selected.object3D.position.y;
+      var nx = Math.min(Math.max(local.x, ix0 + hw), ix1 - hw);
+      var nz = Math.min(Math.max(local.z, iz0 + hd), iz1 - hd);
+      selected.setAttribute('position', { x: nx, y: ny, z: nz });
+    }
   }
 
   function attach(root) {
     detach();
     mount = root;
-    if (!mount) return;
-    var rooms = mount.querySelectorAll('.room-select-hit');
-    var floors = mount.querySelectorAll('.relocate-floor-hit');
-    var i;
-    for (i = 0; i < rooms.length; i++) {
-      rooms[i].addEventListener('click', onRoomHitClick);
-    }
-    for (i = 0; i < floors.length; i++) {
-      floors[i].addEventListener('click', onFloorHitClick);
-    }
+    sceneEl = document.querySelector('a-scene');
+    if (!mount || !sceneEl) return;
+
+    onPickBound = onPick;
+    sceneEl.addEventListener('touchend', onPickBound, { passive: false });
+    sceneEl.addEventListener('click', onPickBound);
   }
 
   function detach() {
-    if (mount) {
-      var rooms = mount.querySelectorAll('.room-select-hit');
-      var floors = mount.querySelectorAll('.relocate-floor-hit');
-      var i;
-      for (i = 0; i < rooms.length; i++) {
-        rooms[i].removeEventListener('click', onRoomHitClick);
-      }
-      for (i = 0; i < floors.length; i++) {
-        floors[i].removeEventListener('click', onFloorHitClick);
-      }
+    if (sceneEl && onPickBound) {
+      sceneEl.removeEventListener('touchend', onPickBound);
+      sceneEl.removeEventListener('click', onPickBound);
     }
+    sceneEl = null;
+    onPickBound = null;
     mount = null;
     clearSelect();
   }

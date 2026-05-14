@@ -233,8 +233,7 @@
         height: h,
         depth: d,
         position: cx + ' ' + cy + ' ' + cz,
-        material:
-          'color: #bae6fd; shader: flat; opacity: 0.32; transparent: true; side: double',
+        material: 'color: #93c5fd; shader: flat; opacity: 0.88; transparent: true; side: double',
       });
       wall.classList.add('int-wall');
       parent.appendChild(wall);
@@ -267,28 +266,18 @@
         var innerZ1 = z1 - wt / 2;
 
         var baseSlab = el('a-box', {
+          class: 'clickable relocate-floor-hit',
           width: usableW,
           height: slabT,
           depth: usableD,
           position: (aptX0 + aptX1) / 2 + ' ' + (floorY + slabT / 2) + ' ' + (z0 + z1) / 2,
-          material:
-            'color: #f8fafc; shader: flat; opacity: 0.28; transparent: true; side: double',
+          material: 'color: #e2e8f0; shader: flat; opacity: 1; transparent: true; side: double',
         });
+        baseSlab.dataset.innerX0 = String(innerX0);
+        baseSlab.dataset.innerX1 = String(innerX1);
+        baseSlab.dataset.innerZ0 = String(innerZ0);
+        baseSlab.dataset.innerZ1 = String(innerZ1);
         parent.appendChild(baseSlab);
-
-        var floorRelocate = el('a-plane', {
-          class: 'clickable relocate-floor-hit',
-          width: usableW * 0.99,
-          height: usableD * 0.99,
-          position: (aptX0 + aptX1) / 2 + ' ' + (floorY + 0.04) + ' ' + (z0 + z1) / 2,
-          rotation: '-90 0 0',
-          material: 'opacity: 0.003; transparent: true; shader: flat; side: double',
-        });
-        floorRelocate.dataset.innerX0 = String(innerX0);
-        floorRelocate.dataset.innerX1 = String(innerX1);
-        floorRelocate.dataset.innerZ0 = String(innerZ0);
-        floorRelocate.dataset.innerZ1 = String(innerZ1);
-        parent.appendChild(floorRelocate);
 
         var ri;
         for (ri = 0; ri < rooms.length; ri++) {
@@ -311,10 +300,7 @@
           grp.dataset.halfW = String(bw / 2);
           grp.dataset.halfD = String(bd / 2);
 
-          var slabMat =
-            'color: ' +
-            col +
-            '; opacity: 0.82; transparent: true; shader: flat; side: double';
+          var slabMat = 'color: ' + col + '; opacity: 1; transparent: true; shader: flat; side: double';
           var slab = el('a-box', {
             width: bw,
             height: slabT,
@@ -324,8 +310,6 @@
             'data-room': rm.key,
             'data-slab': '1',
           });
-          slab.dataset.origMaterial = slabMat;
-
           var tw = Math.min(Math.max(bw, bd) * 0.85, 3.2);
           var label = el('a-text', {
             value: rm.label,
@@ -342,9 +326,9 @@
             class: 'clickable room-select-hit',
             width: bw,
             height: bd,
-            position: '0 0.06 0',
+            position: '0 0.08 0',
             rotation: '-90 0 0',
-            material: 'opacity: 0.02; transparent: true; shader: flat; side: double',
+            material: 'opacity: 0.001; transparent: true; shader: flat; side: double',
             'data-room-key': rm.key,
           });
 
@@ -562,7 +546,7 @@
     node.dataset.extColor = hex;
     node.setAttribute(
       'material',
-      'color: ' + hex + '; shader: flat; opacity: 0.24; transparent: true; side: double'
+      'color: ' + hex + '; shader: flat; opacity: 0.88; transparent: true; side: double'
     );
     node.dataset.wallMode = 'glass';
   }

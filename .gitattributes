@@ -1,0 +1,2 @@
+# HIRO pattern must stay byte-for-byte (CRLF breaks ARToolkit).
+data/patt.hiro -text

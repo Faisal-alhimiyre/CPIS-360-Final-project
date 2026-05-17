@@ -500,6 +500,89 @@
   };
 
   /**
+   * Solid building stack: two floor blocks + stair shaft (pick a floor first).
+   * @param {Element} parent
+   * @param {BuildingSpec} spec
+   */
+  function addBuildingStackPreview(parent, spec) {
+    var W = spec.width;
+    var D = spec.depth;
+    var perFloorH = spec.height / clampMin(spec.floors, 1);
+    var layout = getFirstFloorLayout(W, D);
+    var hall = layout.hall;
+    var stairs = layout.stairs;
+    var stairW = stairs.x1 - stairs.x0;
+    var stairD = stairs.z1 - stairs.z0;
+    var stairCx = (stairs.x0 + stairs.x1) / 2;
+    var stairCz = (stairs.z0 + stairs.z1) / 2;
+    var blockMat = 'shader: flat; opacity: 1; transparent: false';
+
+    function addFloorBlock(floorIndex, baseY, color, label) {
+      var cy = baseY + perFloorH / 2;
+      var block = el('a-box', {
+        class: 'floor-picker-hit',
+        width: W * 0.98,
+        height: perFloorH,
+        depth: D * 0.98,
+        position: '0 ' + cy + ' 0',
+        material: 'color: ' + color + '; ' + blockMat,
+      });
+      block.dataset.floorIndex = String(floorIndex);
+      parent.appendChild(block);
+
+      var hit = el('a-plane', {
+        class: 'floor-picker-hit clickable',
+        width: W * 0.96,
+        height: D * 0.96,
+        position: '0 ' + (baseY + perFloorH + 0.02) + ' 0',
+        rotation: '-90 0 0',
+        material: 'opacity: 0.02; transparent: true; shader: flat; side: double',
+      });
+      hit.dataset.floorIndex = String(floorIndex);
+      parent.appendChild(hit);
+
+      parent.appendChild(
+        el('a-text', {
+          value: label,
+          position: '0 ' + (cy + perFloorH * 0.08) + ' 0',
+          align: 'center',
+          anchor: 'center',
+          baseline: 'center',
+          color: '#f8fafc',
+          width: Math.min(W, D) * 0.85,
+          wrapCount: 12,
+        })
+      );
+    }
+
+    addFloorBlock(0, 0, '#64748b', 'First floor\n(tap to open)');
+    addFloorBlock(1, perFloorH, '#475569', 'Second floor\n(tap to open)');
+
+    var shaftH = perFloorH * 2;
+    parent.appendChild(
+      el('a-box', {
+        width: stairW,
+        height: shaftH,
+        depth: stairD,
+        position: stairCx + ' ' + shaftH / 2 + ' ' + stairCz,
+        material: 'color: #78716c; ' + blockMat,
+      })
+    );
+    parent.appendChild(
+      el('a-text', {
+        value: 'Stairs',
+        position: stairCx + ' ' + (shaftH * 0.52) + ' ' + stairCz,
+        align: 'center',
+        anchor: 'center',
+        baseline: 'center',
+        color: '#f1f5f9',
+        width: Math.max(stairW, stairD) * 1.2,
+        wrapCount: 8,
+      })
+    );
+  }
+
+  /**
    * First floor block: 2 apartments + hall + stairs (tap an apartment to open its layout).
    * @param {Element} parent
    * @param {BuildingSpec} spec
@@ -1072,7 +1155,11 @@
       if (spec.previewCutaway) {
         if (spec.viewerMode === 'apartment' && typeof spec.selectedApartmentIndex === 'number') {
           addFixedCutawayPreview(buildingRoot, buildSpec, spec.selectedApartmentIndex);
-        } else if (spec.viewerMode === 'building' || clampMin(spec.apartments, 1) >= 2) {
+        } else if (spec.viewerMode === 'floor') {
+          addFirstFloorBlockPreview(buildingRoot, buildSpec);
+        } else if (spec.viewerMode === 'building') {
+          addBuildingStackPreview(buildingRoot, buildSpec);
+        } else if (clampMin(spec.apartments, 1) >= 2) {
           addFirstFloorBlockPreview(buildingRoot, buildSpec);
         } else {
           addFixedCutawayPreview(buildingRoot, buildSpec);
@@ -1090,7 +1177,13 @@
 
     if (spec.previewCutaway) {
       var foot = Math.max(buildSpec.width, buildSpec.depth, 0.5);
-      var s = 10 / foot;
+      var s;
+      if (spec.viewerMode === 'building') {
+        var stackH = buildSpec.height * 2;
+        s = 6.5 / Math.max(foot, stackH * 0.45);
+      } else {
+        s = 10 / foot;
+      }
       buildingRoot.setAttribute('scale', s + ' ' + s + ' ' + s);
     } else {
       var AR_MAX = 2.3;

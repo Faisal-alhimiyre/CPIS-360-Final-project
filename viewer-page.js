@@ -1,7 +1,5 @@
 /**
  * viewer-page.js
- * --------------
- * Load form spec → building block first, then drill into an apartment.
  */
 
 (function () {
@@ -39,12 +37,13 @@
     }
 
     spec.apartments = Math.max(2, spec.apartments || 2);
+    if (spec.floors < 2) spec.floors = 2;
 
     var backBtn = document.getElementById('btn-back-building');
     if (backBtn) {
       backBtn.addEventListener('click', function () {
         if (window.ViewerAppCore) {
-          window.ViewerAppCore.showBuilding();
+          window.ViewerAppCore.goBack();
           setError('');
         }
       });
@@ -58,11 +57,8 @@
 
     function build() {
       var buildErr = window.ViewerAppCore.initFromSpec(spec);
-      if (buildErr) {
-        setError(buildErr);
-        return;
-      }
-      setError('');
+      if (buildErr) setError(buildErr);
+      else setError('');
     }
 
     if (scene.hasLoaded) {

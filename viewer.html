@@ -19,8 +19,8 @@
       position: fixed !important;
       top: 0 !important;
       left: 0 !important;
-      width: 100% !important;
-      height: 100% !important;
+      width: 100vw !important;
+      height: 100vh !important;
     }
     a-scene canvas {
       touch-action: none !important;
@@ -197,19 +197,24 @@
     <a-entity light="type: ambient; color: #ffffff; intensity: 0.8"></a-entity>
     <a-entity light="type: directional; color: #ffffff; intensity: 0.9" position="3 6 5"></a-entity>
 
-    <a-entity id="camera-rig" cpis-touch-orbit="minDistance: 1.5; maxDistance: 22">
-      <a-camera id="viewer-camera" look-controls="enabled: false" wasd-controls="enabled: false"></a-camera>
+    <a-entity id="camera-rig" cpis-touch-orbit="minDistance: 2; maxDistance: 28">
+      <a-camera
+        id="viewer-camera"
+        look-controls="enabled: false"
+        wasd-controls="enabled: false"
+        camera="active: true; far: 200; near: 0.05"
+      ></a-camera>
     </a-entity>
   </a-scene>
 
-  <script src="viewer-camera.js?v=4"></script>
-  <script src="viewer-orbit.js?v=5"></script>
+  <script src="viewer-camera.js?v=5"></script>
+  <script src="viewer-orbit.js?v=6"></script>
   <script src="viewer-controls.js?v=2"></script>
   <script src="generator.js?v=realestate-19"></script>
   <script src="room-relocate.js?v=realestate-7"></script>
   <script src="viewer-navigation.js?v=3"></script>
   <script src="viewer-overlay.js?v=1"></script>
-  <script src="viewer-app-core.js?v=6"></script>
+  <script src="viewer-app-core.js?v=7"></script>
   <script src="ui.js?v=realestate-7"></script>
   <script src="viewer-page.js?v=5"></script>
 </body>

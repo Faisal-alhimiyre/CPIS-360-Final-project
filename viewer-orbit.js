@@ -177,7 +177,15 @@
       var py = this._target.y + this.distance * Math.cos(this.phi);
       var pz = this._target.z + this.distance * sinP * Math.cos(this.theta);
       this.el.object3D.position.set(px, py, pz);
-      this.el.object3D.lookAt(this._target);
+
+      var camEl = this._camEl;
+      if (!camEl) {
+        camEl = this.el.querySelector('a-camera');
+        this._camEl = camEl;
+      }
+      if (camEl) {
+        camEl.object3D.lookAt(this._target);
+      }
 
       var focus = document.getElementById('orbit-focus');
       if (focus) {

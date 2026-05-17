@@ -28,13 +28,7 @@
 
   function afterRebuild(mount) {
     if (window.ViewerCamera && mount) {
-      var mode = state.mode;
-      requestAnimationFrame(function () {
-        window.ViewerCamera.focusOnMount(mount, mode);
-        setTimeout(function () {
-          window.ViewerCamera.focusOnMount(mount, mode);
-        }, 120);
-      });
+      window.ViewerCamera.focusOnMount(mount, state.mode);
     }
   }
 

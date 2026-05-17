@@ -10,6 +10,14 @@
     var apts = document.getElementById('overlay-apts');
     if (floors) floors.hidden = state.mode !== 'building';
     if (apts) apts.hidden = state.mode !== 'floor';
+    requestAnimationFrame(function () {
+      var mount = document.getElementById('building-mount');
+      if (mount && window.ViewerCamera && window.ViewerCamera.focusOnMount) {
+        window.ViewerCamera.focusOnMount(mount);
+      } else if (window.ViewerCamera && window.ViewerCamera.reapplyViewOffset) {
+        window.ViewerCamera.reapplyViewOffset();
+      }
+    });
   }
 
   function bind(handlers) {

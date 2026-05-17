@@ -32,9 +32,9 @@
       var self = this;
       this._T = AFRAME.THREE;
       this._target = new this._T.Vector3(0, 1, 0);
-      this.theta = 0.72;
-      this.phi = 0.88;
-      this.distance = 8;
+      this.theta = 0.78;
+      this.phi = 0.62;
+      this.distance = 6;
 
       this._dragging = false;
       this._pinching = false;
@@ -86,14 +86,51 @@
           self.distance *= 1.2;
           self._clampDist();
         },
-        setFrame: function (x, y, z, dist) {
+        setFrame: function (x, y, z, dist, phi, theta) {
           self._target.set(x, y, z);
           self.distance = dist;
+          if (typeof phi === 'number') self.phi = phi;
+          if (typeof theta === 'number') self.theta = theta;
           self._clampDist();
+          self._applyViewOffset();
+        },
+        applyViewOffset: function () {
+          self._applyViewOffset();
         },
       };
 
+      this._onResize = function () {
+        self._applyViewOffset();
+      };
+      window.addEventListener('resize', this._onResize);
+
       this._applyOrbit();
+    },
+
+    _applyViewOffset: function () {
+      var camComp = this.el.components && this.el.components.camera;
+      if (!camComp || !camComp.camera) return;
+      var cam = camComp.camera;
+      var w = window.innerWidth;
+      var h = window.innerHeight;
+      if (w < 2 || h < 2) return;
+      var dpr = window.devicePixelRatio || 1;
+      var fullW = Math.round(w * dpr);
+      var fullH = Math.round(h * dpr);
+      var bar = document.querySelector('.viewer-bar');
+      var topH = bar ? bar.offsetHeight : 48;
+      var botH = 0;
+      var overlays = document.querySelectorAll('.viewer-overlay');
+      var i;
+      for (i = 0; i < overlays.length; i++) {
+        if (!overlays[i].hidden) {
+          botH = Math.max(botH, overlays[i].offsetHeight);
+        }
+      }
+      if (!botH) botH = 88;
+      var midY = topH + (h - topH - botH) * 0.5;
+      var offsetPx = Math.round((h * 0.5 - midY) * dpr);
+      cam.setViewOffset(fullW, fullH, 0, offsetPx, fullW, fullH);
     },
 
     _clampDist: function () {
@@ -198,6 +235,9 @@
     },
 
     remove: function () {
+      if (this._onResize) {
+        window.removeEventListener('resize', this._onResize);
+      }
       window.removeEventListener('mousedown', this._onDown, true);
       window.removeEventListener('mousemove', this._onMove, true);
       window.removeEventListener('mouseup', this._onUp, true);

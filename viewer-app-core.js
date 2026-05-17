@@ -35,7 +35,6 @@
   function rebuild() {
     var mount = document.getElementById('building-mount');
     if (!mount || !savedSpec) return 'Scene not ready.';
-    mount.setAttribute('position', '0 0 0');
 
     var perFloorH = savedSpec.height / clampMin(savedSpec.floors, 1);
     var buildSpec = Object.assign({}, savedSpec, {

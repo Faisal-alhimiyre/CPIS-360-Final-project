@@ -1,12 +1,13 @@
 /**
- * viewer-camera.js — frame the model in the center of the screen (dollhouse view).
+ * viewer-camera.js
+ * Model lives on a fixed-height stage (center of screen). Camera always looks at the stage.
  */
 
 (function () {
   'use strict';
 
-  /** Larger = bigger model on screen */
   var PREVIEW_MAX = 5.5;
+  var STAGE_Y = 2.75;
 
   function three() {
     if (typeof AFRAME !== 'undefined' && AFRAME.THREE) return AFRAME.THREE;
@@ -20,77 +21,71 @@
     return PREVIEW_MAX / raw;
   }
 
+  function frameCamera(dist) {
+    if (window.CpisViewerOrbit && window.CpisViewerOrbit.setFrame) {
+      window.CpisViewerOrbit.setFrame(0, STAGE_Y, 0, dist, 0.52, 0.85);
+    }
+    var focus = document.getElementById('orbit-focus');
+    if (focus) {
+      focus.setAttribute('position', '0 ' + STAGE_Y + ' 0');
+    }
+  }
+
   function applyFocus(mount) {
     var T = three();
     if (!T || !mount) return false;
 
     mount.setAttribute('rotation', '0 0 0');
+    mount.setAttribute('position', '0 0 0');
     mount.object3D.updateMatrixWorld(true);
+
     var box = new T.Box3().setFromObject(mount.object3D);
     if (box.isEmpty()) return false;
 
     var center = box.getCenter(new T.Vector3());
     var size = box.getSize(new T.Vector3());
 
-    /* Put model on a "pedestal" in the upper half of the scene */
-    var pedestalY = 2.4 + size.y * 0.35;
-    mount.setAttribute(
-      'position',
-      -center.x + ' ' + (-center.y + pedestalY) + ' ' + -center.z
-    );
+    mount.setAttribute('position', -center.x + ' 0 ' + -center.z);
 
-    mount.object3D.updateMatrixWorld(true);
-    box.setFromObject(mount.object3D);
-    center = box.getCenter(new T.Vector3());
-    size = box.getSize(new T.Vector3());
-
-    var maxDim = Math.max(size.x, size.y, size.z, 0.25);
-    /* Closer camera = model fills the viewport */
-    var dist = Math.max(maxDim * 1.45, 4);
-    dist = Math.min(dist, 12);
-
-    /*
-     * Aim slightly below the model center so the building sits higher on screen
-     * (fixes flat floor plans hugging the bottom edge).
-     */
-    var aimY = center.y - Math.max(size.y * 0.55, 0.35);
-
-    var focus = document.getElementById('orbit-focus');
-    if (focus) {
-      focus.object3D.position.set(center.x, aimY, center.z);
-    }
-
-    if (window.CpisViewerOrbit && window.CpisViewerOrbit.setFrame) {
-      window.CpisViewerOrbit.setFrame(center.x, aimY, center.z, dist, 0.45, 0.82);
-    }
+    var maxDim = Math.max(size.x, size.y, size.z, 0.3);
+    var dist = Math.max(maxDim * 1.35, 4.2);
+    dist = Math.min(dist, 11);
+    frameCamera(dist);
     return true;
   }
 
   function focusOnMount(mount) {
     if (!mount) return;
 
+    frameCamera(6);
+
     var tries = 0;
     function attempt() {
       if (applyFocus(mount)) return;
       tries += 1;
-      if (tries < 80) {
+      if (tries < 100) {
         requestAnimationFrame(attempt);
-      } else if (window.CpisViewerOrbit && window.CpisViewerOrbit.setFrame) {
-        window.CpisViewerOrbit.setFrame(0, 2, 0, 5, 0.45, 0.82);
+      } else {
+        frameCamera(6);
       }
     }
     attempt();
+
     setTimeout(function () {
       applyFocus(mount);
-    }, 250);
+    }, 200);
     setTimeout(function () {
       applyFocus(mount);
-    }, 600);
+    }, 500);
+    setTimeout(function () {
+      applyFocus(mount);
+    }, 1000);
   }
 
   window.ViewerCamera = {
     focusOnMount: focusOnMount,
     previewScale: previewScale,
     PREVIEW_MAX: PREVIEW_MAX,
+    STAGE_Y: STAGE_Y,
   };
 })();

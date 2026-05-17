@@ -31,10 +31,10 @@
     init: function () {
       var self = this;
       this._T = AFRAME.THREE;
-      this._target = new this._T.Vector3(0, 1, 0);
-      this.theta = 0.82;
-      this.phi = 0.45;
-      this.distance = 5;
+      this._target = new this._T.Vector3(0, 2.75, 0);
+      this.theta = 0.85;
+      this.phi = 0.52;
+      this.distance = 6;
 
       this._dragging = false;
       this._pinching = false;

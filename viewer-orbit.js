@@ -1,13 +1,11 @@
 /**
- * viewer-orbit.js — orbit camera rig; window-level touch + button API.
+ * viewer-orbit.js — orbit on the camera entity (no parent rig).
  */
 
 (function () {
   'use strict';
 
   if (typeof AFRAME === 'undefined') return;
-
-  var activeOrbit = null;
 
   function isUiTarget(el) {
     if (!el || !el.closest) return false;
@@ -20,20 +18,24 @@
     );
   }
 
+  function radToDeg(r) {
+    return (r * 180) / Math.PI;
+  }
+
   AFRAME.registerComponent('cpis-touch-orbit', {
     schema: {
-      minDistance: { type: 'number', default: 1.2 },
-      maxDistance: { type: 'number', default: 24 },
+      minDistance: { type: 'number', default: 2 },
+      maxDistance: { type: 'number', default: 30 },
     },
 
     init: function () {
       var self = this;
-      activeOrbit = this;
       this._T = AFRAME.THREE;
-      this._target = new this._T.Vector3(0, 0.6, 0);
+      this._target = new this._T.Vector3(0, 1, 0);
       this.theta = 0.72;
       this.phi = 0.88;
-      this.distance = 10;
+      this.distance = 8;
+
       this._dragging = false;
       this._pinching = false;
       this._lastX = 0;
@@ -63,7 +65,7 @@
       window.addEventListener('touchend', this._onUp, opts);
       window.addEventListener('touchcancel', this._onUp, opts);
 
-      var canvas = this.el.sceneEl.canvas;
+      var canvas = this.el.sceneEl && this.el.sceneEl.canvas;
       if (canvas) canvas.style.touchAction = 'none';
 
       window.CpisViewerOrbit = {
@@ -84,23 +86,43 @@
           self.distance *= 1.2;
           self._clampDist();
         },
-        resetView: function () {
-          self.theta = 0.72;
-          self.phi = 0.88;
-          if (self._lastDist) self.distance = self._lastDist;
-          self._clampDist();
-        },
         setFrame: function (x, y, z, dist) {
           self._target.set(x, y, z);
           self.distance = dist;
-          self._lastDist = dist;
           self._clampDist();
         },
       };
+
+      this._applyOrbit();
     },
 
     _clampDist: function () {
-      this.distance = Math.min(this.data.maxDistance, Math.max(this.data.minDistance, this.distance));
+      this.distance = Math.min(
+        this.data.maxDistance,
+        Math.max(this.data.minDistance, this.distance)
+      );
+    },
+
+    _applyOrbit: function () {
+      var sinP = Math.sin(this.phi);
+      var px = this._target.x + this.distance * sinP * Math.sin(this.theta);
+      var py = this._target.y + this.distance * Math.cos(this.phi);
+      var pz = this._target.z + this.distance * sinP * Math.cos(this.theta);
+
+      this.el.object3D.position.set(px, py, pz);
+      this.el.object3D.lookAt(this._target);
+
+      var r = this.el.object3D.rotation;
+      this.el.setAttribute('rotation', {
+        x: radToDeg(r.x),
+        y: radToDeg(r.y),
+        z: radToDeg(r.z),
+      });
+
+      var focus = document.getElementById('orbit-focus');
+      if (focus) {
+        focus.object3D.position.copy(this._target);
+      }
     },
 
     _pointer: function (e) {
@@ -172,25 +194,7 @@
     },
 
     tick: function () {
-      var sinP = Math.sin(this.phi);
-      var px = this._target.x + this.distance * sinP * Math.sin(this.theta);
-      var py = this._target.y + this.distance * Math.cos(this.phi);
-      var pz = this._target.z + this.distance * sinP * Math.cos(this.theta);
-      this.el.object3D.position.set(px, py, pz);
-
-      var camEl = this._camEl;
-      if (!camEl) {
-        camEl = this.el.querySelector('a-camera');
-        this._camEl = camEl;
-      }
-      if (camEl) {
-        camEl.object3D.lookAt(this._target);
-      }
-
-      var focus = document.getElementById('orbit-focus');
-      if (focus) {
-        focus.object3D.position.copy(this._target);
-      }
+      this._applyOrbit();
     },
 
     remove: function () {
@@ -202,7 +206,6 @@
       window.removeEventListener('touchmove', this._onMove, true);
       window.removeEventListener('touchend', this._onUp, true);
       window.removeEventListener('touchcancel', this._onUp, true);
-      if (activeOrbit === this) activeOrbit = null;
     },
   });
 })();

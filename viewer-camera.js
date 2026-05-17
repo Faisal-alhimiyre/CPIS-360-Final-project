@@ -5,7 +5,7 @@
 (function () {
   'use strict';
 
-  var PREVIEW_MAX = 2.6;
+  var PREVIEW_MAX = 3.2;
 
   function three() {
     if (typeof AFRAME !== 'undefined' && AFRAME.THREE) return AFRAME.THREE;
@@ -61,8 +61,10 @@
     function attempt() {
       if (applyFocus(mount)) return;
       tries += 1;
-      if (tries < 40) {
+      if (tries < 60) {
         requestAnimationFrame(attempt);
+      } else if (window.CpisViewerOrbit && window.CpisViewerOrbit.setFrame) {
+        window.CpisViewerOrbit.setFrame(0, 1, 0, 8);
       }
     }
     attempt();

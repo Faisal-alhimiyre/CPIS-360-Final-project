@@ -67,6 +67,14 @@
     }
 
     function build() {
+      if (!window.BuildingGenerator) {
+        setError('3D generator failed to load. Hard-refresh the page.');
+        return;
+      }
+      if (!window.ViewerAppCore) {
+        setError('Viewer failed to load. Hard-refresh the page.');
+        return;
+      }
       var buildErr = window.ViewerAppCore.initFromSpec(spec);
       if (buildErr) setError(buildErr);
       else setError('');

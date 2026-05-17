@@ -1206,14 +1206,14 @@
     }
 
     if (spec.previewCutaway) {
-      var foot = Math.max(buildSpec.width, buildSpec.depth, 0.5);
-      var s;
-      if (spec.viewerMode === 'building') {
-        var stackH = buildSpec.height * 2;
-        s = 6.5 / Math.max(foot, stackH * 0.45);
-      } else {
-        s = 10 / foot;
-      }
+      var perFloorH = buildSpec.height / clampMin(buildSpec.floors, 1);
+      var stackH = spec.viewerMode === 'building' ? perFloorH * 2 : perFloorH;
+      var raw = Math.max(buildSpec.width, buildSpec.depth, stackH, 0.5);
+      var PREVIEW_MAX =
+        window.ViewerCamera && window.ViewerCamera.PREVIEW_MAX
+          ? window.ViewerCamera.PREVIEW_MAX
+          : 2.6;
+      var s = PREVIEW_MAX / raw;
       buildingRoot.setAttribute('scale', s + ' ' + s + ' ' + s);
     } else {
       var AR_MAX = 2.3;

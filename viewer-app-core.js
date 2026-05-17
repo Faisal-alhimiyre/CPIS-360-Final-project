@@ -28,11 +28,12 @@
 
   function afterRebuild(mount) {
     if (window.ViewerCamera && mount) {
+      var mode = state.mode;
       requestAnimationFrame(function () {
-        window.ViewerCamera.focusOnMount(mount);
-        requestAnimationFrame(function () {
-          window.ViewerCamera.focusOnMount(mount);
-        });
+        window.ViewerCamera.focusOnMount(mount, mode);
+        setTimeout(function () {
+          window.ViewerCamera.focusOnMount(mount, mode);
+        }, 120);
       });
     }
   }
@@ -40,6 +41,7 @@
   function rebuild() {
     var mount = document.getElementById('building-mount');
     if (!mount || !savedSpec) return 'Scene not ready.';
+    mount.setAttribute('position', '0 0 0');
 
     var perFloorH = savedSpec.height / clampMin(savedSpec.floors, 1);
     var buildSpec = Object.assign({}, savedSpec, {
@@ -87,18 +89,18 @@
     }
 
     if (state.mode === 'building') {
-      setHint('Use the blue buttons below OR tap a glowing floor in 3D · drag to rotate');
+      setHint('Tap 1st/2nd floor below · use ⟲ ⟳ + − to spin and zoom');
     } else if (state.mode === 'floor') {
       setHint(
         'Floor ' +
           (state.floorIndex + 1) +
-          ' — tap Apartment 1 or 2 · drag/pinch to move view'
+          ' — tap Apartment 1 or 2 · use ⟲ ⟳ + − on the right'
       );
     } else {
       setHint(
         'Apt ' +
           (state.aptIndex + 1) +
-          ' — tap room then floor to move · drag/pinch for 360°'
+          ' — tap room then floor to move · ⟲ ⟳ + − to spin/zoom'
       );
     }
     setBackButton();

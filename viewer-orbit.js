@@ -1,5 +1,5 @@
 /**
- * viewer-orbit.js — touch/mouse orbit on #camera-rig (works with A-Frame; no OrbitControls fight).
+ * viewer-orbit.js — orbit camera rig; window-level touch + button API.
  */
 
 (function () {
@@ -7,57 +7,100 @@
 
   if (typeof AFRAME === 'undefined') return;
 
+  var activeOrbit = null;
+
+  function isUiTarget(el) {
+    if (!el || !el.closest) return false;
+    return !!(
+      el.closest('.pick-btn') ||
+      el.closest('.viewer-bar') ||
+      el.closest('.orbit-pad') ||
+      el.closest('a') ||
+      el.closest('button')
+    );
+  }
+
   AFRAME.registerComponent('cpis-touch-orbit', {
     schema: {
-      target: { type: 'vec3', default: { x: 0, y: 1, z: 0 } },
-      minDistance: { type: 'number', default: 2 },
-      maxDistance: { type: 'number', default: 55 },
+      minDistance: { type: 'number', default: 1.2 },
+      maxDistance: { type: 'number', default: 24 },
     },
 
     init: function () {
       var self = this;
-      var T = AFRAME.THREE;
-      this._T = T;
-      this._target = new T.Vector3();
-      this._offset = new T.Vector3();
-      this.theta = 0.75;
-      this.phi = 1.05;
-      this.distance = 14;
+      activeOrbit = this;
+      this._T = AFRAME.THREE;
+      this._target = new this._T.Vector3(0, 0.6, 0);
+      this.theta = 0.72;
+      this.phi = 0.88;
+      this.distance = 10;
       this._dragging = false;
       this._pinching = false;
       this._lastX = 0;
       this._lastY = 0;
       this._pinchDist = 0;
+
+      this._onDown = function (e) {
+        self._pointerDown(e);
+      };
+      this._onMove = function (e) {
+        self._pointerMove(e);
+      };
+      this._onUp = function () {
+        self._pointerUp();
+      };
+      this._onWheel = function (e) {
+        self._wheel(e);
+      };
+
+      var opts = { passive: false, capture: true };
+      window.addEventListener('mousedown', this._onDown, opts);
+      window.addEventListener('mousemove', this._onMove, opts);
+      window.addEventListener('mouseup', this._onUp, opts);
+      window.addEventListener('wheel', this._onWheel, opts);
+      window.addEventListener('touchstart', this._onDown, opts);
+      window.addEventListener('touchmove', this._onMove, opts);
+      window.addEventListener('touchend', this._onUp, opts);
+      window.addEventListener('touchcancel', this._onUp, opts);
+
+      var canvas = this.el.sceneEl.canvas;
+      if (canvas) canvas.style.touchAction = 'none';
+
       window.CpisViewerOrbit = {
         isDragging: function () {
           return self._dragging || self._pinching;
         },
+        rotateLeft: function () {
+          self.theta += 0.28;
+        },
+        rotateRight: function () {
+          self.theta -= 0.28;
+        },
+        zoomIn: function () {
+          self.distance *= 0.82;
+          self._clampDist();
+        },
+        zoomOut: function () {
+          self.distance *= 1.2;
+          self._clampDist();
+        },
+        resetView: function () {
+          self.theta = 0.72;
+          self.phi = 0.88;
+          if (self._lastDist) self.distance = self._lastDist;
+          self._clampDist();
+        },
+        setFrame: function (x, y, z, dist) {
+          self._target.set(x, y, z);
+          self.distance = dist;
+          self._lastDist = dist;
+          self._clampDist();
+        },
       };
+    },
 
-      this._onDown = function (e) {
-        self._onPointerDown(e);
-      };
-      this._onMove = function (e) {
-        self._onPointerMove(e);
-      };
-      this._onUp = function (e) {
-        self._onPointerUp(e);
-      };
-      this._onWheel = function (e) {
-        self._onWheelZoom(e);
-      };
-
-      var canvas = this.el.sceneEl.canvas;
-      canvas.style.touchAction = 'none';
-      canvas.addEventListener('mousedown', this._onDown);
-      canvas.addEventListener('mousemove', this._onMove);
-      canvas.addEventListener('mouseup', this._onUp);
-      canvas.addEventListener('mouseleave', this._onUp);
-      canvas.addEventListener('wheel', this._onWheel, { passive: false });
-      canvas.addEventListener('touchstart', this._onDown, { passive: false });
-      canvas.addEventListener('touchmove', this._onMove, { passive: false });
-      canvas.addEventListener('touchend', this._onUp);
-      canvas.addEventListener('touchcancel', this._onUp);
+    _clampDist: function () {
+      this.distance = Math.min(this.data.maxDistance, Math.max(this.data.minDistance, this.distance));
     },
 
     _pointer: function (e) {
@@ -77,8 +120,8 @@
       return Math.sqrt(dx * dx + dy * dy);
     },
 
-    _onPointerDown: function (e) {
-      if (e.target && e.target.closest && e.target.closest('.viewer-overlay')) return;
+    _pointerDown: function (e) {
+      if (isUiTarget(e.target)) return;
       if (e.touches && e.touches.length === 2) {
         this._pinching = true;
         this._pinchDist = this._pinchLength(e);
@@ -92,15 +135,12 @@
       e.preventDefault();
     },
 
-    _onPointerMove: function (e) {
+    _pointerMove: function (e) {
       if (e.touches && e.touches.length === 2 && this._pinching) {
         var d = this._pinchLength(e);
         if (this._pinchDist > 0) {
           this.distance *= this._pinchDist / d;
-          this.distance = Math.min(
-            this.data.maxDistance,
-            Math.max(this.data.minDistance, this.distance)
-          );
+          this._clampDist();
         }
         this._pinchDist = d;
         e.preventDefault();
@@ -112,66 +152,49 @@
       var dy = p.y - this._lastY;
       this._lastX = p.x;
       this._lastY = p.y;
-      this.theta -= dx * 0.008;
-      this.phi -= dy * 0.008;
-      this.phi = Math.max(0.15, Math.min(Math.PI - 0.15, this.phi));
+      this.theta -= dx * 0.009;
+      this.phi -= dy * 0.009;
+      this.phi = Math.max(0.4, Math.min(1.25, this.phi));
       e.preventDefault();
     },
 
-    _onPointerUp: function () {
+    _pointerUp: function () {
       this._dragging = false;
       this._pinching = false;
       this._pinchDist = 0;
     },
 
-    _onWheelZoom: function (e) {
-      if (e.target && e.target.closest && e.target.closest('.viewer-overlay')) return;
-      this.distance += e.deltaY * 0.012;
-      this.distance = Math.min(
-        this.data.maxDistance,
-        Math.max(this.data.minDistance, this.distance)
-      );
+    _wheel: function (e) {
+      if (isUiTarget(e.target)) return;
+      this.distance += e.deltaY * 0.008;
+      this._clampDist();
       e.preventDefault();
     },
 
-    setDistance: function (d) {
-      this.distance = Math.min(this.data.maxDistance, Math.max(this.data.minDistance, d));
-    },
-
-    setTarget: function (x, y, z) {
-      this.data.target.x = x;
-      this.data.target.y = y;
-      this.data.target.z = z;
-    },
-
     tick: function () {
-      var T = this._T;
-      this._target.set(this.data.target.x, this.data.target.y, this.data.target.z);
       var sinP = Math.sin(this.phi);
-      this._offset.set(
-        this.distance * sinP * Math.sin(this.theta),
-        this.distance * Math.cos(this.phi),
-        this.distance * sinP * Math.cos(this.theta)
-      );
-      var px = this._target.x + this._offset.x;
-      var py = this._target.y + this._offset.y;
-      var pz = this._target.z + this._offset.z;
+      var px = this._target.x + this.distance * sinP * Math.sin(this.theta);
+      var py = this._target.y + this.distance * Math.cos(this.phi);
+      var pz = this._target.z + this.distance * sinP * Math.cos(this.theta);
       this.el.object3D.position.set(px, py, pz);
       this.el.object3D.lookAt(this._target);
+
+      var focus = document.getElementById('orbit-focus');
+      if (focus) {
+        focus.object3D.position.copy(this._target);
+      }
     },
 
     remove: function () {
-      var canvas = this.el.sceneEl.canvas;
-      if (!canvas) return;
-      canvas.removeEventListener('mousedown', this._onDown);
-      canvas.removeEventListener('mousemove', this._onMove);
-      canvas.removeEventListener('mouseup', this._onUp);
-      canvas.removeEventListener('mouseleave', this._onUp);
-      canvas.removeEventListener('wheel', this._onWheel);
-      canvas.removeEventListener('touchstart', this._onDown);
-      canvas.removeEventListener('touchmove', this._onMove);
-      canvas.removeEventListener('touchend', this._onUp);
-      canvas.removeEventListener('touchcancel', this._onUp);
+      window.removeEventListener('mousedown', this._onDown, true);
+      window.removeEventListener('mousemove', this._onMove, true);
+      window.removeEventListener('mouseup', this._onUp, true);
+      window.removeEventListener('wheel', this._onWheel, true);
+      window.removeEventListener('touchstart', this._onDown, true);
+      window.removeEventListener('touchmove', this._onMove, true);
+      window.removeEventListener('touchend', this._onUp, true);
+      window.removeEventListener('touchcancel', this._onUp, true);
+      if (activeOrbit === this) activeOrbit = null;
     },
   });
 })();

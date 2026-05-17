@@ -13,6 +13,7 @@
       overflow: hidden;
       background: #b8bcc4;
       font: 14px system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      touch-action: none;
     }
     a-scene {
       position: fixed !important;
@@ -62,9 +63,9 @@
       cursor: pointer;
     }
     #viewer-hint {
-      flex: 1 1 180px;
+      flex: 1 1 160px;
       min-width: 0;
-      font-size: 13px;
+      font-size: 12px;
     }
     #viewer-error {
       flex: 1 0 100%;
@@ -88,54 +89,71 @@
     }
     .viewer-overlay--bottom {
       bottom: 0;
-      background: linear-gradient(transparent, rgba(15, 23, 42, 0.55));
+      background: linear-gradient(transparent, rgba(15, 23, 42, 0.5));
     }
     .pick-btn {
       pointer-events: auto;
-      flex: 1 1 140px;
-      max-width: 200px;
-      padding: 14px 12px;
+      flex: 1 1 130px;
+      max-width: 180px;
+      padding: 12px 10px;
       border: 3px solid #0369a1;
       border-radius: 12px;
       background: #0ea5e9;
       color: #fff;
       font-weight: 800;
-      font-size: 15px;
-      line-height: 1.25;
+      font-size: 14px;
+      line-height: 1.2;
       text-align: center;
       cursor: pointer;
       box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
-      animation: pulse-btn 1.2s ease-in-out infinite alternate;
-    }
-    .pick-btn:active {
-      transform: scale(0.97);
     }
     .pick-btn--secondary {
       background: #6366f1;
       border-color: #4338ca;
     }
-    @keyframes pulse-btn {
-      from {
-        box-shadow: 0 4px 12px rgba(14, 165, 233, 0.35);
-      }
-      to {
-        box-shadow: 0 6px 20px rgba(14, 165, 233, 0.75);
-      }
-    }
-    .orbit-hint {
+    .orbit-pad {
       position: fixed;
-      bottom: 88px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 15;
-      padding: 6px 14px;
-      border-radius: 20px;
-      background: rgba(15, 23, 42, 0.72);
-      color: #f8fafc;
-      font-size: 12px;
-      font-weight: 600;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 25;
+      display: grid;
+      grid-template-columns: 44px 44px;
+      grid-template-rows: 44px 44px 44px;
+      gap: 6px;
       pointer-events: none;
-      white-space: nowrap;
+    }
+    .orbit-pad button {
+      pointer-events: auto;
+      width: 44px;
+      height: 44px;
+      border: 2px solid #0f172a;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.95);
+      font-size: 20px;
+      font-weight: 800;
+      line-height: 1;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+    .orbit-pad button:active {
+      background: #e0f2fe;
+    }
+    #orb-zoom-in {
+      grid-column: 1;
+    }
+    #orb-zoom-out {
+      grid-column: 2;
+    }
+    #orb-left {
+      grid-column: 1 / span 2;
+      justify-self: center;
+      width: 92px;
+    }
+    #orb-right {
+      grid-column: 1 / span 2;
+      justify-self: center;
+      width: 92px;
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/aframe@1.2.0/dist/aframe.min.js"></script>
@@ -148,7 +166,12 @@
     <p id="viewer-error" role="alert" style="color:#9d174d;font-weight:600"></p>
   </div>
 
-  <p class="orbit-hint" id="orbit-hint-pill">Drag to rotate · Pinch to zoom</p>
+  <div class="orbit-pad" aria-label="Rotate and zoom">
+    <button type="button" id="orb-zoom-in" title="Zoom in">+</button>
+    <button type="button" id="orb-zoom-out" title="Zoom out">−</button>
+    <button type="button" id="orb-left" title="Rotate left">⟲</button>
+    <button type="button" id="orb-right" title="Rotate right">⟳</button>
+  </div>
 
   <div class="viewer-overlay viewer-overlay--bottom" id="overlay-floors" hidden>
     <button type="button" class="pick-btn" id="pick-floor-0">1st floor</button>
@@ -163,33 +186,31 @@
   <a-scene
     id="viewer-scene"
     vr-mode-ui="enabled: false"
+    embedded
     background="color: #b8bcc4"
-    renderer="antialias: true; colorManagement: true"
+    renderer="antialias: true"
     device-orientation-permission-ui="enabled: false"
   >
-    <a-entity light="type: ambient; color: #ffffff; intensity: 0.78"></a-entity>
-    <a-entity light="type: directional; color: #ffffff; intensity: 0.92" position="4 9 6"></a-entity>
-    <a-entity light="type: directional; color: #e2e8f0; intensity: 0.38" position="-5 3 -4"></a-entity>
-
+    <a-entity id="orbit-focus" position="0 0.6 0"></a-entity>
     <a-entity id="building-mount" position="0 0 0"></a-entity>
 
-    <a-entity id="camera-rig" cpis-touch-orbit="target: 0 1 0; minDistance: 2; maxDistance: 55">
-      <a-camera
-        id="viewer-camera"
-        look-controls="enabled: false"
-        wasd-controls="enabled: false"
-      ></a-camera>
+    <a-entity light="type: ambient; color: #ffffff; intensity: 0.8"></a-entity>
+    <a-entity light="type: directional; color: #ffffff; intensity: 0.9" position="3 6 5"></a-entity>
+
+    <a-entity id="camera-rig" cpis-touch-orbit="minDistance: 1.5; maxDistance: 22">
+      <a-camera id="viewer-camera" look-controls="enabled: false" wasd-controls="enabled: false"></a-camera>
     </a-entity>
   </a-scene>
 
-  <script src="viewer-orbit.js?v=3"></script>
-  <script src="viewer-camera.js?v=2"></script>
-  <script src="generator.js?v=realestate-17"></script>
-  <script src="room-relocate.js?v=realestate-6"></script>
+  <script src="viewer-camera.js?v=4"></script>
+  <script src="viewer-orbit.js?v=5"></script>
+  <script src="viewer-controls.js?v=2"></script>
+  <script src="generator.js?v=realestate-19"></script>
+  <script src="room-relocate.js?v=realestate-7"></script>
   <script src="viewer-navigation.js?v=3"></script>
   <script src="viewer-overlay.js?v=1"></script>
-  <script src="viewer-app-core.js?v=4"></script>
+  <script src="viewer-app-core.js?v=6"></script>
   <script src="ui.js?v=realestate-7"></script>
-  <script src="viewer-page.js?v=4"></script>
+  <script src="viewer-page.js?v=5"></script>
 </body>
 </html>

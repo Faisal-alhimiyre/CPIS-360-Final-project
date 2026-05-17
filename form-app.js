@@ -14,6 +14,7 @@
       try {
         spec.useFixedApartmentTemplate = true;
         spec.previewCutaway = true;
+        spec.apartments = Math.max(2, spec.apartments || 2);
         delete spec.apartmentLayout;
         sessionStorage.setItem(STORAGE_KEY, JSON.stringify(spec));
       } catch (e) {

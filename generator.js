@@ -467,6 +467,28 @@
     }
   }
 
+  /**
+   * First-floor footprint: two apartments, central hall, stairs at back of hall.
+   * @param {number} W
+   * @param {number} D
+   * @returns {{ apt0: Object, apt1: Object, hall: Object, stairs: Object }}
+   */
+  function getFirstFloorLayout(W, D) {
+    var hallFracW = 0.16;
+    var stairFracD = 0.22;
+    var hallW = W * hallFracW;
+    var aptW = (W - hallW) / 2;
+    var stairD = D * stairFracD;
+    var hallX0 = -hallW / 2;
+    var hallX1 = hallW / 2;
+    return {
+      apt0: { x0: -W / 2, x1: -W / 2 + aptW, z0: -D / 2, z1: D / 2 },
+      apt1: { x0: W / 2 - aptW, x1: W / 2, z0: -D / 2, z1: D / 2 },
+      hall: { x0: hallX0, x1: hallX1, z0: -D / 2, z1: D / 2 - stairD },
+      stairs: { x0: hallX0, x1: hallX1, z0: D / 2 - stairD, z1: D / 2 },
+    };
+  }
+
   /** Room tints for grey-background 3D preview (reference floor-plan style). */
   var PREVIEW_COLORS = {
     kitchen: '#e8c872',
@@ -478,14 +500,127 @@
   };
 
   /**
-   * Dollhouse cutaway: one floor, open front, solid walls + caps, no AR glass/roof/door clutter.
+   * First floor block: 2 apartments + hall + stairs (tap an apartment to open its layout).
    * @param {Element} parent
    * @param {BuildingSpec} spec
    */
-  function addFixedCutawayPreview(parent, spec) {
+  function addFirstFloorBlockPreview(parent, spec) {
+    var W = spec.width;
+    var D = spec.depth;
+    var layout = getFirstFloorLayout(W, D);
+    var wt = 0.06;
+    var slabT = 0.05;
+    var wallH = Math.min(1.05, Math.max(0.72, (spec.height / clampMin(spec.floors, 1)) * 0.52));
+    var floorY = 0.01;
+    var wallCenterY = floorY + slabT + wallH / 2;
+    var wallMat = 'color: #f8f9fa; shader: flat';
+    var capMat = 'color: #64748b; shader: flat';
+
+    function addCapWall(w, h, d, cx, cy, cz) {
+      parent.appendChild(
+        el('a-box', { width: w, height: h, depth: d, position: cx + ' ' + cy + ' ' + cz, material: wallMat })
+      );
+      var capH = 0.035;
+      parent.appendChild(
+        el('a-box', {
+          width: w,
+          height: capH,
+          depth: d,
+          position: cx + ' ' + (cy + h / 2 + capH / 2) + ' ' + cz,
+          material: capMat,
+        })
+      );
+    }
+
+    function addZone(box, col, label, extraClass, dataset) {
+      var cx = (box.x0 + box.x1) / 2;
+      var cz = (box.z0 + box.z1) / 2;
+      var bw = box.x1 - box.x0;
+      var bd = box.z1 - box.z0;
+      var attrs = {
+        width: bw,
+        height: slabT,
+        depth: bd,
+        position: cx + ' ' + (floorY + slabT / 2) + ' ' + cz,
+        material: 'color: ' + col + '; shader: flat',
+      };
+      if (extraClass) attrs.class = extraClass;
+      var slab = el('a-box', attrs);
+      if (dataset) {
+        Object.keys(dataset).forEach(function (k) {
+          slab.dataset[k] = dataset[k];
+        });
+      }
+      parent.appendChild(slab);
+      var tw = Math.min(Math.max(bw, bd) * 0.7, 3.5);
+      parent.appendChild(
+        el('a-text', {
+          value: label,
+          position: cx + ' ' + (wallCenterY + 0.15) + ' ' + cz,
+          align: 'center',
+          anchor: 'center',
+          baseline: 'center',
+          color: '#0f172a',
+          width: tw,
+          wrapCount: 14,
+        })
+      );
+      if (extraClass) {
+        var hit = el('a-plane', {
+          class: extraClass + ' clickable',
+          width: bw * 0.98,
+          height: bd * 0.98,
+          position: cx + ' ' + (floorY + slabT + 0.05) + ' ' + cz,
+          rotation: '-90 0 0',
+          material: 'opacity: 0.02; transparent: true; shader: flat; side: double',
+        });
+        if (dataset) {
+          Object.keys(dataset).forEach(function (k) {
+            hit.dataset[k] = dataset[k];
+          });
+        }
+        parent.appendChild(hit);
+      }
+    }
+
+    parent.appendChild(
+      el('a-box', {
+        width: W,
+        height: slabT,
+        depth: D,
+        position: '0 ' + (floorY + slabT / 2) + ' 0',
+        material: 'color: #94a3b8; shader: flat',
+      })
+    );
+
+    addZone(layout.apt0, '#93c5fd', 'Apartment 1\n(tap to open)', 'apt-picker-hit', { aptIndex: '0' });
+    addZone(layout.apt1, '#93c5fd', 'Apartment 2\n(tap to open)', 'apt-picker-hit', { aptIndex: '1' });
+    addZone(layout.hall, '#cbd5e1', 'Hallway', null, null);
+    addZone(layout.stairs, '#78716c', 'Stairs', null, null);
+
+    var z0 = -D / 2;
+    var z1 = D / 2;
+    addCapWall(W, wallH, wt, 0, wallCenterY, z0 + wt / 2);
+    addCapWall(W, wallH, wt, 0, wallCenterY, z1 - wt / 2);
+    addCapWall(wt, wallH, D, -W / 2 + wt / 2, wallCenterY, 0);
+    addCapWall(wt, wallH, D, W / 2 - wt / 2, wallCenterY, 0);
+
+    var hall = layout.hall;
+    addCapWall(wt, wallH, hall.z1 - hall.z0, hall.x0 - wt / 2, wallCenterY, (hall.z0 + hall.z1) / 2);
+    addCapWall(wt, wallH, hall.z1 - hall.z0, hall.x1 + wt / 2, wallCenterY, (hall.z0 + hall.z1) / 2);
+
+    var st = layout.stairs;
+    addCapWall(st.x1 - st.x0, wallH, wt, (st.x0 + st.x1) / 2, wallCenterY, st.z0 - wt / 2);
+  }
+
+  /**
+   * Dollhouse cutaway for one apartment zone (open front). aptIndex 0|1 uses first-floor layout.
+   * @param {Element} parent
+   * @param {BuildingSpec} spec
+   * @param {number} [aptIndex]
+   */
+  function addFixedCutawayPreview(parent, spec, aptIndex) {
     var floorH = spec.height / clampMin(spec.floors, 1);
-    var aptCount = clampMin(spec.apartments, 1);
-    var aptWidthOuter = spec.width / aptCount;
     var wt = 0.06;
     var wallH = Math.min(1.05, Math.max(0.72, floorH * 0.52));
     var slabT = 0.045;
@@ -526,20 +661,37 @@
     }
 
     var f;
-    var a;
     for (f = 0; f < spec.floors; f++) {
       var floorBaseY = f * floorH;
       floorY = floorBaseY + 0.01;
       wallCenterY = floorY + slabT + wallH / 2;
       labelY = wallCenterY + wallH * 0.12;
 
-      for (a = 0; a < aptCount; a++) {
-        var aptX0 = -spec.width / 2 + a * aptWidthOuter + wt;
-        var aptX1 = -spec.width / 2 + (a + 1) * aptWidthOuter - wt;
-        var usableW = aptX1 - aptX0;
-        var z0 = -spec.depth / 2 + wt;
-        var z1 = spec.depth / 2 - wt;
-        var usableD = z1 - z0;
+      var zone;
+      if (typeof aptIndex === 'number') {
+        var layout = getFirstFloorLayout(spec.width, spec.depth);
+        zone = aptIndex === 0 ? layout.apt0 : layout.apt1;
+      }
+
+      var aptX0;
+      var aptX1;
+      var z0;
+      var z1;
+      if (zone) {
+        aptX0 = zone.x0 + wt;
+        aptX1 = zone.x1 - wt;
+        z0 = zone.z0 + wt;
+        z1 = zone.z1 - wt;
+      } else {
+        aptX0 = -spec.width / 2 + wt;
+        aptX1 = spec.width / 2 - wt;
+        z0 = -spec.depth / 2 + wt;
+        z1 = spec.depth / 2 - wt;
+      }
+      var usableW = aptX1 - aptX0;
+      var usableD = z1 - z0;
+
+      (function buildOneApt() {
 
         var xLine1 = aptX0 + 0.36 * usableW;
         var xLine2 = aptX0 + 0.5 * usableW;
@@ -638,8 +790,8 @@
         addWall(usableW, wallH, wt, (aptX0 + aptX1) / 2, wallCenterY, z0 + wt / 2);
         addWall(wt, wallH, usableD, aptX0 + wt / 2, wallCenterY, (z0 + z1) / 2);
         addWall(wt, wallH, usableD, aptX1 - wt / 2, wallCenterY, (z0 + z1) / 2);
-        /* Open front (+Z): no front wall — dollhouse view like reference image. */
-      }
+        /* Open front (+Z): no front wall — dollhouse view. */
+      })();
     }
   }
 
@@ -918,7 +1070,13 @@
         height: perFloorH,
       });
       if (spec.previewCutaway) {
-        addFixedCutawayPreview(buildingRoot, buildSpec);
+        if (spec.viewerMode === 'apartment' && typeof spec.selectedApartmentIndex === 'number') {
+          addFixedCutawayPreview(buildingRoot, buildSpec, spec.selectedApartmentIndex);
+        } else if (spec.viewerMode === 'building' || clampMin(spec.apartments, 1) >= 2) {
+          addFirstFloorBlockPreview(buildingRoot, buildSpec);
+        } else {
+          addFixedCutawayPreview(buildingRoot, buildSpec);
+        }
       } else {
         addFixedSingleApartmentTemplate(buildingRoot, buildSpec);
       }
@@ -945,6 +1103,7 @@
 
   window.BuildingGenerator = {
     generateBuilding: generateBuilding,
+    getFirstFloorLayout: getFirstFloorLayout,
     COLORS: COLORS,
     WALL_T: WALL_T,
   };

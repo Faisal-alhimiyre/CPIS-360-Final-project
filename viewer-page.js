@@ -1,7 +1,7 @@
 /**
  * viewer-page.js
  * --------------
- * Load form spec and show 3D cutaway on grey background.
+ * Load form spec → building block first, then drill into an apartment.
  */
 
 (function () {
@@ -38,6 +38,18 @@
       }
     }
 
+    spec.apartments = Math.max(2, spec.apartments || 2);
+
+    var backBtn = document.getElementById('btn-back-building');
+    if (backBtn) {
+      backBtn.addEventListener('click', function () {
+        if (window.ViewerAppCore) {
+          window.ViewerAppCore.showBuilding();
+          setError('');
+        }
+      });
+    }
+
     var scene = document.getElementById('viewer-scene');
     if (!scene) {
       setError('Scene missing.');
@@ -45,7 +57,7 @@
     }
 
     function build() {
-      var buildErr = window.ViewerAppCore.rebuildFromSpec(spec);
+      var buildErr = window.ViewerAppCore.initFromSpec(spec);
       if (buildErr) {
         setError(buildErr);
         return;

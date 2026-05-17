@@ -18,6 +18,7 @@
       inset: 0;
       width: 100%;
       height: 100%;
+      touch-action: none;
     }
     .viewer-bar {
       position: fixed;
@@ -35,19 +36,37 @@
       border-bottom: 1px solid #94a3b8;
       color: #0f172a;
     }
-    .viewer-bar a {
+    .viewer-bar a,
+    .viewer-bar button {
       font-weight: 700;
+      font-size: 14px;
+      font-family: inherit;
+    }
+    .viewer-bar a {
       color: #6d28d9;
       text-decoration: none;
     }
+    #btn-back-building {
+      display: none;
+      padding: 6px 12px;
+      border: 1px solid #0369a1;
+      border-radius: 8px;
+      background: #fff;
+      color: #0369a1;
+      cursor: pointer;
+    }
+    #viewer-hint {
+      flex: 1 1 200px;
+      min-width: 0;
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/aframe@1.2.0/dist/aframe.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/aframe-orbit-controls@1.3.2/dist/aframe-orbit-controls.min.js"></script>
 </head>
 <body>
   <div class="viewer-bar">
     <a href="index.html?v=realestate-3">← Edit building</a>
-    <span id="viewer-hint">Drag to orbit · pinch/scroll to zoom · tap a room, then tap the floor to move it</span>
+    <button type="button" id="btn-back-building">← Building layout</button>
+    <span id="viewer-hint">Loading…</span>
     <p id="viewer-error" role="alert" style="margin:0;color:#9d174d;font-weight:600"></p>
   </div>
 
@@ -55,29 +74,31 @@
     id="viewer-scene"
     embedded
     background="color: #b8bcc4"
-    renderer="antialias: true; colorManagement: true; physicallyCorrectLights: true"
+    renderer="antialias: true; colorManagement: true"
   >
-    <a-entity light="type: ambient; color: #ffffff; intensity: 0.72"></a-entity>
-    <a-entity light="type: directional; color: #ffffff; intensity: 0.9" position="4 8 6"></a-entity>
-    <a-entity light="type: directional; color: #e2e8f0; intensity: 0.35" position="-5 3 -4"></a-entity>
+    <a-entity light="type: ambient; color: #ffffff; intensity: 0.75"></a-entity>
+    <a-entity light="type: directional; color: #ffffff; intensity: 0.95" position="5 10 7"></a-entity>
+    <a-entity light="type: directional; color: #e2e8f0; intensity: 0.4" position="-6 4 -5"></a-entity>
 
     <a-entity id="building-mount" position="0 0 0"></a-entity>
 
-    <a-entity id="camera-rig" position="0 0 0">
+    <a-entity id="camera-rig">
       <a-camera
         id="viewer-camera"
-        position="0 5.5 9"
+        position="0 10 16"
         look-controls="enabled: false"
         wasd-controls="enabled: false"
-        orbit-controls="target: 0 0.45 0; minDistance: 4; maxDistance: 28; enablePan: true; enableZoom: true; rotateSpeed: 0.45"
+        cpis-orbit-controls="target: 0 0.5 0; minDistance: 3; maxDistance: 55"
       ></a-camera>
     </a-entity>
   </a-scene>
 
-  <script src="generator.js?v=realestate-14"></script>
-  <script src="room-relocate.js?v=realestate-3"></script>
-  <script src="viewer-app-core.js?v=1"></script>
+  <script src="viewer-orbit.js?v=1"></script>
+  <script src="generator.js?v=realestate-15"></script>
+  <script src="room-relocate.js?v=realestate-4"></script>
+  <script src="viewer-navigation.js?v=1"></script>
+  <script src="viewer-app-core.js?v=2"></script>
   <script src="ui.js?v=realestate-7"></script>
-  <script src="viewer-page.js?v=1"></script>
+  <script src="viewer-page.js?v=2"></script>
 </body>
 </html>

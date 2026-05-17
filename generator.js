@@ -1212,7 +1212,7 @@
       var PREVIEW_MAX =
         window.ViewerCamera && window.ViewerCamera.PREVIEW_MAX
           ? window.ViewerCamera.PREVIEW_MAX
-          : 3.2;
+          : 5.5;
       var s = PREVIEW_MAX / raw;
       buildingRoot.setAttribute('scale', s + ' ' + s + ' ' + s);
     } else {

@@ -14,8 +14,6 @@
       var mount = document.getElementById('building-mount');
       if (mount && window.ViewerCamera && window.ViewerCamera.focusOnMount) {
         window.ViewerCamera.focusOnMount(mount);
-      } else if (window.ViewerCamera && window.ViewerCamera.reapplyViewOffset) {
-        window.ViewerCamera.reapplyViewOffset();
       }
     });
   }

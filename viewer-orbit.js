@@ -32,9 +32,9 @@
       var self = this;
       this._T = AFRAME.THREE;
       this._target = new this._T.Vector3(0, 1, 0);
-      this.theta = 0.78;
-      this.phi = 0.62;
-      this.distance = 6;
+      this.theta = 0.82;
+      this.phi = 0.45;
+      this.distance = 5;
 
       this._dragging = false;
       this._pinching = false;
@@ -92,45 +92,19 @@
           if (typeof phi === 'number') self.phi = phi;
           if (typeof theta === 'number') self.theta = theta;
           self._clampDist();
-          self._applyViewOffset();
-        },
-        applyViewOffset: function () {
-          self._applyViewOffset();
+          self._clearViewOffset();
         },
       };
 
-      this._onResize = function () {
-        self._applyViewOffset();
-      };
-      window.addEventListener('resize', this._onResize);
-
+      this._clearViewOffset();
       this._applyOrbit();
     },
 
-    _applyViewOffset: function () {
+    _clearViewOffset: function () {
       var camComp = this.el.components && this.el.components.camera;
-      if (!camComp || !camComp.camera) return;
-      var cam = camComp.camera;
-      var w = window.innerWidth;
-      var h = window.innerHeight;
-      if (w < 2 || h < 2) return;
-      var dpr = window.devicePixelRatio || 1;
-      var fullW = Math.round(w * dpr);
-      var fullH = Math.round(h * dpr);
-      var bar = document.querySelector('.viewer-bar');
-      var topH = bar ? bar.offsetHeight : 48;
-      var botH = 0;
-      var overlays = document.querySelectorAll('.viewer-overlay');
-      var i;
-      for (i = 0; i < overlays.length; i++) {
-        if (!overlays[i].hidden) {
-          botH = Math.max(botH, overlays[i].offsetHeight);
-        }
+      if (camComp && camComp.camera && camComp.camera.clearViewOffset) {
+        camComp.camera.clearViewOffset();
       }
-      if (!botH) botH = 88;
-      var midY = topH + (h - topH - botH) * 0.5;
-      var offsetPx = Math.round((h * 0.5 - midY) * dpr);
-      cam.setViewOffset(fullW, fullH, 0, offsetPx, fullW, fullH);
     },
 
     _clampDist: function () {
@@ -213,7 +187,7 @@
       this._lastY = p.y;
       this.theta -= dx * 0.009;
       this.phi -= dy * 0.009;
-      this.phi = Math.max(0.4, Math.min(1.25, this.phi));
+      this.phi = Math.max(0.32, Math.min(1.1, this.phi));
       e.preventDefault();
     },
 
@@ -235,9 +209,6 @@
     },
 
     remove: function () {
-      if (this._onResize) {
-        window.removeEventListener('resize', this._onResize);
-      }
       window.removeEventListener('mousedown', this._onDown, true);
       window.removeEventListener('mousemove', this._onMove, true);
       window.removeEventListener('mouseup', this._onUp, true);

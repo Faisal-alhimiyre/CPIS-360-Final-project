@@ -87,7 +87,7 @@
     }
 
     if (state.mode === 'building') {
-      setHint('Drag to spin · pinch to zoom · tap First or Second floor');
+      setHint('Use the blue buttons below OR tap a glowing floor in 3D · drag to rotate');
     } else if (state.mode === 'floor') {
       setHint(
         'Floor ' +
@@ -102,6 +102,9 @@
       );
     }
     setBackButton();
+    if (window.ViewerOverlay) {
+      window.ViewerOverlay.update(state);
+    }
     afterRebuild(mount);
     return null;
   }

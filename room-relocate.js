@@ -107,6 +107,7 @@
 
     var res = pickMount(mount, sceneEl, clientX, clientY);
     if (!res || res.type === 'door') return;
+    if (window.CpisViewerOrbit && window.CpisViewerOrbit.isDragging()) return;
 
     var now = Date.now();
     if (now - lastPickAt < 140) return;

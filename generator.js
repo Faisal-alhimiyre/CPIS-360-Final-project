@@ -519,11 +519,28 @@
 
     function addFloorBlock(floorIndex, baseY, color, label) {
       var cy = baseY + perFloorH / 2;
+      var bw = W * 0.98;
+      var bh = perFloorH;
+      var bd = D * 0.98;
+
+      parent.appendChild(
+        el('a-box', {
+          class: 'floor-picker-rim',
+          width: bw * 1.04,
+          height: bh * 1.06,
+          depth: bd * 1.04,
+          position: '0 ' + cy + ' 0',
+          material: 'color: #38bdf8; shader: flat; opacity: 0.45; transparent: true',
+          animation:
+            'property: material.opacity; from: 0.25; to: 0.55; dur: 900; dir: alternate; loop: true',
+        })
+      );
+
       var block = el('a-box', {
         class: 'floor-picker-hit',
-        width: W * 0.98,
-        height: perFloorH,
-        depth: D * 0.98,
+        width: bw,
+        height: bh,
+        depth: bd,
         position: '0 ' + cy + ' 0',
         material: 'color: ' + color + '; ' + blockMat,
       });
@@ -532,31 +549,31 @@
 
       var hit = el('a-plane', {
         class: 'floor-picker-hit clickable',
-        width: W * 0.96,
-        height: D * 0.96,
-        position: '0 ' + (baseY + perFloorH + 0.02) + ' 0',
+        width: bw,
+        height: bd,
+        position: '0 ' + (baseY + perFloorH + 0.04) + ' 0',
         rotation: '-90 0 0',
-        material: 'opacity: 0.02; transparent: true; shader: flat; side: double',
+        material: 'opacity: 0.04; transparent: true; shader: flat; side: double',
       });
       hit.dataset.floorIndex = String(floorIndex);
       parent.appendChild(hit);
 
       parent.appendChild(
         el('a-text', {
-          value: label,
-          position: '0 ' + (cy + perFloorH * 0.08) + ' 0',
+          value: '👆 ' + label,
+          position: '0 ' + (cy + perFloorH * 0.12) + ' 0',
           align: 'center',
           anchor: 'center',
           baseline: 'center',
-          color: '#f8fafc',
-          width: Math.min(W, D) * 0.85,
-          wrapCount: 12,
+          color: '#ffffff',
+          width: Math.min(W, D) * 0.9,
+          wrapCount: 14,
         })
       );
     }
 
-    addFloorBlock(0, 0, '#64748b', 'First floor\n(tap to open)');
-    addFloorBlock(1, perFloorH, '#475569', 'Second floor\n(tap to open)');
+    addFloorBlock(0, 0, '#64748b', 'FIRST FLOOR — TAP');
+    addFloorBlock(1, perFloorH, '#475569', 'SECOND FLOOR — TAP');
 
     var shaftH = perFloorH * 2;
     parent.appendChild(
@@ -648,6 +665,19 @@
           wrapCount: 14,
         })
       );
+      if (extraClass && extraClass.indexOf('apt-picker') >= 0) {
+        parent.appendChild(
+          el('a-box', {
+            width: bw * 1.03,
+            height: slabT * 3,
+            depth: bd * 1.03,
+            position: cx + ' ' + (floorY + slabT) + ' ' + cz,
+            material: 'color: #fbbf24; shader: flat; opacity: 0.5; transparent: true',
+            animation:
+              'property: material.opacity; from: 0.3; to: 0.65; dur: 800; dir: alternate; loop: true',
+          })
+        );
+      }
       if (extraClass) {
         var hit = el('a-plane', {
           class: extraClass + ' clickable',
@@ -655,7 +685,7 @@
           height: bd * 0.98,
           position: cx + ' ' + (floorY + slabT + 0.05) + ' ' + cz,
           rotation: '-90 0 0',
-          material: 'opacity: 0.02; transparent: true; shader: flat; side: double',
+          material: 'opacity: 0.04; transparent: true; shader: flat; side: double',
         });
         if (dataset) {
           Object.keys(dataset).forEach(function (k) {
@@ -676,8 +706,8 @@
       })
     );
 
-    addZone(layout.apt0, '#93c5fd', 'Apartment 1\n(tap to open)', 'apt-picker-hit', { aptIndex: '0' });
-    addZone(layout.apt1, '#93c5fd', 'Apartment 2\n(tap to open)', 'apt-picker-hit', { aptIndex: '1' });
+    addZone(layout.apt0, '#93c5fd', '👆 APT 1 — TAP', 'apt-picker-hit', { aptIndex: '0' });
+    addZone(layout.apt1, '#93c5fd', '👆 APT 2 — TAP', 'apt-picker-hit', { aptIndex: '1' });
     addZone(layout.hall, '#cbd5e1', 'Hallway', null, null);
     addZone(layout.stairs, '#78716c', 'Stairs', null, null);
 

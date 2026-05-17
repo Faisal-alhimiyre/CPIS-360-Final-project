@@ -21,6 +21,9 @@
       width: 100% !important;
       height: 100% !important;
     }
+    a-scene canvas {
+      touch-action: none !important;
+    }
     .viewer-bar {
       position: fixed;
       top: 0;
@@ -68,6 +71,72 @@
       margin: 0;
       pointer-events: auto;
     }
+    .viewer-overlay {
+      position: fixed;
+      left: 0;
+      right: 0;
+      z-index: 20;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      padding: 12px 14px;
+      padding-bottom: max(14px, env(safe-area-inset-bottom, 12px));
+      pointer-events: none;
+    }
+    .viewer-overlay[hidden] {
+      display: none !important;
+    }
+    .viewer-overlay--bottom {
+      bottom: 0;
+      background: linear-gradient(transparent, rgba(15, 23, 42, 0.55));
+    }
+    .pick-btn {
+      pointer-events: auto;
+      flex: 1 1 140px;
+      max-width: 200px;
+      padding: 14px 12px;
+      border: 3px solid #0369a1;
+      border-radius: 12px;
+      background: #0ea5e9;
+      color: #fff;
+      font-weight: 800;
+      font-size: 15px;
+      line-height: 1.25;
+      text-align: center;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+      animation: pulse-btn 1.2s ease-in-out infinite alternate;
+    }
+    .pick-btn:active {
+      transform: scale(0.97);
+    }
+    .pick-btn--secondary {
+      background: #6366f1;
+      border-color: #4338ca;
+    }
+    @keyframes pulse-btn {
+      from {
+        box-shadow: 0 4px 12px rgba(14, 165, 233, 0.35);
+      }
+      to {
+        box-shadow: 0 6px 20px rgba(14, 165, 233, 0.75);
+      }
+    }
+    .orbit-hint {
+      position: fixed;
+      bottom: 88px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 15;
+      padding: 6px 14px;
+      border-radius: 20px;
+      background: rgba(15, 23, 42, 0.72);
+      color: #f8fafc;
+      font-size: 12px;
+      font-weight: 600;
+      pointer-events: none;
+      white-space: nowrap;
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/aframe@1.2.0/dist/aframe.min.js"></script>
 </head>
@@ -77,6 +146,18 @@
     <button type="button" id="btn-back-building">← Back</button>
     <span id="viewer-hint">Loading…</span>
     <p id="viewer-error" role="alert" style="color:#9d174d;font-weight:600"></p>
+  </div>
+
+  <p class="orbit-hint" id="orbit-hint-pill">Drag to rotate · Pinch to zoom</p>
+
+  <div class="viewer-overlay viewer-overlay--bottom" id="overlay-floors" hidden>
+    <button type="button" class="pick-btn" id="pick-floor-0">1st floor</button>
+    <button type="button" class="pick-btn pick-btn--secondary" id="pick-floor-1">2nd floor</button>
+  </div>
+
+  <div class="viewer-overlay viewer-overlay--bottom" id="overlay-apts" hidden>
+    <button type="button" class="pick-btn" id="pick-apt-0">Apartment 1</button>
+    <button type="button" class="pick-btn pick-btn--secondary" id="pick-apt-1">Apartment 2</button>
   </div>
 
   <a-scene
@@ -92,22 +173,23 @@
 
     <a-entity id="building-mount" position="0 0 0"></a-entity>
 
-    <a-camera
-      id="viewer-camera"
-      position="0 4 8"
-      look-controls="enabled: false"
-      wasd-controls="enabled: false"
-      cpis-orbit-controls="target: 0 1 0; minDistance: 2; maxDistance: 50"
-    ></a-camera>
+    <a-entity id="camera-rig" cpis-touch-orbit="target: 0 1 0; minDistance: 2; maxDistance: 55">
+      <a-camera
+        id="viewer-camera"
+        look-controls="enabled: false"
+        wasd-controls="enabled: false"
+      ></a-camera>
+    </a-entity>
   </a-scene>
 
-  <script src="viewer-orbit.js?v=2"></script>
-  <script src="viewer-camera.js?v=1"></script>
-  <script src="generator.js?v=realestate-16"></script>
-  <script src="room-relocate.js?v=realestate-5"></script>
-  <script src="viewer-navigation.js?v=2"></script>
-  <script src="viewer-app-core.js?v=3"></script>
+  <script src="viewer-orbit.js?v=3"></script>
+  <script src="viewer-camera.js?v=2"></script>
+  <script src="generator.js?v=realestate-17"></script>
+  <script src="room-relocate.js?v=realestate-6"></script>
+  <script src="viewer-navigation.js?v=3"></script>
+  <script src="viewer-overlay.js?v=1"></script>
+  <script src="viewer-app-core.js?v=4"></script>
   <script src="ui.js?v=realestate-7"></script>
-  <script src="viewer-page.js?v=3"></script>
+  <script src="viewer-page.js?v=4"></script>
 </body>
 </html>

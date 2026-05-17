@@ -49,6 +49,17 @@
       });
     }
 
+    if (window.ViewerOverlay) {
+      window.ViewerOverlay.bind({
+        onFloor: function (fi) {
+          if (window.ViewerAppCore) window.ViewerAppCore.showFloor(fi);
+        },
+        onApt: function (ai) {
+          if (window.ViewerAppCore) window.ViewerAppCore.showApartment(ai);
+        },
+      });
+    }
+
     var scene = document.getElementById('viewer-scene');
     if (!scene) {
       setError('Scene missing.');

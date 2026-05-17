@@ -53,6 +53,7 @@
 
   function onPointerEnd(evt) {
     if (!mount || !pickMode) return;
+    if (window.CpisViewerOrbit && window.CpisViewerOrbit.isDragging()) return;
     var tch = evt.changedTouches && evt.changedTouches[0];
     var x = tch ? tch.clientX : evt.clientX;
     var y = tch ? tch.clientY : evt.clientY;

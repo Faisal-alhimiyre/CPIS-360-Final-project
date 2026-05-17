@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>AR Building Preview — configure your model</title>
+  <title>3D Apartment Preview — configure your model</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400..700;1,9..40,400..700&family=Fraunces:opsz,wght@9..144,500;9..144,700&display=swap" rel="stylesheet" />
@@ -13,26 +13,20 @@
   <main class="listing-shell">
     <article class="listing-card">
       <header class="listing-hero">
-        <p class="eyebrow">Augmented reality preview</p>
-        <h1>Design a building, then walk around it on your desk</h1>
+        <p class="eyebrow">3D floor-plan preview</p>
+        <h1>Design an apartment, then explore it in 3D</h1>
         <p class="lead">
-          This site is for <strong>exploring a layout in AR</strong>: you set the size of one floor, how many levels you want, and how rooms are arranged.
-          The numbers are <strong>real metres</strong> (like an architect’s drawing). If you enter a 20&nbsp;m by 20&nbsp;m floor, one level covers
-          <strong>20 × 20 = 400&nbsp;m²</strong> — the same multiplication you would use on paper.
+          Set your floor size in <strong>real metres</strong>, then open a <strong>3D dollhouse view</strong> on a grey background — drag to orbit, pinch to zoom.
+          You can <strong>tap a room and move it</strong> on the floor. One template apartment (Kitchen, Entrance, Bathroom, Living room, Bedroom) for now.
         </p>
       </header>
 
       <details class="how-ar">
-        <summary>Optional: how the next screens work</summary>
+        <summary>Optional: how the 3D viewer works</summary>
         <ol class="steps">
-          <li>On the camera page, the model appears on a <strong>printed square marker</strong> so the phone can keep it steady while you look around.</li>
-          <li>Tap the <strong>door</strong> for the cutaway inside view; swipe to rotate the model.</li>
+          <li><strong>Drag</strong> to orbit around the model; <strong>scroll or pinch</strong> to zoom.</li>
+          <li><strong>Tap a coloured room</strong> to select it, then <strong>tap the floor</strong> where it should go.</li>
         </ol>
-        <p class="dev-foot">
-          <a href="https://raw.githubusercontent.com/AR-js-org/ARToolkit5/master/bin/HIRO.jpg" target="_blank" rel="noopener">Printable marker image</a>
-          <span aria-hidden="true">·</span>
-          <a href="ar-test.html?v=markerfix-24" target="_blank" rel="noopener">Minimal AR test</a>
-        </p>
       </details>
 
       <form id="building-form" novalidate>
@@ -111,7 +105,7 @@
         </fieldset>
 
         <div class="form-actions">
-          <button type="submit" id="btn-generate">Open camera &amp; AR</button>
+          <button type="submit" id="btn-generate">Open 3D preview</button>
         </div>
         <p id="form-message" class="form-message" role="status"></p>
       </form>

@@ -467,6 +467,182 @@
     }
   }
 
+  /** Room tints for grey-background 3D preview (reference floor-plan style). */
+  var PREVIEW_COLORS = {
+    kitchen: '#e8c872',
+    entrance: '#d1d5db',
+    bathroom: '#b8cfc0',
+    living: '#c9a87c',
+    bedroom: '#7e9cc4',
+    hallway: '#94a3b8',
+  };
+
+  /**
+   * Dollhouse cutaway: one floor, open front, solid walls + caps, no AR glass/roof/door clutter.
+   * @param {Element} parent
+   * @param {BuildingSpec} spec
+   */
+  function addFixedCutawayPreview(parent, spec) {
+    var floorH = spec.height / clampMin(spec.floors, 1);
+    var aptCount = clampMin(spec.apartments, 1);
+    var aptWidthOuter = spec.width / aptCount;
+    var wt = 0.06;
+    var wallH = Math.min(1.05, Math.max(0.72, floorH * 0.52));
+    var slabT = 0.045;
+    var floorY = 0;
+    var wallCenterY = floorY + slabT + wallH / 2;
+    var labelY = wallCenterY + 0.08;
+    var wallMat = 'color: #f8f9fa; shader: flat; opacity: 1';
+    var capMat = 'color: #64748b; shader: flat';
+
+    var rooms = [
+      { key: 'kitchen', label: 'Kitchen', x0: 0, x1: 0.36, z0: 0, z1: 0.32 },
+      { key: 'entrance', label: 'Entrance', x0: 0.36, x1: 0.5, z0: 0, z1: 0.32 },
+      { key: 'bathroom', label: 'Bathroom', x0: 0.5, x1: 1, z0: 0, z1: 0.32 },
+      { key: 'living', label: 'Living room', x0: 0, x1: 0.66, z0: 0.32, z1: 1 },
+      { key: 'bedroom', label: 'Bedroom', x0: 0.66, x1: 1, z0: 0.32, z1: 1 },
+    ];
+
+    function addWall(w, h, d, cx, cy, cz) {
+      parent.appendChild(
+        el('a-box', {
+          width: w,
+          height: h,
+          depth: d,
+          position: cx + ' ' + cy + ' ' + cz,
+          material: wallMat,
+        })
+      );
+      var capH = 0.035;
+      parent.appendChild(
+        el('a-box', {
+          width: w,
+          height: capH,
+          depth: d,
+          position: cx + ' ' + (cy + h / 2 + capH / 2) + ' ' + cz,
+          material: capMat,
+        })
+      );
+    }
+
+    var f;
+    var a;
+    for (f = 0; f < spec.floors; f++) {
+      var floorBaseY = f * floorH;
+      floorY = floorBaseY + 0.01;
+      wallCenterY = floorY + slabT + wallH / 2;
+      labelY = wallCenterY + wallH * 0.12;
+
+      for (a = 0; a < aptCount; a++) {
+        var aptX0 = -spec.width / 2 + a * aptWidthOuter + wt;
+        var aptX1 = -spec.width / 2 + (a + 1) * aptWidthOuter - wt;
+        var usableW = aptX1 - aptX0;
+        var z0 = -spec.depth / 2 + wt;
+        var z1 = spec.depth / 2 - wt;
+        var usableD = z1 - z0;
+
+        var xLine1 = aptX0 + 0.36 * usableW;
+        var xLine2 = aptX0 + 0.5 * usableW;
+        var xLine3 = aptX0 + 0.66 * usableW;
+        var zLine1 = z0 + 0.32 * usableD;
+
+        var innerX0 = aptX0 + wt / 2;
+        var innerX1 = aptX1 - wt / 2;
+        var innerZ0 = z0 + wt / 2;
+        var innerZ1 = z1 - wt / 2;
+
+        var floorHit = el('a-box', {
+          class: 'clickable relocate-floor-hit',
+          width: usableW,
+          height: slabT,
+          depth: usableD,
+          position: (aptX0 + aptX1) / 2 + ' ' + (floorY + slabT / 2) + ' ' + (z0 + z1) / 2,
+          material: 'color: #cbd5e1; shader: flat',
+        });
+        floorHit.dataset.innerX0 = String(innerX0);
+        floorHit.dataset.innerX1 = String(innerX1);
+        floorHit.dataset.innerZ0 = String(innerZ0);
+        floorHit.dataset.innerZ1 = String(innerZ1);
+        parent.appendChild(floorHit);
+
+        var ri;
+        for (ri = 0; ri < rooms.length; ri++) {
+          var rm = rooms[ri];
+          var xL = aptX0 + rm.x0 * usableW + wt * 0.2;
+          var xR = aptX0 + rm.x1 * usableW - wt * 0.2;
+          var zB = z0 + rm.z0 * usableD + wt * 0.2;
+          var zF = z0 + rm.z1 * usableD - wt * 0.2;
+          var bw = Math.max(0.1, xR - xL);
+          var bd = Math.max(0.1, zF - zB);
+          var cx = (xL + xR) / 2;
+          var cz = (zB + zF) / 2;
+          var col = PREVIEW_COLORS[rm.key] || COLORS[rm.key] || '#cbd5e1';
+
+          var grp = el('a-entity', {
+            class: 'room-cluster',
+            'data-room-key': rm.key,
+            position: cx + ' ' + floorY + ' ' + cz,
+          });
+          grp.dataset.halfW = String(bw / 2);
+          grp.dataset.halfD = String(bd / 2);
+
+          var slab = el('a-box', {
+            width: bw,
+            height: slabT,
+            depth: bd,
+            position: '0 ' + (slabT * 1.05) + ' 0',
+            material: 'color: ' + col + '; shader: flat',
+            'data-room': rm.key,
+            'data-slab': '1',
+          });
+
+          var tw = Math.min(Math.max(bw, bd) * 0.75, 2.8);
+          var label = el('a-text', {
+            value: rm.label,
+            position: '0 ' + (labelY - floorY) + ' 0',
+            align: 'center',
+            anchor: 'center',
+            baseline: 'center',
+            color: '#1e293b',
+            width: tw,
+            wrapCount: 16,
+          });
+
+          var hitPad = el('a-plane', {
+            class: 'clickable room-select-hit',
+            width: bw,
+            height: bd,
+            position: '0 ' + (wallH * 0.35) + ' 0',
+            rotation: '-90 0 0',
+            material: 'opacity: 0.01; transparent: true; shader: flat; side: double',
+            'data-room-key': rm.key,
+          });
+
+          grp.appendChild(slab);
+          grp.appendChild(label);
+          grp.appendChild(hitPad);
+          parent.appendChild(grp);
+        }
+
+        var topZ0 = innerZ0;
+        var topZ1 = zLine1 - wt / 2;
+        addWall(wt, wallH, Math.max(0.05, topZ1 - topZ0), xLine1, wallCenterY, (topZ0 + topZ1) / 2);
+        addWall(wt, wallH, Math.max(0.05, topZ1 - topZ0), xLine2, wallCenterY, (topZ0 + topZ1) / 2);
+
+        var botZ0 = zLine1 + wt / 2;
+        var botZ1 = innerZ1;
+        addWall(wt, wallH, Math.max(0.05, botZ1 - botZ0), xLine3, wallCenterY, (botZ0 + botZ1) / 2);
+
+        addWall(Math.max(0.05, innerX1 - innerX0), wallH, wt, (innerX0 + innerX1) / 2, wallCenterY, zLine1);
+
+        addWall(usableW, wallH, wt, (aptX0 + aptX1) / 2, wallCenterY, z0 + wt / 2);
+        addWall(wt, wallH, usableD, aptX0 + wt / 2, wallCenterY, (z0 + z1) / 2);
+        addWall(wt, wallH, usableD, aptX1 - wt / 2, wallCenterY, (z0 + z1) / 2);
+        /* Open front (+Z): no front wall — dollhouse view like reference image. */
+      }
+    }
+  }
+
   function addInteriorRooms(parent, spec) {
     var floorH = spec.height / clampMin(spec.floors, 1);
     var aptCount = clampMin(spec.apartments, 1);
@@ -736,17 +912,16 @@
     var buildSpec = spec;
 
     if (spec.useFixedApartmentTemplate) {
-      // One floor in AR for now: same template footprint, height = one storey (total height / floors).
       var perFloorH = spec.height / clampMin(spec.floors, 1);
       buildSpec = Object.assign({}, spec, {
         floors: 1,
         height: perFloorH,
       });
-      addFixedSingleApartmentTemplate(buildingRoot, buildSpec);
-      /*
-       * Full-building shell (façades, marker-scale box) paused while we perfect one apartment unit.
-       * Restore later: addShell(buildingRoot, spec);
-       */
+      if (spec.previewCutaway) {
+        addFixedCutawayPreview(buildingRoot, buildSpec);
+      } else {
+        addFixedSingleApartmentTemplate(buildingRoot, buildSpec);
+      }
     } else if (spec.apartmentLayout && layoutGridValid(spec.apartmentLayout)) {
       addInteriorRoomsFromLayout(buildingRoot, spec, spec.apartmentLayout);
       addShell(buildingRoot, spec);
@@ -755,13 +930,17 @@
       addShell(buildingRoot, spec);
     }
 
-    // Fit inside ~2.3×2.3×2.3 virtual units on the marker. Per-axis scale keeps width/depth readable when
-    // total height is large (uniform scale used to crush the footprint into a grey pillar).
-    var AR_MAX = 2.3;
-    var gw = Math.max(buildSpec.width, 0.2);
-    var gh = Math.max(buildSpec.height, 0.2);
-    var gd = Math.max(buildSpec.depth, 0.2);
-    buildingRoot.setAttribute('scale', AR_MAX / gw + ' ' + AR_MAX / gh + ' ' + AR_MAX / gd);
+    if (spec.previewCutaway) {
+      var foot = Math.max(buildSpec.width, buildSpec.depth, 0.5);
+      var s = 10 / foot;
+      buildingRoot.setAttribute('scale', s + ' ' + s + ' ' + s);
+    } else {
+      var AR_MAX = 2.3;
+      var gw = Math.max(buildSpec.width, 0.2);
+      var gh = Math.max(buildSpec.height, 0.2);
+      var gd = Math.max(buildSpec.depth, 0.2);
+      buildingRoot.setAttribute('scale', AR_MAX / gw + ' ' + AR_MAX / gh + ' ' + AR_MAX / gd);
+    }
   }
 
   window.BuildingGenerator = {

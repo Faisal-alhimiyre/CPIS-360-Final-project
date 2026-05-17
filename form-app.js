@@ -1,7 +1,7 @@
 /**
  * form-app.js
  * -----------
- * index.html only: valid submit → save spec → AR with fixed single-apartment template (MVP).
+ * index.html only: valid submit → save spec → 3D viewer (cutaway apartment).
  */
 
 (function () {
@@ -13,13 +13,14 @@
     window.Ui.bindForm(function (spec) {
       try {
         spec.useFixedApartmentTemplate = true;
+        spec.previewCutaway = true;
         delete spec.apartmentLayout;
         sessionStorage.setItem(STORAGE_KEY, JSON.stringify(spec));
       } catch (e) {
         window.Ui.setMessage('Could not save your inputs. Allow site storage or try another browser.');
         return;
       }
-      window.location.href = 'ar.html?v=markerfix-24&c=' + String(Date.now());
+      window.location.href = 'viewer.html?v=preview-1&c=' + String(Date.now());
     });
   }
 

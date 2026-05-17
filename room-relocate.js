@@ -143,7 +143,7 @@
   function attach(root) {
     detach();
     mount = root;
-    sceneEl = document.querySelector('a-scene');
+    sceneEl = document.getElementById('viewer-scene') || document.getElementById('ar-scene');
     if (!mount || !sceneEl) return;
 
     onPickBound = onPick;

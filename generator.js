@@ -1238,7 +1238,7 @@
         } else if (spec.viewerMode === 'floor') {
           addFirstFloorBlockPreview(buildingRoot, buildSpec);
         } else if (spec.viewerMode === 'building') {
-          addBuildingDollhousePreview(buildingRoot, buildSpec);
+          addBuildingStackPreview(buildingRoot, buildSpec);
         } else if (clampMin(spec.apartments, 1) >= 2) {
           addFirstFloorBlockPreview(buildingRoot, buildSpec);
         } else {
@@ -1262,7 +1262,7 @@
       var PREVIEW_MAX =
         window.ViewerCamera && window.ViewerCamera.PREVIEW_MAX
           ? window.ViewerCamera.PREVIEW_MAX
-          : 5;
+          : 6;
       var s = PREVIEW_MAX / raw;
       buildingRoot.setAttribute('scale', s + ' ' + s + ' ' + s);
     } else {

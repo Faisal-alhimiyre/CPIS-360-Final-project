@@ -28,10 +28,10 @@
       var self = this;
       this._T = AFRAME.THREE;
       this._look = new this._T.Vector3();
-      this._targetY = 1.35;
-      this.theta = 0.75;
-      this.phi = 0.78;
-      this.distance = 6.5;
+      this._targetY = 1.2;
+      this.theta = 0.72;
+      this.phi = 0.76;
+      this.distance = 7.5;
 
       this._dragging = false;
       this._pinching = false;

@@ -28,9 +28,10 @@
       var self = this;
       this._T = AFRAME.THREE;
       this._look = new this._T.Vector3();
-      this.theta = 0.72;
-      this.phi = 0.84;
-      this.distance = 7;
+      this._targetY = 1.35;
+      this.theta = 0.75;
+      this.phi = 0.78;
+      this.distance = 6.5;
 
       this._dragging = false;
       this._pinching = false;
@@ -82,10 +83,17 @@
           self.distance *= 1.25;
           self._clampDist();
         },
-        setView: function (dist, phi, theta) {
+        setView: function (dist, phi, theta, targetY) {
           self.distance = dist;
           if (typeof phi === 'number') self.phi = phi;
           if (typeof theta === 'number') self.theta = theta;
+          if (typeof targetY === 'number') {
+            self._targetY = targetY;
+            var pivot = self._pivot();
+            if (pivot) {
+              pivot.setAttribute('position', '0 ' + targetY + ' 0');
+            }
+          }
           self._clampDist();
         },
       };
@@ -114,7 +122,7 @@
       var dz = this.distance * sinP * Math.cos(this.theta);
 
       this.el.object3D.position.set(dx, dy, dz);
-      pivot.object3D.getWorldPosition(this._look);
+      this._look.set(0, this._targetY, 0);
       this.el.object3D.lookAt(this._look);
     },
 

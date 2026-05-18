@@ -11,7 +11,7 @@
       height: 100%;
       width: 100%;
       overflow: hidden;
-      background: #3d4f63;
+      background: #c5cad3;
       font: 14px system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
       touch-action: none;
     }
@@ -190,17 +190,13 @@
   <a-scene
     id="viewer-scene"
     vr-mode-ui="enabled: false"
-    background="color: #3d4f63"
+    background="color: #c5cad3"
     renderer="antialias: true"
     device-orientation-permission-ui="enabled: false"
   >
-    <a-entity id="orbit-focus" position="0 2.75 0"></a-entity>
+    <a-entity id="building-mount" position="0 0 0"></a-entity>
 
-    <a-entity id="model-stage" position="0 2.75 0">
-      <a-entity id="building-mount" position="0 0 0"></a-entity>
-    </a-entity>
-
-    <a-entity id="orbit-pivot" position="0 2.75 0">
+    <a-entity id="orbit-pivot" position="0 1.35 0">
       <a-entity id="orbit-arm" cpis-touch-orbit="minDistance: 1.2; maxDistance: 28">
         <a-camera
           id="viewer-camera"
@@ -215,10 +211,10 @@
     <a-entity light="type: directional; color: #ffffff; intensity: 0.95" position="5 10 8"></a-entity>
   </a-scene>
 
-  <script src="viewer-camera.js?v=12"></script>
-  <script src="viewer-orbit.js?v=13"></script>
+  <script src="viewer-camera.js?v=13"></script>
+  <script src="viewer-orbit.js?v=14"></script>
   <script src="viewer-controls.js?v=2"></script>
-  <script src="generator.js?v=realestate-23"></script>
+  <script src="generator.js?v=realestate-24"></script>
   <script src="room-relocate.js?v=realestate-7"></script>
   <script src="viewer-navigation.js?v=3"></script>
   <script src="viewer-overlay.js?v=2"></script>

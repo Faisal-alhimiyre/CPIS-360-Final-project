@@ -523,19 +523,6 @@
       var bh = perFloorH;
       var bd = D * 0.98;
 
-      parent.appendChild(
-        el('a-box', {
-          class: 'floor-picker-rim',
-          width: bw * 1.04,
-          height: bh * 1.06,
-          depth: bd * 1.04,
-          position: '0 ' + cy + ' 0',
-          material: 'color: #38bdf8; shader: flat; opacity: 0.45; transparent: true',
-          animation:
-            'property: material.opacity; from: 0.25; to: 0.55; dur: 900; dir: alternate; loop: true',
-        })
-      );
-
       var block = el('a-box', {
         class: 'floor-picker-hit',
         width: bw,
@@ -1188,7 +1175,7 @@
         } else if (spec.viewerMode === 'floor') {
           addFirstFloorBlockPreview(buildingRoot, buildSpec);
         } else if (spec.viewerMode === 'building') {
-          addBuildingStackPreview(buildingRoot, buildSpec);
+          addFirstFloorBlockPreview(buildingRoot, buildSpec);
         } else if (clampMin(spec.apartments, 1) >= 2) {
           addFirstFloorBlockPreview(buildingRoot, buildSpec);
         } else {

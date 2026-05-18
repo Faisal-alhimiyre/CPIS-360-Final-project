@@ -24,6 +24,10 @@
     }
     a-scene canvas {
       touch-action: none !important;
+      cursor: grab;
+    }
+    a-scene canvas:active {
+      cursor: grabbing;
     }
     .viewer-bar {
       position: fixed;
@@ -209,14 +213,14 @@
     ></a-camera>
   </a-scene>
 
-  <script src="viewer-camera.js?v=9"></script>
-  <script src="viewer-orbit.js?v=10"></script>
+  <script src="viewer-camera.js?v=10"></script>
+  <script src="viewer-orbit.js?v=11"></script>
   <script src="viewer-controls.js?v=2"></script>
-  <script src="generator.js?v=realestate-20"></script>
+  <script src="generator.js?v=realestate-21"></script>
   <script src="room-relocate.js?v=realestate-7"></script>
   <script src="viewer-navigation.js?v=3"></script>
   <script src="viewer-overlay.js?v=2"></script>
-  <script src="viewer-app-core.js?v=9"></script>
+  <script src="viewer-app-core.js?v=10"></script>
   <script src="ui.js?v=realestate-7"></script>
   <script src="viewer-page.js?v=6"></script>
 </body>

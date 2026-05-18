@@ -185,8 +185,8 @@
       var dy = p.y - this._lastY;
       this._lastX = p.x;
       this._lastY = p.y;
-      this.theta -= dx * 0.009;
-      this.phi -= dy * 0.009;
+      this.theta -= dx * 0.012;
+      this.phi -= dy * 0.012;
       this.phi = Math.max(0.32, Math.min(1.1, this.phi));
       e.preventDefault();
     },

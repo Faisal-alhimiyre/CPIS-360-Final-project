@@ -1,6 +1,5 @@
 /**
- * viewer-camera.js
- * Model lives on a fixed-height stage (center of screen). Camera always looks at the stage.
+ * viewer-camera.js — center model on stage; camera orbits the middle of the screen.
  */
 
 (function () {
@@ -21,9 +20,16 @@
     return PREVIEW_MAX / raw;
   }
 
-  function frameCamera(dist) {
+  function frameCamera(dist, theta, phi) {
     if (window.CpisViewerOrbit && window.CpisViewerOrbit.setFrame) {
-      window.CpisViewerOrbit.setFrame(0, STAGE_Y, 0, dist, 0.52, 0.85);
+      window.CpisViewerOrbit.setFrame(
+        0,
+        STAGE_Y,
+        0,
+        dist,
+        typeof phi === 'number' ? phi : 0.58,
+        typeof theta === 'number' ? theta : 0.78
+      );
     }
     var focus = document.getElementById('orbit-focus');
     if (focus) {
@@ -33,7 +39,8 @@
 
   function applyFocus(mount) {
     var T = three();
-    if (!T || !mount) return false;
+    var stage = document.getElementById('model-stage');
+    if (!T || !mount || !stage) return false;
 
     mount.setAttribute('rotation', '0 0 0');
     mount.setAttribute('position', '0 0 0');
@@ -42,22 +49,27 @@
     var box = new T.Box3().setFromObject(mount.object3D);
     if (box.isEmpty()) return false;
 
-    var center = box.getCenter(new T.Vector3());
     var size = box.getSize(new T.Vector3());
+    var centerWorld = box.getCenter(new T.Vector3());
+    var stageWorld = new T.Vector3();
+    stage.object3D.getWorldPosition(stageWorld);
 
-    mount.setAttribute('position', -center.x + ' 0 ' + -center.z);
+    mount.setAttribute(
+      'position',
+      (stageWorld.x - centerWorld.x) + ' 0 ' + (stageWorld.z - centerWorld.z)
+    );
 
     var maxDim = Math.max(size.x, size.y, size.z, 0.3);
-    var dist = Math.max(maxDim * 1.35, 4.2);
-    dist = Math.min(dist, 11);
-    frameCamera(dist);
+    var dist = Math.max(maxDim * 1.22, 4);
+    dist = Math.min(dist, 10);
+    frameCamera(dist, 0.78, 0.58);
     return true;
   }
 
   function focusOnMount(mount) {
     if (!mount) return;
 
-    frameCamera(6);
+    frameCamera(5.5, 0.78, 0.58);
 
     var tries = 0;
     function attempt() {
@@ -66,20 +78,16 @@
       if (tries < 100) {
         requestAnimationFrame(attempt);
       } else {
-        frameCamera(6);
+        frameCamera(5.5, 0.78, 0.58);
       }
     }
     attempt();
 
-    setTimeout(function () {
-      applyFocus(mount);
-    }, 200);
-    setTimeout(function () {
-      applyFocus(mount);
-    }, 500);
-    setTimeout(function () {
-      applyFocus(mount);
-    }, 1000);
+    [200, 500, 1000].forEach(function (ms) {
+      setTimeout(function () {
+        applyFocus(mount);
+      }, ms);
+    });
   }
 
   window.ViewerCamera = {

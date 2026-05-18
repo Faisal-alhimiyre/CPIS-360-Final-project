@@ -559,8 +559,8 @@
       );
     }
 
-    addFloorBlock(0, 0, '#64748b', 'FIRST FLOOR — TAP');
-    addFloorBlock(1, perFloorH, '#475569', 'SECOND FLOOR — TAP');
+    addFloorBlock(0, 0, '#94a3b8', '1st floor');
+    addFloorBlock(1, perFloorH, '#64748b', '2nd floor');
 
     var shaftH = perFloorH * 2;
     parent.appendChild(
@@ -584,6 +584,72 @@
         wrapCount: 8,
       })
     );
+  }
+
+  /**
+   * Dollhouse building: 3D floor 1 layout + floor 2 block (isometric-friendly, centered).
+   * @param {Element} parent
+   * @param {BuildingSpec} spec
+   */
+  function addBuildingDollhousePreview(parent, spec) {
+    var perFloorH = spec.height / clampMin(spec.floors, 1);
+    var W = spec.width;
+    var D = spec.depth;
+
+    var floor1 = document.createElement('a-entity');
+    floor1.setAttribute('class', 'floor-picker-hit');
+    floor1.dataset.floorIndex = '0';
+    parent.appendChild(floor1);
+    addFirstFloorBlockPreview(floor1, spec);
+
+    var y2 = perFloorH;
+    var floor2 = document.createElement('a-entity');
+    floor2.setAttribute('class', 'floor-picker-hit');
+    floor2.setAttribute('position', '0 ' + y2 + ' 0');
+    floor2.dataset.floorIndex = '1';
+    parent.appendChild(floor2);
+
+    var cy2 = y2 + perFloorH / 2;
+    floor2.appendChild(
+      el('a-box', {
+        width: W * 0.96,
+        height: perFloorH * 0.92,
+        depth: D * 0.96,
+        position: '0 ' + perFloorH / 2 + ' 0',
+        material: 'color: #64748b; shader: flat',
+      })
+    );
+    floor2.appendChild(
+      el('a-box', {
+        width: W * 0.94,
+        height: 0.06,
+        depth: D * 0.94,
+        position: '0 ' + (perFloorH - 0.02) + ' 0',
+        material: 'color: #475569; shader: flat',
+      })
+    );
+    floor2.appendChild(
+      el('a-text', {
+        value: '2nd floor',
+        position: '0 ' + (perFloorH * 0.55) + ' 0',
+        align: 'center',
+        anchor: 'center',
+        baseline: 'center',
+        color: '#f8fafc',
+        width: Math.min(W, D) * 0.7,
+        wrapCount: 10,
+      })
+    );
+    var hit2 = el('a-plane', {
+      class: 'floor-picker-hit clickable',
+      width: W,
+      height: D,
+      position: '0 ' + perFloorH + ' 0',
+      rotation: '-90 0 0',
+      material: 'opacity: 0.01; transparent: true; shader: flat; side: double',
+    });
+    hit2.dataset.floorIndex = '1';
+    floor2.appendChild(hit2);
   }
 
   /**
@@ -719,7 +785,7 @@
   function addFixedCutawayPreview(parent, spec, aptIndex) {
     var floorH = spec.height / clampMin(spec.floors, 1);
     var wt = 0.06;
-    var wallH = Math.min(1.05, Math.max(0.72, floorH * 0.52));
+    var wallH = Math.min(1.55, Math.max(1.0, floorH * 0.72));
     var slabT = 0.045;
     var floorY = 0;
     var wallCenterY = floorY + slabT + wallH / 2;
@@ -1172,7 +1238,7 @@
         } else if (spec.viewerMode === 'floor') {
           addFirstFloorBlockPreview(buildingRoot, buildSpec);
         } else if (spec.viewerMode === 'building') {
-          addBuildingStackPreview(buildingRoot, buildSpec);
+          addBuildingDollhousePreview(buildingRoot, buildSpec);
         } else if (clampMin(spec.apartments, 1) >= 2) {
           addFirstFloorBlockPreview(buildingRoot, buildSpec);
         } else {
@@ -1196,7 +1262,7 @@
       var PREVIEW_MAX =
         window.ViewerCamera && window.ViewerCamera.PREVIEW_MAX
           ? window.ViewerCamera.PREVIEW_MAX
-          : 5.5;
+          : 4.2;
       var s = PREVIEW_MAX / raw;
       buildingRoot.setAttribute('scale', s + ' ' + s + ' ' + s);
     } else {

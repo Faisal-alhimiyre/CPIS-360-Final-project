@@ -1,12 +1,11 @@
 /**
- * viewer-camera.js — center model on stage; orbit pivot = screen center.
+ * viewer-camera.js — center model at origin, isometric orbit (reference-style).
  */
 
 (function () {
   'use strict';
 
-  var PREVIEW_MAX = 5.5;
-  var STAGE_Y = 2.75;
+  var PREVIEW_MAX = 4.2;
 
   function three() {
     if (typeof AFRAME !== 'undefined' && AFRAME.THREE) return AFRAME.THREE;
@@ -20,32 +19,24 @@
     return PREVIEW_MAX / raw;
   }
 
-  function setPivot() {
+  /** Isometric-style orbit (like reference dollhouse image). */
+  function frameCamera(dist) {
     var pivot = document.getElementById('orbit-pivot');
     if (pivot) {
-      pivot.setAttribute('position', '0 ' + STAGE_Y + ' 0');
+      pivot.setAttribute('position', '0 0 0');
     }
     var focus = document.getElementById('orbit-focus');
     if (focus) {
-      focus.setAttribute('position', '0 ' + STAGE_Y + ' 0');
+      focus.setAttribute('position', '0 0 0');
     }
-  }
-
-  function frameCamera(dist, phi, theta) {
-    setPivot();
     if (window.CpisViewerOrbit && window.CpisViewerOrbit.setView) {
-      window.CpisViewerOrbit.setView(
-        dist,
-        typeof phi === 'number' ? phi : 0.55,
-        typeof theta === 'number' ? theta : 0.75
-      );
+      window.CpisViewerOrbit.setView(dist, 0.84, 0.72);
     }
   }
 
   function applyFocus(mount) {
     var T = three();
-    var stage = document.getElementById('model-stage');
-    if (!T || !mount || !stage) return false;
+    if (!T || !mount) return false;
 
     mount.setAttribute('rotation', '0 0 0');
     mount.setAttribute('position', '0 0 0');
@@ -54,27 +45,28 @@
     var box = new T.Box3().setFromObject(mount.object3D);
     if (box.isEmpty()) return false;
 
+    var center = box.getCenter(new T.Vector3());
     var size = box.getSize(new T.Vector3());
-    var centerWorld = box.getCenter(new T.Vector3());
-    var stageWorld = new T.Vector3();
-    stage.object3D.getWorldPosition(stageWorld);
 
     mount.setAttribute(
       'position',
-      (stageWorld.x - centerWorld.x) + ' 0 ' + (stageWorld.z - centerWorld.z)
+      -center.x + ' ' + -center.y + ' ' + -center.z
     );
 
-    var maxDim = Math.max(size.x, size.y, size.z, 0.25);
-    var dist = Math.max(maxDim * 1.15, 3.5);
-    dist = Math.min(dist, 11);
-    frameCamera(dist, 0.55, 0.75);
+    mount.object3D.updateMatrixWorld(true);
+    box.setFromObject(mount.object3D);
+    size = box.getSize(new T.Vector3());
+
+    var maxDim = Math.max(size.x, size.y, size.z, 0.35);
+    var dist = Math.max(maxDim * 2.05, 5);
+    dist = Math.min(dist, 13);
+    frameCamera(dist);
     return true;
   }
 
   function focusOnMount(mount) {
     if (!mount) return;
-    setPivot();
-    frameCamera(5.5, 0.55, 0.75);
+    frameCamera(7);
 
     var tries = 0;
     function attempt() {
@@ -83,11 +75,11 @@
       if (tries < 100) {
         requestAnimationFrame(attempt);
       } else {
-        frameCamera(5.5, 0.55, 0.75);
+        frameCamera(7);
       }
     }
     attempt();
-    [150, 400, 800, 1200].forEach(function (ms) {
+    [200, 500, 1000].forEach(function (ms) {
       setTimeout(function () {
         applyFocus(mount);
       }, ms);
@@ -98,6 +90,5 @@
     focusOnMount: focusOnMount,
     previewScale: previewScale,
     PREVIEW_MAX: PREVIEW_MAX,
-    STAGE_Y: STAGE_Y,
   };
 })();

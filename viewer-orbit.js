@@ -28,9 +28,9 @@
       var self = this;
       this._T = AFRAME.THREE;
       this._look = new this._T.Vector3();
-      this.theta = 0.75;
-      this.phi = 0.55;
-      this.distance = 6;
+      this.theta = 0.72;
+      this.phi = 0.84;
+      this.distance = 7;
 
       this._dragging = false;
       this._pinching = false;

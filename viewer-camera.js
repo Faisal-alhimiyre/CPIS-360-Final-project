@@ -1,12 +1,11 @@
 /**
- * viewer-camera.js — simple fixed framing (no auto-center that hides the model).
+ * viewer-camera.js — aim at the real middle of the 3D boxes (fixes model at bottom).
  */
 
 (function () {
   'use strict';
 
-  var PREVIEW_MAX = 6;
-  var PIVOT_Y = 1.2;
+  var PREVIEW_MAX = 8;
 
   function three() {
     if (typeof AFRAME !== 'undefined' && AFRAME.THREE) return AFRAME.THREE;
@@ -20,27 +19,80 @@
     return PREVIEW_MAX / raw;
   }
 
-  function frameCamera(dist) {
+  function modelMetrics(mount) {
+    var T = three();
+    if (!T || !mount) return null;
+
+    mount.object3D.updateMatrixWorld(true);
+    var box = new T.Box3();
+    var hit = false;
+    var nodes = mount.querySelectorAll('a-box');
+    var i;
+
+    for (i = 0; i < nodes.length; i++) {
+      var el = nodes[i];
+      if (!el.object3D) continue;
+      var b = new T.Box3().setFromObject(el.object3D);
+      if (b.isEmpty()) continue;
+      if (!hit) {
+        box.copy(b);
+        hit = true;
+      } else {
+        box.union(b);
+      }
+    }
+
+    if (!hit) return null;
+
+    var center = box.getCenter(new T.Vector3());
+    var size = box.getSize(new T.Vector3());
+    return { center: center, size: size };
+  }
+
+  function aimAtModel(mount) {
+    var m = modelMetrics(mount);
     var pivot = document.getElementById('orbit-pivot');
-    if (pivot) {
-      pivot.setAttribute('position', '0 ' + PIVOT_Y + ' 0');
+    if (!m || !pivot) {
+      if (pivot) pivot.setAttribute('position', '0 2.5 0');
+      if (window.CpisViewerOrbit) {
+        window.CpisViewerOrbit.setView(8, 0.95, 0.78, 2.5);
+      }
+      return false;
     }
-    if (window.CpisViewerOrbit && window.CpisViewerOrbit.setView) {
-      window.CpisViewerOrbit.setView(dist, 0.76, 0.72, PIVOT_Y);
+
+    var cy = m.center.y;
+    var maxDim = Math.max(m.size.x, m.size.y, m.size.z, 0.4);
+    var dist = Math.max(maxDim * 1.65, 5);
+    dist = Math.min(dist, 14);
+
+    pivot.setAttribute('position', '0 ' + cy + ' 0');
+    if (window.CpisViewerOrbit) {
+      window.CpisViewerOrbit.setView(dist, 0.95, 0.78, cy);
     }
+    return true;
   }
 
   function focusOnMount(mount) {
     if (!mount) return;
     mount.setAttribute('position', '0 0 0');
     mount.setAttribute('rotation', '0 0 0');
-    frameCamera(7.5);
-    setTimeout(function () {
-      frameCamera(7.5);
-    }, 400);
-    setTimeout(function () {
-      frameCamera(7.5);
-    }, 1000);
+
+    var tries = 0;
+    function attempt() {
+      if (aimAtModel(mount)) return;
+      tries += 1;
+      if (tries < 150) {
+        requestAnimationFrame(attempt);
+      } else {
+        aimAtModel(mount);
+      }
+    }
+    attempt();
+    [300, 700, 1500].forEach(function (ms) {
+      setTimeout(function () {
+        aimAtModel(mount);
+      }, ms);
+    });
   }
 
   window.ViewerCamera = {

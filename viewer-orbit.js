@@ -1,5 +1,5 @@
 /**
- * viewer-orbit.js — orbit arm around pivot; drag / pinch / buttons / wheel.
+ * viewer-orbit.js — orbit camera around orbit-pivot (world lookAt).
  */
 
 (function () {
@@ -20,18 +20,18 @@
 
   AFRAME.registerComponent('cpis-touch-orbit', {
     schema: {
-      minDistance: { type: 'number', default: 1.2 },
-      maxDistance: { type: 'number', default: 28 },
+      minDistance: { type: 'number', default: 2 },
+      maxDistance: { type: 'number', default: 22 },
     },
 
     init: function () {
       var self = this;
       this._T = AFRAME.THREE;
       this._look = new this._T.Vector3();
-      this._targetY = 1.2;
-      this.theta = 0.72;
-      this.phi = 0.76;
-      this.distance = 7.5;
+      this._targetY = 2.5;
+      this.theta = 0.78;
+      this.phi = 0.95;
+      this.distance = 8;
 
       this._dragging = false;
       this._pinching = false;
@@ -80,7 +80,7 @@
           self._clampDist();
         },
         zoomOut: function () {
-          self.distance *= 1.25;
+          self.distance *= 1.22;
           self._clampDist();
         },
         setView: function (dist, phi, theta, targetY) {
@@ -122,7 +122,7 @@
       var dz = this.distance * sinP * Math.cos(this.theta);
 
       this.el.object3D.position.set(dx, dy, dz);
-      this._look.set(0, this._targetY, 0);
+      pivot.object3D.getWorldPosition(this._look);
       this.el.object3D.lookAt(this._look);
     },
 
@@ -177,7 +177,7 @@
       this._lastY = p.y;
       this.theta -= dx * 0.014;
       this.phi -= dy * 0.014;
-      this.phi = Math.max(0.28, Math.min(1.05, this.phi));
+      this.phi = Math.max(0.35, Math.min(1.12, this.phi));
       e.preventDefault();
     },
 
@@ -189,7 +189,7 @@
 
     _wheel: function (e) {
       if (isUiTarget(e.target)) return;
-      this.distance += e.deltaY * 0.012;
+      this.distance += e.deltaY * 0.014;
       this._clampDist();
       e.preventDefault();
     },

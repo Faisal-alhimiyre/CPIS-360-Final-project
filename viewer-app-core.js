@@ -82,7 +82,7 @@
     }
 
     if (state.mode === 'building') {
-      setHint('3D building — drag to rotate · + − zoom · tap 1st/2nd floor below');
+      setHint('Drag grey area to rotate · + − zoom · tap 1st/2nd floor');
     } else if (state.mode === 'floor') {
       setHint(
         'Floor ' +

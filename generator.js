@@ -597,11 +597,12 @@
     var layout = getFirstFloorLayout(W, D);
     var wt = 0.06;
     var slabT = 0.05;
-    var wallH = Math.min(1.05, Math.max(0.72, (spec.height / clampMin(spec.floors, 1)) * 0.52));
+    var wallH = Math.min(1.65, Math.max(1.05, (spec.height / clampMin(spec.floors, 1)) * 0.75));
     var floorY = 0.01;
     var wallCenterY = floorY + slabT + wallH / 2;
     var wallMat = 'color: #f8f9fa; shader: flat';
     var capMat = 'color: #64748b; shader: flat';
+    var volH = wallH * 0.88;
 
     function addCapWall(w, h, d, cx, cy, cz) {
       parent.appendChild(
@@ -624,6 +625,15 @@
       var cz = (box.z0 + box.z1) / 2;
       var bw = box.x1 - box.x0;
       var bd = box.z1 - box.z0;
+      parent.appendChild(
+        el('a-box', {
+          width: bw * 0.96,
+          height: volH,
+          depth: bd * 0.96,
+          position: cx + ' ' + (floorY + slabT + volH / 2) + ' ' + cz,
+          material: 'color: ' + col + '; shader: flat; opacity: 0.92',
+        })
+      );
       var attrs = {
         width: bw,
         height: slabT,
@@ -652,19 +662,6 @@
           wrapCount: 14,
         })
       );
-      if (extraClass && extraClass.indexOf('apt-picker') >= 0) {
-        parent.appendChild(
-          el('a-box', {
-            width: bw * 1.03,
-            height: slabT * 3,
-            depth: bd * 1.03,
-            position: cx + ' ' + (floorY + slabT) + ' ' + cz,
-            material: 'color: #fbbf24; shader: flat; opacity: 0.5; transparent: true',
-            animation:
-              'property: material.opacity; from: 0.3; to: 0.65; dur: 800; dir: alternate; loop: true',
-          })
-        );
-      }
       if (extraClass) {
         var hit = el('a-plane', {
           class: extraClass + ' clickable',
@@ -1175,7 +1172,7 @@
         } else if (spec.viewerMode === 'floor') {
           addFirstFloorBlockPreview(buildingRoot, buildSpec);
         } else if (spec.viewerMode === 'building') {
-          addFirstFloorBlockPreview(buildingRoot, buildSpec);
+          addBuildingStackPreview(buildingRoot, buildSpec);
         } else if (clampMin(spec.apartments, 1) >= 2) {
           addFirstFloorBlockPreview(buildingRoot, buildSpec);
         } else {

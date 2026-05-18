@@ -1,5 +1,5 @@
 /**
- * viewer-camera.js — center model on stage; camera orbits the middle of the screen.
+ * viewer-camera.js — center model on stage; orbit pivot = screen center.
  */
 
 (function () {
@@ -20,20 +20,25 @@
     return PREVIEW_MAX / raw;
   }
 
-  function frameCamera(dist, theta, phi) {
-    if (window.CpisViewerOrbit && window.CpisViewerOrbit.setFrame) {
-      window.CpisViewerOrbit.setFrame(
-        0,
-        STAGE_Y,
-        0,
-        dist,
-        typeof phi === 'number' ? phi : 0.58,
-        typeof theta === 'number' ? theta : 0.78
-      );
+  function setPivot() {
+    var pivot = document.getElementById('orbit-pivot');
+    if (pivot) {
+      pivot.setAttribute('position', '0 ' + STAGE_Y + ' 0');
     }
     var focus = document.getElementById('orbit-focus');
     if (focus) {
       focus.setAttribute('position', '0 ' + STAGE_Y + ' 0');
+    }
+  }
+
+  function frameCamera(dist, phi, theta) {
+    setPivot();
+    if (window.CpisViewerOrbit && window.CpisViewerOrbit.setView) {
+      window.CpisViewerOrbit.setView(
+        dist,
+        typeof phi === 'number' ? phi : 0.55,
+        typeof theta === 'number' ? theta : 0.75
+      );
     }
   }
 
@@ -59,17 +64,17 @@
       (stageWorld.x - centerWorld.x) + ' 0 ' + (stageWorld.z - centerWorld.z)
     );
 
-    var maxDim = Math.max(size.x, size.y, size.z, 0.3);
-    var dist = Math.max(maxDim * 1.22, 4);
-    dist = Math.min(dist, 10);
-    frameCamera(dist, 0.78, 0.58);
+    var maxDim = Math.max(size.x, size.y, size.z, 0.25);
+    var dist = Math.max(maxDim * 1.15, 3.5);
+    dist = Math.min(dist, 11);
+    frameCamera(dist, 0.55, 0.75);
     return true;
   }
 
   function focusOnMount(mount) {
     if (!mount) return;
-
-    frameCamera(5.5, 0.78, 0.58);
+    setPivot();
+    frameCamera(5.5, 0.55, 0.75);
 
     var tries = 0;
     function attempt() {
@@ -78,12 +83,11 @@
       if (tries < 100) {
         requestAnimationFrame(attempt);
       } else {
-        frameCamera(5.5, 0.78, 0.58);
+        frameCamera(5.5, 0.55, 0.75);
       }
     }
     attempt();
-
-    [200, 500, 1000].forEach(function (ms) {
+    [150, 400, 800, 1200].forEach(function (ms) {
       setTimeout(function () {
         applyFocus(mount);
       }, ms);

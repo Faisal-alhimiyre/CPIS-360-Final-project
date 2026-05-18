@@ -195,32 +195,34 @@
     device-orientation-permission-ui="enabled: false"
   >
     <a-entity id="orbit-focus" position="0 2.75 0"></a-entity>
-    <!-- Fixed height = model stays in middle of screen, not on the floor -->
+
     <a-entity id="model-stage" position="0 2.75 0">
       <a-entity id="building-mount" position="0 0 0"></a-entity>
     </a-entity>
 
-    <a-entity light="type: ambient; color: #ffffff; intensity: 0.85"></a-entity>
-    <a-entity light="type: directional; color: #ffffff; intensity: 1" position="4 8 6"></a-entity>
+    <a-entity id="orbit-pivot" position="0 2.75 0">
+      <a-entity id="orbit-arm" cpis-touch-orbit="minDistance: 1.2; maxDistance: 28">
+        <a-camera
+          id="viewer-camera"
+          look-controls="enabled: false"
+          wasd-controls="enabled: false"
+          camera="active: true; far: 200; near: 0.05"
+        ></a-camera>
+      </a-entity>
+    </a-entity>
 
-    <a-camera
-      id="viewer-camera"
-      cpis-touch-orbit="minDistance: 2; maxDistance: 30"
-      position="5 5 9"
-      look-controls="enabled: false"
-      wasd-controls="enabled: false"
-      camera="active: true; far: 200; near: 0.05"
-    ></a-camera>
+    <a-entity light="type: ambient; color: #ffffff; intensity: 0.9"></a-entity>
+    <a-entity light="type: directional; color: #ffffff; intensity: 0.95" position="5 10 8"></a-entity>
   </a-scene>
 
-  <script src="viewer-camera.js?v=10"></script>
-  <script src="viewer-orbit.js?v=11"></script>
+  <script src="viewer-camera.js?v=11"></script>
+  <script src="viewer-orbit.js?v=12"></script>
   <script src="viewer-controls.js?v=2"></script>
-  <script src="generator.js?v=realestate-21"></script>
+  <script src="generator.js?v=realestate-22"></script>
   <script src="room-relocate.js?v=realestate-7"></script>
   <script src="viewer-navigation.js?v=3"></script>
   <script src="viewer-overlay.js?v=2"></script>
-  <script src="viewer-app-core.js?v=10"></script>
+  <script src="viewer-app-core.js?v=11"></script>
   <script src="ui.js?v=realestate-7"></script>
   <script src="viewer-page.js?v=6"></script>
 </body>

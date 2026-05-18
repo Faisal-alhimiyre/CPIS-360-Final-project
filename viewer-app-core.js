@@ -82,7 +82,7 @@
     }
 
     if (state.mode === 'building') {
-      setHint('Drag to rotate · ⟲ ⟳ + − buttons · tap 1st/2nd floor below');
+      setHint('Building view — drag to rotate, + − to zoom · tap 1st/2nd floor below');
     } else if (state.mode === 'floor') {
       setHint(
         'Floor ' +

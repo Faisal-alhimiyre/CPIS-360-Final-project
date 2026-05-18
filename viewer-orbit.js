@@ -1,5 +1,5 @@
 /**
- * viewer-orbit.js — orbit on the camera entity (no parent rig).
+ * viewer-orbit.js — orbit arm around pivot; drag / pinch / buttons / wheel.
  */
 
 (function () {
@@ -18,22 +18,18 @@
     );
   }
 
-  function radToDeg(r) {
-    return (r * 180) / Math.PI;
-  }
-
   AFRAME.registerComponent('cpis-touch-orbit', {
     schema: {
-      minDistance: { type: 'number', default: 2 },
-      maxDistance: { type: 'number', default: 30 },
+      minDistance: { type: 'number', default: 1.2 },
+      maxDistance: { type: 'number', default: 28 },
     },
 
     init: function () {
       var self = this;
       this._T = AFRAME.THREE;
-      this._target = new this._T.Vector3(0, 2.75, 0);
-      this.theta = 0.85;
-      this.phi = 0.52;
+      this._look = new this._T.Vector3();
+      this.theta = 0.75;
+      this.phi = 0.55;
       this.distance = 6;
 
       this._dragging = false;
@@ -73,38 +69,32 @@
           return self._dragging || self._pinching;
         },
         rotateLeft: function () {
-          self.theta += 0.28;
+          self.theta += 0.32;
         },
         rotateRight: function () {
-          self.theta -= 0.28;
+          self.theta -= 0.32;
         },
         zoomIn: function () {
-          self.distance *= 0.82;
+          self.distance *= 0.78;
           self._clampDist();
         },
         zoomOut: function () {
-          self.distance *= 1.2;
+          self.distance *= 1.25;
           self._clampDist();
         },
-        setFrame: function (x, y, z, dist, phi, theta) {
-          self._target.set(x, y, z);
+        setView: function (dist, phi, theta) {
           self.distance = dist;
           if (typeof phi === 'number') self.phi = phi;
           if (typeof theta === 'number') self.theta = theta;
           self._clampDist();
-          self._clearViewOffset();
         },
       };
 
-      this._clearViewOffset();
       this._applyOrbit();
     },
 
-    _clearViewOffset: function () {
-      var camComp = this.el.components && this.el.components.camera;
-      if (camComp && camComp.camera && camComp.camera.clearViewOffset) {
-        camComp.camera.clearViewOffset();
-      }
+    _pivot: function () {
+      return this.el.parentEl;
     },
 
     _clampDist: function () {
@@ -115,25 +105,17 @@
     },
 
     _applyOrbit: function () {
+      var pivot = this._pivot();
+      if (!pivot) return;
+
       var sinP = Math.sin(this.phi);
-      var px = this._target.x + this.distance * sinP * Math.sin(this.theta);
-      var py = this._target.y + this.distance * Math.cos(this.phi);
-      var pz = this._target.z + this.distance * sinP * Math.cos(this.theta);
+      var dx = this.distance * sinP * Math.sin(this.theta);
+      var dy = this.distance * Math.cos(this.phi);
+      var dz = this.distance * sinP * Math.cos(this.theta);
 
-      this.el.object3D.position.set(px, py, pz);
-      this.el.object3D.lookAt(this._target);
-
-      var r = this.el.object3D.rotation;
-      this.el.setAttribute('rotation', {
-        x: radToDeg(r.x),
-        y: radToDeg(r.y),
-        z: radToDeg(r.z),
-      });
-
-      var focus = document.getElementById('orbit-focus');
-      if (focus) {
-        focus.object3D.position.copy(this._target);
-      }
+      this.el.object3D.position.set(dx, dy, dz);
+      pivot.object3D.getWorldPosition(this._look);
+      this.el.object3D.lookAt(this._look);
     },
 
     _pointer: function (e) {
@@ -148,9 +130,9 @@
 
     _pinchLength: function (e) {
       if (!e.touches || e.touches.length < 2) return 0;
-      var dx = e.touches[0].clientX - e.touches[1].clientX;
-      var dy = e.touches[0].clientY - e.touches[1].clientY;
-      return Math.sqrt(dx * dx + dy * dy);
+      var t0 = e.touches[0];
+      var t1 = e.touches[1];
+      return Math.hypot(t0.clientX - t1.clientX, t0.clientY - t1.clientY);
     },
 
     _pointerDown: function (e) {
@@ -185,9 +167,9 @@
       var dy = p.y - this._lastY;
       this._lastX = p.x;
       this._lastY = p.y;
-      this.theta -= dx * 0.012;
-      this.phi -= dy * 0.012;
-      this.phi = Math.max(0.32, Math.min(1.1, this.phi));
+      this.theta -= dx * 0.014;
+      this.phi -= dy * 0.014;
+      this.phi = Math.max(0.28, Math.min(1.05, this.phi));
       e.preventDefault();
     },
 
@@ -199,7 +181,7 @@
 
     _wheel: function (e) {
       if (isUiTarget(e.target)) return;
-      this.distance += e.deltaY * 0.008;
+      this.distance += e.deltaY * 0.012;
       this._clampDist();
       e.preventDefault();
     },
